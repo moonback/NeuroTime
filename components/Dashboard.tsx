@@ -16,16 +16,25 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const [summary, setSummary] = useState<string>('Analyse de vos activités en cours...');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Calculate Stats
+  // Calculate Stats - Seulement les missions terminées (completed)
   const thisMonthMissions = missions.filter(m => isThisMonth(new Date(m.startTime)));
+  const completedMissions = thisMonthMissions.filter(m => m.status === 'completed');
+  const plannedMissions = thisMonthMissions.filter(m => m.status === 'planned');
   
-  const totalHours = thisMonthMissions.reduce((acc, m) => {
+  // Heures et gains des missions terminées (réalisé)
+  const totalHours = completedMissions.reduce((acc, m) => {
     const start = new Date(m.startTime).getTime();
     const end = new Date(m.endTime).getTime();
     return acc + (end - start) / (1000 * 60 * 60);
   }, 0);
 
-  const totalEarnings = thisMonthMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+  const totalEarningsCompleted = completedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+  
+  // Gains prévisionnels des missions planifiées
+  const totalEarningsPlanned = plannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+  
+  // Total = Réalisé + Prévisionnel
+  const totalEarnings = totalEarningsCompleted + totalEarningsPlanned;
   
   // Upcoming includes planned missions in the future OR today
   const upcomingMissions = missions
@@ -143,7 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           icon={<Euro className="w-6 h-6 text-emerald-400" />}
           label="CA ce mois"
           value={`${totalEarnings.toFixed(0)} €`}
-          subtext="Prévisionnel + Réalisé"
+          subtext={`Réalisé: ${totalEarningsCompleted.toFixed(0)}€ + Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€`}
           color="bg-emerald-500/10 border-emerald-500/30"
           textColor="text-emerald-400"
         />
@@ -151,7 +160,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           icon={<Clock className="w-6 h-6 text-primary-400" />}
           label="Heures totales"
           value={`${totalHours.toFixed(1)} h`}
-          subtext="Cumul mensuel"
+          subtext="Cumul mensuel (missions terminées)"
           color="bg-primary-500/10 border-primary-500/30"
           textColor="text-primary-400"
         />

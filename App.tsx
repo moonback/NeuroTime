@@ -21,15 +21,20 @@ const App: React.FC = () => {
 
   // Load data on mount
   useEffect(() => {
-    const data = loadMissions();
-    setMissions(data);
-    setIsLoaded(true);
+    const loadData = async () => {
+      const data = await loadMissions();
+      setMissions(data);
+      setIsLoaded(true);
+    };
+    loadData();
   }, []);
 
   // Save data whenever it changes, BUT only if initial load is done
   useEffect(() => {
     if (isLoaded) {
-      saveMissions(missions);
+      saveMissions(missions).catch(error => {
+        console.error('Erreur lors de la sauvegarde:', error);
+      });
     }
   }, [missions, isLoaded]);
 
