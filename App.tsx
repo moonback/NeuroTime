@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import CalendarView from './components/CalendarView';
 import MissionsList from './components/MissionsList';
 import MissionForm from './components/MissionForm';
 import ImageImportModal from './components/ImageImportModal';
+import AuthModal from './components/AuthModal';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
+import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
@@ -16,18 +18,54 @@ const App: React.FC = () => {
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
   
+  // Authentification
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  
   // État pour éviter d'écraser le localStorage au démarrage avant le chargement
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load data on mount
+  // Vérifier l'authentification au démarrage
   useEffect(() => {
-    const loadData = async () => {
-      const data = await loadMissions();
-      setMissions(data);
-      setIsLoaded(true);
+    const checkAuth = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      setAuthLoading(false);
+      
+      if (!currentUser) {
+        setIsAuthModalOpen(true);
+      }
     };
-    loadData();
+    
+    checkAuth();
+    
+    // Écouter les changements d'authentification
+    const unsubscribe = onAuthStateChange((authUser) => {
+      setUser(authUser);
+      if (!authUser) {
+        setIsAuthModalOpen(true);
+        setMissions([]);
+        setIsLoaded(false);
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
+
+  // Load data on mount (seulement si connecté)
+  useEffect(() => {
+    if (user && !isLoaded) {
+      const loadData = async () => {
+        const data = await loadMissions();
+        setMissions(data);
+        setIsLoaded(true);
+      };
+      loadData();
+    }
+  }, [user, isLoaded]);
 
   // Save data whenever it changes, BUT only if initial load is done
   useEffect(() => {
@@ -78,11 +116,55 @@ const App: React.FC = () => {
     }
   };
 
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+    // Recharger les données après connexion
+    const loadData = async () => {
+      const data = await loadMissions();
+      setMissions(data);
+      setIsLoaded(true);
+    };
+    loadData();
+  };
+
+  const handleSignOut = async () => {
+    if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+      await signOut();
+      setMissions([]);
+      setIsLoaded(false);
+    }
+  };
+
   const openNewMissionModal = (dateStr?: string) => {
     setEditingMission(null);
     setSelectedDateForNew(dateStr);
     setIsModalOpen(true);
   };
+
+  // Afficher le modal d'authentification si non connecté
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-dark-300 text-gray-100 font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => {}} 
+          onSuccess={handleAuthSuccess}
+          initialMode="login"
+        />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased">
@@ -131,6 +213,21 @@ const App: React.FC = () => {
             <Plus size={18} />
             <span>Nouvelle mission</span>
           </button>
+          
+          {/* User Info & Logout */}
+          <div className="pt-2 border-t border-dark-100/80 mt-2">
+            <div className="flex items-center gap-2 px-2 py-2 mb-2 text-xs text-gray-400">
+              <User size={14} />
+              <span className="truncate">{user.email || 'Utilisateur'}</span>
+            </div>
+            <button 
+              onClick={handleSignOut}
+              className="w-full bg-dark-100/50 hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 border border-dark-200 hover:border-red-500/30 transition-all text-sm"
+            >
+              <LogOut size={14} />
+              <span>Déconnexion</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -221,6 +318,13 @@ const App: React.FC = () => {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleBulkAddMissions}
+      />
+
+      <AuthModal 
+        isOpen={isAuthModalOpen && !user} 
+        onClose={() => {}} 
+        onSuccess={handleAuthSuccess}
+        initialMode="login"
       />
     </div>
   );

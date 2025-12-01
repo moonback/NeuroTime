@@ -4,6 +4,7 @@
 -- Créer la table missions
 CREATE TABLE IF NOT EXISTS missions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   client TEXT,
   location TEXT NOT NULL,
@@ -20,15 +21,41 @@ CREATE TABLE IF NOT EXISTS missions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Désactiver RLS (Row Level Security) pour cette table
--- Comme vous êtes le seul à voir ces données, RLS n'est pas nécessaire
-ALTER TABLE missions DISABLE ROW LEVEL SECURITY;
+-- Activer RLS (Row Level Security) pour la sécurité
+ALTER TABLE missions ENABLE ROW LEVEL SECURITY;
+
+-- Politique : Les utilisateurs ne peuvent voir que leurs propres missions
+CREATE POLICY "Users can view own missions" ON missions
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Politique : Les utilisateurs ne peuvent insérer que leurs propres missions
+CREATE POLICY "Users can insert own missions" ON missions
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Politique : Les utilisateurs ne peuvent mettre à jour que leurs propres missions
+CREATE POLICY "Users can update own missions" ON missions
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Politique : Les utilisateurs ne peuvent supprimer que leurs propres missions
+CREATE POLICY "Users can delete own missions" ON missions
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Créer un index sur user_id pour améliorer les performances des requêtes
+CREATE INDEX IF NOT EXISTS idx_missions_user_id ON missions(user_id);
 
 -- Créer un index sur start_time pour améliorer les performances des requêtes
 CREATE INDEX IF NOT EXISTS idx_missions_start_time ON missions(start_time DESC);
 
 -- Créer un index sur status pour filtrer rapidement
 CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status);
+
+-- Index composite pour les requêtes utilisateur + date
+CREATE INDEX IF NOT EXISTS idx_missions_user_start_time ON missions(user_id, start_time DESC);
 
 -- Fonction pour mettre à jour updated_at automatiquement
 CREATE OR REPLACE FUNCTION update_updated_at_column()

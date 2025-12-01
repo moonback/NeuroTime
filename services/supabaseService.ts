@@ -1,22 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import { Mission } from '../types';
+import { getSupabase } from './authService';
 
-// Initialisation du client Supabase
+// Initialisation du client Supabase (utilise le même client que l'auth)
 const getSupabaseClient = () => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Variables Supabase manquantes. Vérifiez votre fichier .env.local');
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return getSupabase();
 };
 
 // Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL)
-const missionToDb = (mission: Mission) => ({
+const missionToDb = (mission: Mission, userId?: string) => ({
   id: mission.id,
+  user_id: userId || null,
   title: mission.title,
   client: mission.client,
   location: mission.location,
@@ -47,6 +41,15 @@ const dbToMission = (dbRow: any): Mission => ({
   logistics: dbRow.logistics,
 });
 
+// Obtenir l'ID de l'utilisateur connecté
+const getCurrentUserId = async (): Promise<string | null> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id || null;
+};
+
 // Sauvegarder toutes les missions (synchronise avec la base de données)
 export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void> => {
   const supabase = getSupabaseClient();
@@ -55,11 +58,18 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
     return;
   }
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return;
+  }
+
   try {
-    // Récupérer les IDs existants
+    // Récupérer les IDs existants pour cet utilisateur
     const { data: existingData } = await supabase
       .from('missions')
-      .select('id');
+      .select('id')
+      .eq('user_id', userId);
     
     const existingIds = new Set((existingData || []).map(row => row.id));
     const missionIds = new Set(missions.map(m => m.id));
@@ -70,7 +80,8 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
       const { error: deleteError } = await supabase
         .from('missions')
         .delete()
-        .in('id', idsToDelete);
+        .in('id', idsToDelete)
+        .eq('user_id', userId);
 
       if (deleteError) {
         console.error('Erreur lors de la suppression des missions:', deleteError);
@@ -79,7 +90,7 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
 
     // Utiliser upsert pour insérer ou mettre à jour les missions
     if (missions.length > 0) {
-      const missionsDb = missions.map(missionToDb);
+      const missionsDb = missions.map(m => missionToDb(m, userId));
       const { error: upsertError } = await supabase
         .from('missions')
         .upsert(missionsDb, { onConflict: 'id' });
@@ -103,10 +114,17 @@ export const loadMissionsFromSupabase = async (): Promise<Mission[]> => {
     return [];
   }
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return [];
+  }
+
   try {
     const { data, error } = await supabase
       .from('missions')
       .select('*')
+      .eq('user_id', userId)
       .order('start_time', { ascending: false });
 
     if (error) {
@@ -129,8 +147,14 @@ export const addMissionToSupabase = async (mission: Mission): Promise<void> => {
     return;
   }
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return;
+  }
+
   try {
-    const missionDb = missionToDb(mission);
+    const missionDb = missionToDb(mission, userId);
     const { error } = await supabase
       .from('missions')
       .insert([missionDb]);
@@ -153,12 +177,19 @@ export const updateMissionInSupabase = async (mission: Mission): Promise<void> =
     return;
   }
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return;
+  }
+
   try {
-    const missionDb = missionToDb(mission);
+    const missionDb = missionToDb(mission, userId);
     const { error } = await supabase
       .from('missions')
       .update(missionDb)
-      .eq('id', mission.id);
+      .eq('id', mission.id)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Erreur lors de la mise à jour de la mission:', error);
@@ -178,11 +209,18 @@ export const deleteMissionFromSupabase = async (missionId: string): Promise<void
     return;
   }
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return;
+  }
+
   try {
     const { error } = await supabase
       .from('missions')
       .delete()
-      .eq('id', missionId);
+      .eq('id', missionId)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Erreur lors de la suppression de la mission:', error);

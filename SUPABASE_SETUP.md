@@ -17,14 +17,12 @@ Ce guide vous explique comment configurer Supabase pour sauvegarder vos missions
 3. Collez-le dans l'éditeur SQL et exécutez-le
 4. Vérifiez que la table `missions` a été créée dans **Table Editor**
 
-### 3. Désactiver RLS (Row Level Security)
+### 3. Activer RLS (Row Level Security)
 
-Le script SQL désactive automatiquement RLS pour la table `missions` avec la commande :
-```sql
-ALTER TABLE missions DISABLE ROW LEVEL SECURITY;
-```
-
-Cela signifie que toutes les requêtes utilisant votre clé API anonyme pourront accéder aux données. Comme vous êtes le seul à utiliser cette application, c'est suffisant pour vos besoins.
+Le script SQL active RLS et crée des politiques de sécurité qui permettent à chaque utilisateur de voir uniquement ses propres missions. Cela garantit que :
+- Chaque utilisateur ne peut accéder qu'à ses propres données
+- Les missions sont automatiquement filtrées par `user_id`
+- La sécurité est assurée même si plusieurs utilisateurs utilisent l'application
 
 ### 4. Configurer les variables d'environnement
 
