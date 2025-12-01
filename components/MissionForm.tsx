@@ -224,34 +224,34 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-all">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] border border-gray-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-3 md:p-4 transition-all">
+      <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] border border-gray-100">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-6 border-b ${isConverting ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
           <div>
-            <h2 className={`text-xl font-bold ${isConverting ? 'text-green-800' : 'text-gray-800'}`}>
+            <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-800' : 'text-gray-800'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
-            <p className={`text-xs mt-0.5 ${isConverting ? 'text-green-600' : 'text-gray-500'}`}>
+            <p className={`text-[10px] md:text-xs mt-0.5 ${isConverting ? 'text-green-600' : 'text-gray-500'}`}>
               {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors text-gray-500">
-            <X size={20} />
+          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-black/5 rounded-full transition-colors text-gray-500">
+            <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar">
-          <div className="p-6 space-y-8">
+          <div className="p-4 md:p-6 space-y-6 md:space-y-8">
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
-                 <Copy size={16} className="text-blue-500" />
+               <div className="bg-blue-50 border border-blue-100 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5">
+                 <Copy size={14} className="text-blue-500" />
                  <select 
                    onChange={handleCopyFromMission}
-                   className="bg-transparent text-sm text-blue-700 font-medium w-full focus:outline-none cursor-pointer"
+                   className="bg-transparent text-xs md:text-sm text-blue-700 font-medium w-full focus:outline-none cursor-pointer"
                    defaultValue=""
                  >
                    <option value="" disabled>Copier depuis une mission précédente...</option>
@@ -263,38 +263,38 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             )}
 
             {/* Section 1: Informations Générales */}
-            <section className="space-y-4">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <Briefcase size={14} /> Détails de la mission
+            <section className="space-y-3 md:space-y-4">
+              <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <Briefcase size={12} /> Détails de la mission
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">Titre de la mission</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-700">Titre de la mission</label>
                   <input
                     type="text"
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ex: Régie Son - Concert"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">Client</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-700">Client</label>
                   <input
                     type="text"
                     value={client}
                     onChange={(e) => setClient(e.target.value)}
                     placeholder="Ex: Event Pro Agency"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                  <MapPin size={14} className="text-gray-400" /> Lieu
+                <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1">
+                  <MapPin size={12} className="text-gray-400" /> Lieu
                 </label>
                 <input
                   type="text"
@@ -302,7 +302,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Ex: Paris La Défense Arena"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
                 />
               </div>
             </section>
@@ -310,78 +310,78 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             <hr className="border-gray-100" />
 
             {/* Section 2: Date & Horaires */}
-            <section className="space-y-4">
+            <section className="space-y-3 md:space-y-4">
                <div className="flex justify-between items-center">
-                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <Calculator size={14} /> Horaires & Calcul
+                 <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                  <Calculator size={12} /> Horaires & Calcul
                 </h3>
                 
                 {/* Toggle Mode */}
-                <div className="bg-gray-100 p-0.5 rounded-lg flex text-xs font-medium">
+                <div className="bg-gray-100 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium">
                   <button
                     type="button"
                     onClick={() => setCalculationMode('auto')}
-                    className={`px-3 py-1 rounded-md transition-all ${calculationMode === 'auto' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-2.5 md:px-3 py-0.5 md:py-1 rounded-md transition-all ${calculationMode === 'auto' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     Auto
                   </button>
                   <button
                     type="button"
                     onClick={() => setCalculationMode('manual')}
-                    className={`px-3 py-1 rounded-md transition-all ${calculationMode === 'manual' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-2.5 md:px-3 py-0.5 md:py-1 rounded-md transition-all ${calculationMode === 'manual' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     Manuel
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">Date</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-700">Date</label>
                   <input
                     type="date"
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">Début</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-700">Début</label>
                   <input
                     type="time"
                     required
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-primary-500 outline-none ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">Fin</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-700">Fin</label>
                   <input
                     type="time"
                     required
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                     className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-primary-500 outline-none ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
+                     className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
                   />
                 </div>
               </div>
 
               {/* Smart Calculator Display */}
-              <div className={`p-5 rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-50/50 border-green-200' : 'bg-gradient-to-br from-slate-50 to-blue-50/30 border-slate-200'}`}>
+              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-50/50 border-green-200' : 'bg-gradient-to-br from-slate-50 to-blue-50/30 border-slate-200'}`}>
                 
                 {calculationMode === 'auto' ? (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="flex justify-between items-start gap-4">
                        <div>
-                         <label className="text-sm font-bold text-slate-700 block mb-1">Calcul Automatique</label>
-                         <p className="text-xs text-slate-500">Basé sur jour ({RATE_DAY}€) et nuit ({RATE_NIGHT}€ {'>'} 22h)</p>
+                         <label className="text-xs md:text-sm font-bold text-slate-700 block mb-1">Calcul Automatique</label>
+                         <p className="text-[10px] md:text-xs text-slate-500">Jour ({RATE_DAY}€) et nuit ({RATE_NIGHT}€ {'>'} 22h)</p>
                        </div>
                        <div className="text-right">
-                          <span className="text-xs text-gray-500 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-700' : 'text-primary-700'}`}>
-                            {computedTotal.toFixed(2)} <Euro size={24} strokeWidth={2.5} />
+                          <span className="text-[10px] md:text-xs text-gray-500 block mb-1 uppercase tracking-wide">Total Estimé</span>
+                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-700' : 'text-primary-700'}`}>
+                            {computedTotal.toFixed(2)} <Euro size={20} strokeWidth={2.5} />
                           </span>
                        </div>
                     </div>
@@ -561,23 +561,23 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-4">
+          <div className="p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex gap-3 md:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-white hover:shadow-sm transition-all"
+              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-white hover:shadow-sm transition-all text-sm md:text-base"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 ${
+              className={`flex-[2] bg-gradient-to-r text-white font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm md:text-base ${
                 isConverting 
                 ? 'from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-green-500/30' 
                 : 'from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-primary-500/30'
               }`}
             >
-               {isConverting ? <CheckCircle size={18} /> : <Calendar size={18} />}
+               {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
               {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
             </button>
           </div>

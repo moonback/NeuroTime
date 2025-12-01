@@ -90,63 +90,63 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
   const dailyTotal = selectedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full pb-24 md:pb-0 animate-fade-in">
+    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-full pb-24 md:pb-0 animate-fade-in">
       {/* Calendar Main Panel */}
-      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-6 flex flex-col">
+      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 lg:p-6 flex flex-col">
         
         {/* Header with Navigation & Stats */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-             <div className="flex gap-1 bg-gray-50 p-1 rounded-xl border border-gray-200">
-              <button onClick={prevMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
-                <ChevronLeft size={20} />
+        <div className="flex flex-col md:flex-row items-center justify-between mb-4 md:mb-6 gap-3 md:gap-4">
+          <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-start">
+             <div className="flex gap-0.5 bg-gray-50 p-0.5 rounded-lg border border-gray-200">
+              <button onClick={prevMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+                <ChevronLeft size={18} />
               </button>
-              <button onClick={goToToday} className="px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">
+              <button onClick={goToToday} className="px-2.5 py-1.5 text-[10px] md:text-xs font-bold text-gray-600 hover:bg-white hover:shadow-sm rounded-md transition-all">
                 Aujourd'hui
               </button>
-              <button onClick={nextMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
-                <ChevronRight size={20} />
+              <button onClick={nextMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+                <ChevronRight size={18} />
               </button>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 capitalize truncate">
+            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 capitalize truncate">
               {format(currentMonth, 'MMMM yyyy', { locale: fr })}
             </h2>
           </div>
 
-          <div className="flex items-center gap-3 text-sm w-full md:w-auto">
-             <div className="flex-1 md:flex-none px-3 py-2 bg-blue-50 text-blue-800 rounded-xl font-medium border border-blue-100 flex items-center justify-center gap-2">
-                <Clock size={16} />
+          <div className="flex items-center gap-2 text-xs md:text-sm w-full md:w-auto">
+             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-blue-50 text-blue-800 rounded-lg font-medium border border-blue-100 flex items-center justify-center gap-1.5">
+                <Clock size={14} />
                 <span>{monthHours.toFixed(0)}h</span>
              </div>
-             <div className="flex-1 md:flex-none px-3 py-2 bg-emerald-50 text-emerald-800 rounded-xl font-bold border border-emerald-100 flex items-center justify-center gap-2">
-                <Euro size={16} />
-                <span>{monthRevenue.toFixed(0)} €</span>
+             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-emerald-50 text-emerald-800 rounded-lg font-bold border border-emerald-100 flex items-center justify-center gap-1.5">
+                <Euro size={14} />
+                <span>{monthRevenue.toFixed(0)}€</span>
              </div>
              
              {/* Filter Toggle */}
-             <div className="hidden md:flex bg-gray-100 rounded-lg p-1">
+             <div className="hidden md:flex bg-gray-100 rounded-lg p-0.5">
                <button 
                 onClick={() => setFilterStatus(filterStatus === 'all' ? 'planned' : 'all')}
                 className={`p-1.5 rounded-md transition-all ${filterStatus !== 'all' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
                 title="Filtrer"
                >
-                 <Filter size={16} />
+                 <Filter size={14} />
                </button>
              </div>
           </div>
         </div>
 
         {/* Days Header */}
-        <div className="grid grid-cols-7 mb-2 border-b border-gray-100 pb-2">
+        <div className="grid grid-cols-7 mb-1.5 border-b border-gray-100 pb-1.5">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-            <div key={day} className="text-center text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider py-1">
+            <div key={day} className="text-center text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-400 uppercase tracking-wider py-1">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100 border border-gray-200 rounded-lg overflow-hidden flex-1 min-h-[450px]">
+        <div className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100 border border-gray-200 rounded-lg overflow-hidden flex-1 min-h-[400px] md:min-h-[450px]">
           {calendarDays.map((date) => {
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayMissions = missionsByDate.get(dateKey) || [];
@@ -239,49 +239,49 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Side Panel */}
-      <div className="w-full lg:w-80 xl:w-96 bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-6 flex flex-col h-auto">
-        <div className="mb-6 border-b border-gray-100 pb-4">
-           <div className="flex justify-between items-center mb-4">
+      <div className="w-full lg:w-80 xl:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col h-auto">
+        <div className="mb-4 md:mb-6 border-b border-gray-100 pb-3 md:pb-4">
+           <div className="flex justify-between items-center mb-3 md:mb-4">
              <div>
-                <h3 className="text-lg font-bold text-gray-900 capitalize leading-tight">
+                <h3 className="text-base md:text-lg font-bold text-gray-900 capitalize leading-tight">
                   {format(selectedDate, 'EEEE d MMMM', { locale: fr })}
                 </h3>
-                <p className="text-xs text-gray-400 mt-0.5 capitalize">{format(selectedDate, 'yyyy')}</p>
+                <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 capitalize">{format(selectedDate, 'yyyy')}</p>
              </div>
              <button 
               onClick={() => onNewMission(selectedDateKey)}
-              className="p-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/30 transition-all transform hover:scale-105"
-              title="Ajouter une mission ce jour"
+              className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-md shadow-primary-500/25 transition-all"
+              title="Ajouter une mission"
              >
-               <Plus size={20} />
+               <Plus size={18} />
              </button>
            </div>
            
            {selectedMissions.length > 0 && (
-             <div className="flex gap-3 mt-4">
-               <div className="flex-1 bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex flex-col items-center">
-                 <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Revenu</span>
-                 <p className="text-lg font-bold text-gray-800">{dailyTotal.toFixed(0)}€</p>
+             <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
+               <div className="flex-1 bg-gray-50 p-2 md:p-2.5 rounded-lg border border-gray-100 flex flex-col items-center">
+                 <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Revenu</span>
+                 <p className="text-base md:text-lg font-bold text-gray-800">{dailyTotal.toFixed(0)}€</p>
                </div>
-               <div className="flex-1 bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex flex-col items-center">
-                 <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Missions</span>
-                 <p className="text-lg font-bold text-gray-800">{selectedMissions.length}</p>
+               <div className="flex-1 bg-gray-50 p-2 md:p-2.5 rounded-lg border border-gray-100 flex flex-col items-center">
+                 <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Missions</span>
+                 <p className="text-base md:text-lg font-bold text-gray-800">{selectedMissions.length}</p>
                </div>
              </div>
            )}
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar min-h-[300px]">
+        <div className="flex-1 overflow-y-auto space-y-2.5 md:space-y-3 pr-1 custom-scrollbar min-h-[250px] md:min-h-[300px]">
           {selectedMissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 opacity-60 py-10">
-              <div className="bg-gray-50 p-4 rounded-full">
-                <Calendar size={32} strokeWidth={1.5} />
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 opacity-60 py-8 md:py-10">
+              <div className="bg-gray-50 p-3 md:p-4 rounded-full">
+                <Calendar size={28} strokeWidth={1.5} />
               </div>
               <div className="text-center">
-                <p className="font-medium text-sm">Aucune activité</p>
+                <p className="font-medium text-xs md:text-sm">Aucune activité</p>
                 <button 
                   onClick={() => onNewMission(selectedDateKey)} 
-                  className="text-primary-600 font-bold text-xs mt-2 hover:underline uppercase tracking-wide"
+                  className="text-primary-600 font-bold text-[10px] md:text-xs mt-2 hover:underline uppercase tracking-wide"
                 >
                   Créer une mission
                 </button>
@@ -291,7 +291,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
             selectedMissions.map(mission => (
               <div 
                 key={mission.id} 
-                className="group relative bg-white rounded-xl p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300"
+                className="group relative bg-white rounded-lg p-2.5 md:p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-200"
               >
                 <div className="flex justify-between items-start mb-2">
                    <div className="flex items-start gap-2 overflow-hidden">

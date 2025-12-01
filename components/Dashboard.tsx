@@ -101,34 +101,35 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   };
 
   return (
-    <div className="space-y-8 pb-24 md:pb-8 animate-fade-in">
+    <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Tableau de bord</h1>
-          <p className="text-gray-500 mt-1">Vue d'ensemble de votre activité freelance.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Tableau de bord</h1>
+          <p className="text-gray-500 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
         </div>
         <div className="flex gap-2">
             <button 
               onClick={downloadCSV}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2.5 rounded-xl font-medium shadow-sm transition-all text-sm"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg font-medium shadow-sm transition-all text-sm"
               title="Exporter pour Excel"
             >
-              <Download size={18} />
-              <span className="hidden md:inline">CSV</span>
+              <Download size={16} />
+              <span className="hidden md:inline">Exporter CSV</span>
+              <span className="md:hidden">CSV</span>
             </button>
         </div>
       </header>
 
       {/* AI Summary Card */}
-      <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
+      <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 rounded-2xl p-5 md:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden group">
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3">
             <span className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
-               <SparklesIcon className="w-5 h-5 text-yellow-300" />
+               <SparklesIcon className="w-4 h-4 text-yellow-300" />
             </span>
-            <h3 className="font-semibold text-lg tracking-wide opacity-90">Assistant Intelligent</h3>
+            <h3 className="font-semibold text-base md:text-lg tracking-wide opacity-95">Assistant Intelligent</h3>
           </div>
-          <p className="text-indigo-50 leading-relaxed text-lg font-light max-w-2xl">{summary}</p>
+          <p className="text-indigo-50/95 leading-relaxed text-sm md:text-base font-normal max-w-2xl">{summary}</p>
         </div>
         
         {/* Decorative elements */}
@@ -137,7 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Statistics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard 
           icon={<Euro className="w-6 h-6 text-emerald-600" />}
           label="CA ce mois"
@@ -173,70 +174,70 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-            <span className="bg-gray-100 p-2 rounded-xl">
-               <Calendar className="w-5 h-5 text-gray-600" />
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2.5">
+            <span className="bg-gray-100 p-2 rounded-lg">
+               <Calendar className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             </span>
-            À venir & Planifié
+            <span>À venir</span>
           </h3>
-          <span className="text-sm text-gray-500 font-medium bg-gray-50 px-3 py-1 rounded-full">
+          <span className="text-xs md:text-sm text-gray-500 font-medium bg-gray-50 px-2.5 py-1 rounded-full">
             {upcomingMissions.length} en attente
           </span>
         </div>
 
         {upcomingMissions.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-            <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
-              <CheckCircle className="text-green-400" size={24} />
+          <div className="text-center py-10 md:py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+              <CheckCircle className="text-green-400" size={20} />
             </div>
-            <p className="text-gray-500 font-medium">Tout est à jour !</p>
-            <p className="text-sm text-gray-400">Aucune mission en attente de validation.</p>
+            <p className="text-gray-500 font-medium text-sm md:text-base">Tout est à jour !</p>
+            <p className="text-xs md:text-sm text-gray-400 mt-1">Aucune mission en attente</p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {upcomingMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl bg-gray-50/50 border border-gray-100 hover:border-primary-200 hover:shadow-sm transition-all duration-200">
                 
                 {/* Date Badge */}
                 <div 
                   onClick={() => onEdit(mission)}
-                  className="flex cursor-pointer md:flex-col items-center gap-3 md:gap-0 bg-gray-50 p-3 rounded-xl min-w-[80px] text-center border border-gray-100 group-hover:bg-primary-50 group-hover:border-primary-100 transition-colors"
+                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-white p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-gray-200 group-hover:bg-primary-50 group-hover:border-primary-200 transition-colors shadow-sm"
                 >
-                  <div className="text-xs text-gray-500 group-hover:text-primary-600 uppercase font-bold tracking-wider">
+                  <div className="text-[10px] md:text-xs text-gray-500 group-hover:text-primary-600 uppercase font-bold tracking-wider">
                     {format(new Date(mission.startTime), 'MMM', { locale: fr })}
                   </div>
-                  <div className="text-2xl font-black text-gray-800 group-hover:text-primary-700 leading-none md:mt-1">
+                  <div className="text-xl md:text-2xl font-black text-gray-800 group-hover:text-primary-700 leading-none md:mt-1">
                     {format(new Date(mission.startTime), 'dd')}
                   </div>
-                  <div className="md:hidden h-8 w-[1px] bg-gray-300 mx-2"></div>
-                  <div className="md:hidden text-lg font-bold text-gray-700">
+                  <div className="md:hidden h-6 w-[1px] bg-gray-300 mx-2"></div>
+                  <div className="md:hidden text-base font-bold text-gray-700">
                      {format(new Date(mission.startTime), 'HH:mm')}
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit(mission)}>
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-gray-900 text-lg truncate pr-2 group-hover:text-primary-700 transition-colors">{mission.title}</h4>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100">
-                       Est. {mission.totalEarnings?.toFixed(0)}€
+                  <div className="flex justify-between items-start gap-2">
+                    <h4 className="font-bold text-gray-900 text-base md:text-lg truncate group-hover:text-primary-700 transition-colors">{mission.title}</h4>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100 flex-shrink-0">
+                       {mission.totalEarnings?.toFixed(0)}€
                     </span>
                   </div>
                   
-                  <div className="flex flex-wrap gap-y-2 gap-x-4 mt-2 text-sm text-gray-500">
-                    <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
-                      <Clock size={14} className="text-gray-400" />
+                  <div className="flex flex-wrap gap-y-1.5 gap-x-3 mt-2 text-xs md:text-sm text-gray-500">
+                    <span className="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md border border-gray-100">
+                      <Clock size={12} className="text-gray-400" />
                       {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <MapPin size={14} className="text-gray-400" />
-                      {mission.location}
+                      <MapPin size={12} className="text-gray-400" />
+                      <span className="truncate max-w-[150px]">{mission.location}</span>
                     </span>
-                     <span className="flex items-center gap-1.5 text-xs font-medium ml-auto md:ml-0">
-                       {mission.rateType === 'night' ? <Moon size={12} className="text-blue-400" /> : <Sun size={12} className="text-orange-400" />}
-                       {mission.rateType === 'night' ? 'Tarif Nuit' : 'Tarif Jour'}
+                     <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-medium">
+                       {mission.rateType === 'night' ? <Moon size={10} className="text-blue-400" /> : <Sun size={10} className="text-orange-400" />}
+                       {mission.rateType === 'night' ? 'Nuit' : 'Jour'}
                      </span>
                   </div>
                 </div>
@@ -248,12 +249,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                       e.stopPropagation();
                       onValidate(mission);
                     }}
-                    className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-4 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 shadow-sm"
-                    title="Confirmer que la mission est terminée et valider les heures"
+                    className="flex items-center gap-1.5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-3 py-1.5 rounded-lg font-semibold text-xs md:text-sm transition-all shadow-sm"
+                    title="Valider les heures"
                   >
-                    <CheckCircle size={16} />
-                    <span className="md:hidden lg:inline">Valider les heures</span>
-                    <span className="hidden md:inline lg:hidden">Valider</span>
+                    <CheckCircle size={14} />
+                    <span className="hidden lg:inline">Valider</span>
                   </button>
                 </div>
               </div>
@@ -263,24 +263,24 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
        {/* Data Persistence Section */}
-       <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-             <div className="bg-slate-200 p-2 rounded-lg text-slate-600">
-               <Database size={20} />
+       <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 md:p-5">
+          <div className="flex items-center gap-2.5 mb-3">
+             <div className="bg-gray-200 p-1.5 rounded-lg text-gray-600">
+               <Database size={18} />
              </div>
-             <h3 className="text-lg font-bold text-slate-800">Gestion des données</h3>
+             <h3 className="text-base md:text-lg font-bold text-gray-800">Sauvegarde</h3>
           </div>
-          <p className="text-sm text-slate-500 mb-6">
-            Vos données sont enregistrées automatiquement sur cet appareil. Pour éviter de les perdre (en changeant de téléphone ou en vidant le cache), pensez à faire des sauvegardes régulières.
+          <p className="text-xs md:text-sm text-gray-600 mb-4">
+            Sauvegardez régulièrement vos données pour éviter toute perte.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-2.5">
             <button 
               onClick={backupData}
-              className="flex items-center justify-center gap-2 bg-white border border-slate-300 text-slate-700 font-medium py-3 px-6 rounded-xl hover:bg-slate-50 hover:shadow-sm transition-all flex-1"
+              className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all flex-1 text-sm"
             >
-              <Save size={18} />
-              Sauvegarder (JSON)
+              <Save size={16} />
+              Sauvegarder
             </button>
             
             <div className="flex-1">
@@ -293,10 +293,10 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
               />
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 bg-white border border-slate-300 text-slate-700 font-medium py-3 px-6 rounded-xl hover:bg-slate-50 hover:shadow-sm transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all text-sm"
               >
-                <Upload size={18} />
-                Restaurer une sauvegarde
+                <Upload size={16} />
+                Restaurer
               </button>
             </div>
           </div>
@@ -306,17 +306,16 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = ({ icon, label, value, subtext, color, textColor }: any) => (
-  <div className={`p-6 rounded-3xl border transition-transform hover:-translate-y-1 ${color} bg-opacity-40`}>
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 rounded-2xl bg-white shadow-sm ${textColor}`}>
+  <div className={`p-4 md:p-5 rounded-xl border transition-all hover:shadow-md ${color} bg-opacity-50`}>
+    <div className="flex items-start justify-between mb-3">
+      <div className={`p-2.5 rounded-xl bg-white shadow-sm ${textColor}`}>
         {icon}
       </div>
-      {/* Optional graphic/trend could go here */}
     </div>
     <div>
-      <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
-      <p className={`text-sm font-semibold mt-1 ${textColor} opacity-80`}>{label}</p>
-      <p className="text-xs text-gray-400 mt-2">{subtext}</p>
+      <p className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+      <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor} opacity-90`}>{label}</p>
+      <p className="text-[10px] md:text-xs text-gray-500 mt-1.5">{subtext}</p>
     </div>
   </div>
 );
