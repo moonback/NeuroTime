@@ -1,0 +1,36 @@
+export interface Mission {
+  id: string;
+  title: string;
+  client: string;
+  location: string;
+  description: string;
+  startTime: string; // ISO String
+  endTime: string; // ISO String
+  status: 'planned' | 'completed' | 'cancelled';
+  
+  // Nouveaux champs financiers
+  rateType: 'day' | 'night' | 'mixed' | 'custom';
+  hourlyRate: number; // Taux de base (indicatif si mixte)
+  totalEarnings: number;
+  
+  // Détail du calcul automatique
+  details?: {
+    dayHours: number;
+    nightHours: number;
+  };
+
+  // Champs logistiques
+  logistics?: {
+    deliveryTime?: string; // ISO String
+    pickupTime?: string; // ISO String
+  };
+}
+
+export type ViewState = 'dashboard' | 'calendar' | 'missions';
+
+export interface DayStats {
+  date: string;
+  hours: number;
+  count: number;
+  earnings: number;
+}
