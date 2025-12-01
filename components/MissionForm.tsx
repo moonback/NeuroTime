@@ -224,20 +224,20 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] border border-gray-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
+      <div className="bg-dark-50 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] border border-dark-100">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-500/20 border-green-500/30' : 'bg-dark-100 border-dark-200'}`}>
           <div>
-            <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-800' : 'text-gray-800'}`}>
+            <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-300' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
-            <p className={`text-[10px] md:text-xs mt-0.5 ${isConverting ? 'text-green-600' : 'text-gray-500'}`}>
+            <p className={`text-[10px] md:text-xs mt-0.5 ${isConverting ? 'text-green-400' : 'text-gray-400'}`}>
               {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-black/5 rounded-full transition-colors text-gray-500">
+          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-colors text-gray-400">
             <X size={18} />
           </button>
         </div>
@@ -247,16 +247,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-blue-50 border border-blue-100 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5">
-                 <Copy size={14} className="text-blue-500" />
+               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5">
+                 <Copy size={14} className="text-primary-400" />
                  <select 
                    onChange={handleCopyFromMission}
-                   className="bg-transparent text-xs md:text-sm text-blue-700 font-medium w-full focus:outline-none cursor-pointer"
+                   className="bg-transparent text-xs md:text-sm text-primary-300 font-medium w-full focus:outline-none cursor-pointer"
                    defaultValue=""
                  >
                    <option value="" disabled>Copier depuis une mission précédente...</option>
                    {missions.slice(-10).reverse().map(m => (
-                     <option key={m.id} value={m.id}>{m.title} - {m.client}</option>
+                     <option key={m.id} value={m.id} className="bg-dark-50">{m.title} - {m.client}</option>
                    ))}
                  </select>
                </div>
@@ -277,24 +277,24 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ex: Régie Son - Concert"
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-700">Client</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200">Client</label>
                   <input
                     type="text"
                     value={client}
                     onChange={(e) => setClient(e.target.value)}
                     placeholder="Ex: Event Pro Agency"
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1">
-                  <MapPin size={12} className="text-gray-400" /> Lieu
+                <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
+                  <MapPin size={12} className="text-gray-500" /> Lieu
                 </label>
                 <input
                   type="text"
@@ -302,7 +302,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Ex: Paris La Défense Arena"
-                  className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm"
+                  className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
                 />
               </div>
             </section>
@@ -343,44 +343,44 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-700">Début</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200">Début</label>
                   <input
                     type="time"
                     required
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${isConverting ? 'border-orange-500/50 bg-orange-500/20 font-bold' : 'border-dark-200'}`}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-700">Fin</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200">Fin</label>
                   <input
                     type="time"
                     required
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                     className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm ${isConverting ? 'border-orange-300 bg-orange-50 font-bold text-gray-900' : 'border-gray-200'}`}
+                     className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${isConverting ? 'border-orange-500/50 bg-orange-500/20 font-bold' : 'border-dark-200'}`}
                   />
                 </div>
               </div>
 
               {/* Smart Calculator Display */}
-              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-50/50 border-green-200' : 'bg-gradient-to-br from-slate-50 to-blue-50/30 border-slate-200'}`}>
+              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-500/20 border-green-500/30' : 'bg-gradient-to-br from-dark-100 to-primary-500/10 border-dark-200'}`}>
                 
                 {calculationMode === 'auto' ? (
                   <div className="space-y-3 md:space-y-4">
                     <div className="flex justify-between items-start gap-4">
                        <div>
-                         <label className="text-xs md:text-sm font-bold text-slate-700 block mb-1">Calcul Automatique</label>
-                         <p className="text-[10px] md:text-xs text-slate-500">Jour ({RATE_DAY}€) et nuit ({RATE_NIGHT}€ {'>'} 22h)</p>
+                         <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
+                         <p className="text-[10px] md:text-xs text-gray-400">Jour ({RATE_DAY}€) et nuit ({RATE_NIGHT}€ {'>'} 22h)</p>
                        </div>
                        <div className="text-right">
-                          <span className="text-[10px] md:text-xs text-gray-500 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-700' : 'text-primary-700'}`}>
+                          <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
+                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'}`}>
                             {computedTotal.toFixed(2)} <Euro size={20} strokeWidth={2.5} />
                           </span>
                        </div>
@@ -388,29 +388,29 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
                     {/* Visual Bar Breakdown */}
                     {(dayHours > 0 || nightHours > 0) && (
-                      <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
-                        <div className="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 mb-3">
+                      <div className="bg-dark-50 rounded-xl border border-dark-200 p-3 shadow-sm">
+                        <div className="flex h-3 w-full rounded-full overflow-hidden bg-dark-200 mb-3">
                           {dayHours > 0 && (
                             <div className="bg-orange-400 h-full" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
                            {nightHours > 0 && (
-                            <div className="bg-indigo-600 h-full" style={{ width: `${(nightHours / (dayHours + nightHours)) * 100}%` }} />
+                            <div className="bg-primary-500 h-full" style={{ width: `${(nightHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           {dayHours > 0 ? (
-                             <div className="flex items-center gap-2 text-slate-700">
-                               <Sun size={16} className="text-orange-500" />
+                             <div className="flex items-center gap-2 text-gray-200">
+                               <Sun size={16} className="text-orange-400" />
                                <span className="font-semibold">{dayHours.toFixed(1)}h</span>
-                               <span className="text-slate-400">× {RATE_DAY}€</span>
+                               <span className="text-gray-400">× {RATE_DAY}€</span>
                              </div>
                           ) : <span />}
                           
                           {nightHours > 0 ? (
-                             <div className="flex items-center gap-2 text-slate-700">
-                               <Moon size={16} className="text-indigo-600" />
+                             <div className="flex items-center gap-2 text-gray-200">
+                               <Moon size={16} className="text-primary-400" />
                                <span className="font-semibold">{nightHours.toFixed(1)}h</span>
-                               <span className="text-slate-400">× {RATE_NIGHT}€</span>
+                               <span className="text-gray-400">× {RATE_NIGHT}€</span>
                              </div>
                           ) : <span />}
                         </div>
@@ -421,8 +421,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   // Manual Mode
                    <div className="flex items-center justify-between gap-4">
                      <div className="flex-1">
-                        <label className="text-sm font-bold text-slate-700 block mb-1">Montant Forfaitaire</label>
-                         <p className="text-xs text-slate-500">Saisie manuelle du total</p>
+                        <label className="text-sm font-bold text-gray-200 block mb-1">Montant Forfaitaire</label>
+                         <p className="text-xs text-gray-400">Saisie manuelle du total</p>
                      </div>
                      <div className="w-1/2">
                        <div className="relative">
@@ -432,9 +432,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           step="1"
                           value={manualTotal}
                           onChange={(e) => setManualTotal(parseFloat(e.target.value))}
-                          className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-right font-bold text-xl focus:ring-2 focus:ring-primary-500 outline-none"
+                          className="w-full pl-4 pr-10 py-3 bg-dark-100 border border-dark-200 rounded-xl text-right font-bold text-xl focus:ring-2 focus:ring-primary-500 outline-none text-gray-100"
                         />
-                        <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                        </div>
                      </div>
                    </div>
@@ -462,44 +462,44 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
 
               {showLogistics && (
-                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 animate-fade-in space-y-4">
+                <div className="bg-dark-100 rounded-xl p-4 border border-dark-200 animate-fade-in space-y-4">
                    {/* Delivery */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="flex items-center gap-2 text-sm font-medium text-slate-700 md:col-span-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> Livraison / Install
+                     <div className="flex items-center gap-2 text-sm font-medium text-gray-200 md:col-span-2">
+                        <div className="w-2 h-2 rounded-full bg-primary-400"></div> Livraison / Install
                      </div>
                      <input
                         type="date"
                         value={deliveryDate}
                         onChange={(e) => setDeliveryDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
                       />
                       <input
                         type="time"
                         value={deliveryTime}
                         onChange={(e) => setDeliveryTime(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
                       />
                    </div>
 
-                   <div className="border-t border-slate-200"></div>
+                   <div className="border-t border-dark-200"></div>
 
                    {/* Pickup */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="flex items-center gap-2 text-sm font-medium text-slate-700 md:col-span-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div> Reprise / Démontage
+                     <div className="flex items-center gap-2 text-sm font-medium text-gray-200 md:col-span-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-400"></div> Reprise / Démontage
                      </div>
                      <input
                         type="date"
                         value={pickupDate}
                         onChange={(e) => setPickupDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
                       />
                       <input
                         type="time"
                         value={pickupTime}
                         onChange={(e) => setPickupTime(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
                       />
                    </div>
                 </div>
@@ -531,14 +531,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Notes rapides : monté les spots, câblage régie, fin 2h du mat..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed"
+                  className="w-full px-4 py-3 bg-dark-100 border border-dark-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
                 />
               </div>
             </section>
 
             {/* Status Selector */}
-             <div className="flex gap-4 items-center bg-gray-50 p-3 rounded-xl">
-               <span className="text-sm font-medium text-gray-700 pl-2">Statut :</span>
+             <div className="flex gap-4 items-center bg-dark-100 p-3 rounded-xl border border-dark-200">
+               <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
                <div className="flex gap-2">
                  {(['planned', 'completed', 'cancelled'] as const).map(s => (
                    <button
@@ -547,10 +547,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     onClick={() => setStatus(s)}
                     className={`px-3 py-1 text-xs rounded-full border transition-all capitalize ${
                       status === s 
-                      ? s === 'completed' ? 'bg-green-100 border-green-200 text-green-700 font-bold' 
-                        : s === 'cancelled' ? 'bg-red-100 border-red-200 text-red-700 font-bold'
-                        : 'bg-blue-100 border-blue-200 text-blue-700 font-bold'
-                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-100'
+                      ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold' 
+                        : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
+                        : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
+                      : 'bg-dark-50 border-dark-200 text-gray-400 hover:bg-dark-200 hover:text-gray-200'
                     }`}
                    >
                      {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -561,20 +561,20 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex gap-3 md:gap-4">
+          <div className="p-4 md:p-6 border-t border-dark-200 bg-dark-100 flex gap-3 md:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-white hover:shadow-sm transition-all text-sm md:text-base"
+              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl border border-dark-200 text-gray-200 font-semibold hover:bg-dark-200 hover:shadow-sm transition-all text-sm md:text-base"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-white font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm md:text-base ${
+              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm md:text-base ${
                 isConverting 
-                ? 'from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-green-500/30' 
-                : 'from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-primary-500/30'
+                ? 'from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 shadow-green-500/30' 
+                : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 shadow-primary-500/30'
               }`}
             >
                {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}

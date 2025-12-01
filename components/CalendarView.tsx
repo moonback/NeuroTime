@@ -92,42 +92,42 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-full pb-24 md:pb-0 animate-fade-in">
       {/* Calendar Main Panel */}
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 lg:p-6 flex flex-col">
+      <div className="flex-1 bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-5 lg:p-6 flex flex-col">
         
         {/* Header with Navigation & Stats */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 md:mb-6 gap-3 md:gap-4">
           <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-start">
-             <div className="flex gap-0.5 bg-gray-50 p-0.5 rounded-lg border border-gray-200">
-              <button onClick={prevMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+             <div className="flex gap-0.5 bg-dark-100 p-0.5 rounded-lg border border-dark-200">
+              <button onClick={prevMonth} className="p-1.5 hover:bg-dark-200 hover:shadow-sm rounded-md transition-all text-gray-300">
                 <ChevronLeft size={18} />
               </button>
-              <button onClick={goToToday} className="px-2.5 py-1.5 text-[10px] md:text-xs font-bold text-gray-600 hover:bg-white hover:shadow-sm rounded-md transition-all">
+              <button onClick={goToToday} className="px-2.5 py-1.5 text-[10px] md:text-xs font-bold text-gray-300 hover:bg-dark-200 hover:shadow-sm rounded-md transition-all">
                 Aujourd'hui
               </button>
-              <button onClick={nextMonth} className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+              <button onClick={nextMonth} className="p-1.5 hover:bg-dark-200 hover:shadow-sm rounded-md transition-all text-gray-300">
                 <ChevronRight size={18} />
               </button>
             </div>
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 capitalize truncate">
+            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-100 capitalize truncate">
               {format(currentMonth, 'MMMM yyyy', { locale: fr })}
             </h2>
           </div>
 
           <div className="flex items-center gap-2 text-xs md:text-sm w-full md:w-auto">
-             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-blue-50 text-blue-800 rounded-lg font-medium border border-blue-100 flex items-center justify-center gap-1.5">
+             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-primary-500/20 text-primary-300 rounded-lg font-medium border border-primary-500/30 flex items-center justify-center gap-1.5">
                 <Clock size={14} />
                 <span>{monthHours.toFixed(0)}h</span>
              </div>
-             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-emerald-50 text-emerald-800 rounded-lg font-bold border border-emerald-100 flex items-center justify-center gap-1.5">
+             <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-lg font-bold border border-emerald-500/30 flex items-center justify-center gap-1.5">
                 <Euro size={14} />
                 <span>{monthRevenue.toFixed(0)}€</span>
              </div>
              
              {/* Filter Toggle */}
-             <div className="hidden md:flex bg-gray-100 rounded-lg p-0.5">
+             <div className="hidden md:flex bg-dark-100 rounded-lg p-0.5 border border-dark-200">
                <button 
                 onClick={() => setFilterStatus(filterStatus === 'all' ? 'planned' : 'all')}
-                className={`p-1.5 rounded-md transition-all ${filterStatus !== 'all' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-1.5 rounded-md transition-all ${filterStatus !== 'all' ? 'bg-dark-200 shadow-sm text-primary-400' : 'text-gray-500 hover:text-gray-300'}`}
                 title="Filtrer"
                >
                  <Filter size={14} />
@@ -137,16 +137,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
         </div>
 
         {/* Days Header */}
-        <div className="grid grid-cols-7 mb-1.5 border-b border-gray-100 pb-1.5">
+        <div className="grid grid-cols-7 mb-1.5 border-b border-dark-200 pb-1.5">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-            <div key={day} className="text-center text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-400 uppercase tracking-wider py-1">
+            <div key={day} className="text-center text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-500 uppercase tracking-wider py-1">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100 border border-gray-200 rounded-lg overflow-hidden flex-1 min-h-[400px] md:min-h-[450px]">
+        <div className="grid grid-cols-7 grid-rows-6 gap-px bg-dark-100 border border-dark-200 rounded-lg overflow-hidden flex-1 min-h-[400px] md:min-h-[450px]">
           {calendarDays.map((date) => {
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayMissions = missionsByDate.get(dateKey) || [];
@@ -165,24 +165,24 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                 onClick={() => setSelectedDate(date)}
                 onDoubleClick={() => onNewMission(dateKey)}
                 className={`
-                  relative p-1 md:p-1.5 flex flex-col transition-all duration-200 cursor-pointer select-none bg-white hover:bg-gray-50
-                  ${!isCurrentMonth ? 'bg-gray-50/30 text-gray-300' : ''}
-                  ${isSelected ? 'bg-blue-50/50 inset-0' : ''}
+                  relative p-1 md:p-1.5 flex flex-col transition-all duration-200 cursor-pointer select-none bg-dark-50 hover:bg-dark-100
+                  ${!isCurrentMonth ? 'bg-dark-100/30 text-gray-500' : ''}
+                  ${isSelected ? 'bg-primary-500/20 inset-0' : ''}
                 `}
               >
                 {/* Header of the cell */}
                 <div className="flex justify-between items-center mb-1">
                    <span className={`text-xs md:text-sm w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full transition-all ${
                      isTodayDate 
-                      ? 'bg-primary-600 text-white font-bold shadow-md scale-105' 
-                      : isSelected ? 'bg-primary-100 text-primary-700 font-bold' : 'font-medium'
+                      ? 'bg-primary-500 text-dark-300 font-bold shadow-md scale-105' 
+                      : isSelected ? 'bg-primary-500/30 text-primary-300 font-bold' : 'font-medium text-gray-200'
                    }`}>
                       {format(date, 'd')}
                    </span>
                    
                    {/* Mini revenue badge on desktop */}
                    {hasMissions && dayRevenue > 0 && isCurrentMonth && (
-                     <span className="hidden lg:block text-[9px] font-semibold text-emerald-600 bg-emerald-50 px-1 rounded-md border border-emerald-100">
+                     <span className="hidden lg:block text-[9px] font-semibold text-emerald-300 bg-emerald-500/20 px-1 rounded-md border border-emerald-500/30">
                        {Math.round(dayRevenue)}€
                      </span>
                    )}
@@ -208,21 +208,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                         onClick={(e) => { e.stopPropagation(); onEdit(m); }}
                         className={`
                           group flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border truncate cursor-pointer transition-all hover:scale-[1.02] hover:shadow-sm
-                          ${m.status === 'completed' ? 'bg-green-50 text-green-700 border-green-100 hover:border-green-300' : 
-                            m.status === 'planned' ? 'bg-blue-50 text-blue-700 border-blue-100 hover:border-blue-300' : 
-                            'bg-red-50 text-red-700 border-red-100 hover:border-red-300'}
+                          ${m.status === 'completed' ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:border-green-500/50' : 
+                            m.status === 'planned' ? 'bg-primary-500/20 text-primary-300 border-primary-500/30 hover:border-primary-500/50' : 
+                            'bg-red-500/20 text-red-300 border-red-500/30 hover:border-red-500/50'}
                         `}
                         title={`${m.title} (${format(new Date(m.startTime), 'HH:mm')})`}
                       >
                         <span className={`w-1 h-1 rounded-full flex-shrink-0 ${
-                          m.status === 'completed' ? 'bg-green-500' : m.status === 'planned' ? 'bg-blue-500' : 'bg-red-500'
+                          m.status === 'completed' ? 'bg-green-400' : m.status === 'planned' ? 'bg-primary-400' : 'bg-red-400'
                         }`} />
                         <span className="font-bold opacity-75">{format(new Date(m.startTime), 'HH:mm')}</span>
                         <span className="truncate font-medium">{m.title}</span>
                       </div>
                     ))}
                     {dayMissions.length > 3 && (
-                      <span className="text-[9px] text-gray-400 pl-1 font-medium">
+                      <span className="text-[9px] text-gray-500 pl-1 font-medium">
                         + {dayMissions.length - 3} autres
                       </span>
                     )}
@@ -239,18 +239,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Side Panel */}
-      <div className="w-full lg:w-80 xl:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col h-auto">
-        <div className="mb-4 md:mb-6 border-b border-gray-100 pb-3 md:pb-4">
+      <div className="w-full lg:w-80 xl:w-96 bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-5 flex flex-col h-auto">
+        <div className="mb-4 md:mb-6 border-b border-dark-200 pb-3 md:pb-4">
            <div className="flex justify-between items-center mb-3 md:mb-4">
              <div>
-                <h3 className="text-base md:text-lg font-bold text-gray-900 capitalize leading-tight">
+                <h3 className="text-base md:text-lg font-bold text-gray-100 capitalize leading-tight">
                   {format(selectedDate, 'EEEE d MMMM', { locale: fr })}
                 </h3>
-                <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 capitalize">{format(selectedDate, 'yyyy')}</p>
+                <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 capitalize">{format(selectedDate, 'yyyy')}</p>
              </div>
              <button 
               onClick={() => onNewMission(selectedDateKey)}
-              className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-md shadow-primary-500/25 transition-all"
+              className="p-2 bg-primary-500 text-dark-300 rounded-lg hover:bg-primary-400 shadow-md shadow-primary-500/30 transition-all"
               title="Ajouter une mission"
              >
                <Plus size={18} />
@@ -259,13 +259,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
            
            {selectedMissions.length > 0 && (
              <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
-               <div className="flex-1 bg-gray-50 p-2 md:p-2.5 rounded-lg border border-gray-100 flex flex-col items-center">
+               <div className="flex-1 bg-dark-100 p-2 md:p-2.5 rounded-lg border border-dark-200 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Revenu</span>
-                 <p className="text-base md:text-lg font-bold text-gray-800">{dailyTotal.toFixed(0)}€</p>
+                 <p className="text-base md:text-lg font-bold text-gray-100">{dailyTotal.toFixed(0)}€</p>
                </div>
-               <div className="flex-1 bg-gray-50 p-2 md:p-2.5 rounded-lg border border-gray-100 flex flex-col items-center">
+               <div className="flex-1 bg-dark-100 p-2 md:p-2.5 rounded-lg border border-dark-200 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Missions</span>
-                 <p className="text-base md:text-lg font-bold text-gray-800">{selectedMissions.length}</p>
+                 <p className="text-base md:text-lg font-bold text-gray-100">{selectedMissions.length}</p>
                </div>
              </div>
            )}
@@ -273,15 +273,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
 
         <div className="flex-1 overflow-y-auto space-y-2.5 md:space-y-3 pr-1 custom-scrollbar min-h-[250px] md:min-h-[300px]">
           {selectedMissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 opacity-60 py-8 md:py-10">
-              <div className="bg-gray-50 p-3 md:p-4 rounded-full">
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-3 opacity-60 py-8 md:py-10">
+              <div className="bg-dark-100 p-3 md:p-4 rounded-full border border-dark-200">
                 <Calendar size={28} strokeWidth={1.5} />
               </div>
               <div className="text-center">
-                <p className="font-medium text-xs md:text-sm">Aucune activité</p>
+                <p className="font-medium text-xs md:text-sm text-gray-400">Aucune activité</p>
                 <button 
                   onClick={() => onNewMission(selectedDateKey)} 
-                  className="text-primary-600 font-bold text-[10px] md:text-xs mt-2 hover:underline uppercase tracking-wide"
+                  className="text-primary-400 font-bold text-[10px] md:text-xs mt-2 hover:underline uppercase tracking-wide"
                 >
                   Créer une mission
                 </button>
@@ -291,26 +291,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
             selectedMissions.map(mission => (
               <div 
                 key={mission.id} 
-                className="group relative bg-white rounded-lg p-2.5 md:p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-200"
+                className="group relative bg-dark-100 rounded-lg p-2.5 md:p-3 border border-dark-200 shadow-sm hover:shadow-md hover:border-primary-500/50 transition-all duration-200"
               >
                 <div className="flex justify-between items-start mb-2">
                    <div className="flex items-start gap-2 overflow-hidden">
-                      <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${mission.status === 'completed' ? 'bg-green-500' : mission.status === 'planned' ? 'bg-blue-500' : 'bg-red-400'}`}></span>
+                      <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${mission.status === 'completed' ? 'bg-green-400' : mission.status === 'planned' ? 'bg-primary-400' : 'bg-red-400'}`}></span>
                       <div className="min-w-0">
-                        <h4 className="font-bold text-gray-800 text-sm truncate">{mission.title}</h4>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5 font-medium">
+                        <h4 className="font-bold text-gray-100 text-sm truncate">{mission.title}</h4>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-0.5 font-medium">
                           <Clock size={10} />
                           {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
                         </div>
                       </div>
                    </div>
-                   <span className="font-bold text-xs text-gray-700 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                   <span className="font-bold text-xs text-gray-200 bg-dark-50 px-1.5 py-0.5 rounded border border-dark-200">
                     {mission.totalEarnings?.toFixed(0)}€
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 pl-4 mb-2">
-                   <Briefcase size={12} className="text-gray-400" />
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 pl-4 mb-2">
+                   <Briefcase size={12} className="text-gray-500" />
                    <span className="truncate">{mission.client}</span>
                 </div>
 
@@ -319,7 +319,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                   <div className="mb-2 pl-4 text-[10px] text-gray-500 space-y-1">
                     {mission.logistics.deliveryTime && (
                        <div className="flex items-center gap-1">
-                         <Truck size={10} className="text-blue-400" />
+                         <Truck size={10} className="text-primary-400" />
                          <span>Liv: {format(new Date(mission.logistics.deliveryTime), 'dd/MM HH:mm')}</span>
                        </div>
                     )}
@@ -332,16 +332,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                   </div>
                 )}
                 
-                <div className="flex justify-end gap-1 pt-2 border-t border-gray-50">
+                <div className="flex justify-end gap-1 pt-2 border-t border-dark-200">
                    {mission.status === 'planned' && (
-                       <button onClick={() => onValidate(mission)} className="text-green-600 hover:bg-green-50 p-1.5 rounded-lg transition-colors" title="Valider">
+                       <button onClick={() => onValidate(mission)} className="text-green-400 hover:bg-green-500/20 p-1.5 rounded-lg transition-colors" title="Valider">
                         <CheckCircle size={14} />
                       </button>
                     )}
-                    <button onClick={() => onEdit(mission)} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Modifier">
+                    <button onClick={() => onEdit(mission)} className="text-primary-400 hover:bg-primary-500/20 p-1.5 rounded-lg transition-colors" title="Modifier">
                         <Edit size={14} />
                     </button>
-                    <button onClick={() => onDelete(mission.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Supprimer">
+                    <button onClick={() => onDelete(mission.id)} className="text-red-400 hover:bg-red-500/20 p-1.5 rounded-lg transition-colors" title="Supprimer">
                         <Trash2 size={14} />
                     </button>
                 </div>

@@ -104,13 +104,13 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Tableau de bord</h1>
-          <p className="text-gray-500 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">Tableau de bord</h1>
+          <p className="text-gray-400 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
         </div>
         <div className="flex gap-2">
             <button 
               onClick={downloadCSV}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg font-medium shadow-sm transition-all text-sm"
+              className="flex items-center justify-center gap-2 bg-dark-50 hover:bg-dark-100 text-gray-200 border border-dark-100 px-4 py-2 rounded-lg font-medium shadow-sm transition-all text-sm"
               title="Exporter pour Excel"
             >
               <Download size={16} />
@@ -121,98 +121,98 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </header>
 
       {/* AI Summary Card */}
-      <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 rounded-2xl p-5 md:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden group">
+      <div className="bg-gradient-to-br from-primary-600/30 via-primary-500/40 to-primary-400/30 rounded-2xl p-5 md:p-6 text-gray-100 border border-primary-500/30 shadow-lg shadow-primary-500/20 relative overflow-hidden group">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
-            <span className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
-               <SparklesIcon className="w-4 h-4 text-yellow-300" />
+            <span className="bg-primary-500/30 p-1.5 rounded-lg backdrop-blur-sm border border-primary-400/40">
+               <SparklesIcon className="w-4 h-4 text-primary-300" />
             </span>
-            <h3 className="font-semibold text-base md:text-lg tracking-wide opacity-95">Assistant Intelligent</h3>
+            <h3 className="font-semibold text-base md:text-lg tracking-wide text-primary-300">Assistant Intelligent</h3>
           </div>
-          <p className="text-indigo-50/95 leading-relaxed text-sm md:text-base font-normal max-w-2xl">{summary}</p>
+          <p className="text-gray-200 leading-relaxed text-sm md:text-base font-normal max-w-2xl">{summary}</p>
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl group-hover:opacity-10 transition-opacity duration-700"></div>
-        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-blue-500 opacity-20 blur-2xl"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/10 blur-3xl group-hover:opacity-20 transition-opacity duration-700"></div>
+        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/20 blur-2xl"></div>
       </div>
 
       {/* Statistics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard 
-          icon={<Euro className="w-6 h-6 text-emerald-600" />}
+          icon={<Euro className="w-6 h-6 text-emerald-400" />}
           label="CA ce mois"
           value={`${totalEarnings.toFixed(0)} €`}
           subtext="Prévisionnel + Réalisé"
-          color="bg-emerald-50 border-emerald-100"
-          textColor="text-emerald-700"
+          color="bg-emerald-500/10 border-emerald-500/30"
+          textColor="text-emerald-400"
         />
         <StatCard 
-          icon={<Clock className="w-6 h-6 text-blue-600" />}
+          icon={<Clock className="w-6 h-6 text-primary-400" />}
           label="Heures totales"
           value={`${totalHours.toFixed(1)} h`}
           subtext="Cumul mensuel"
-          color="bg-blue-50 border-blue-100"
-          textColor="text-blue-700"
+          color="bg-primary-500/10 border-primary-500/30"
+          textColor="text-primary-400"
         />
         <StatCard 
-          icon={<CheckCircle className="w-6 h-6 text-purple-600" />}
+          icon={<CheckCircle className="w-6 h-6 text-purple-400" />}
           label="Missions finies"
           value={missions.filter(m => m.status === 'completed').length.toString()}
           subtext="Total missions"
-          color="bg-purple-50 border-purple-100"
-          textColor="text-purple-700"
+          color="bg-purple-500/10 border-purple-500/30"
+          textColor="text-purple-400"
         />
         <StatCard 
-          icon={<TrendingUp className="w-6 h-6 text-orange-600" />}
+          icon={<TrendingUp className="w-6 h-6 text-orange-400" />}
           label="À venir"
           value={upcomingMissions.length.toString()}
           subtext="À planifier / valider"
-          color="bg-orange-50 border-orange-100"
-          textColor="text-orange-700"
+          color="bg-orange-500/10 border-orange-500/30"
+          textColor="text-orange-400"
         />
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+      <div className="bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2.5">
-            <span className="bg-gray-100 p-2 rounded-lg">
-               <Calendar className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
+          <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
+            <span className="bg-dark-100 p-2 rounded-lg border border-dark-200">
+               <Calendar className="w-4 h-4 md:w-5 md:h-5 text-primary-400" />
             </span>
             <span>À venir</span>
           </h3>
-          <span className="text-xs md:text-sm text-gray-500 font-medium bg-gray-50 px-2.5 py-1 rounded-full">
+          <span className="text-xs md:text-sm text-gray-300 font-medium bg-dark-100 px-2.5 py-1 rounded-full border border-dark-200">
             {upcomingMissions.length} en attente
           </span>
         </div>
 
         {upcomingMissions.length === 0 ? (
-          <div className="text-center py-10 md:py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-            <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+          <div className="text-center py-10 md:py-12 bg-dark-100 rounded-xl border border-dashed border-dark-200">
+            <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-dark-50 rounded-full flex items-center justify-center shadow-sm mb-3 border border-dark-200">
               <CheckCircle className="text-green-400" size={20} />
             </div>
-            <p className="text-gray-500 font-medium text-sm md:text-base">Tout est à jour !</p>
+            <p className="text-gray-300 font-medium text-sm md:text-base">Tout est à jour !</p>
             <p className="text-xs md:text-sm text-gray-400 mt-1">Aucune mission en attente</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {upcomingMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl bg-gray-50/50 border border-gray-100 hover:border-primary-200 hover:shadow-sm transition-all duration-200">
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl bg-dark-100/50 border border-dark-200 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-200">
                 
                 {/* Date Badge */}
                 <div 
                   onClick={() => onEdit(mission)}
-                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-white p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-gray-200 group-hover:bg-primary-50 group-hover:border-primary-200 transition-colors shadow-sm"
+                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-dark-50 p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-dark-200 group-hover:bg-primary-500/20 group-hover:border-primary-500/50 transition-colors shadow-sm"
                 >
-                  <div className="text-[10px] md:text-xs text-gray-500 group-hover:text-primary-600 uppercase font-bold tracking-wider">
+                  <div className="text-[10px] md:text-xs text-gray-400 group-hover:text-primary-300 uppercase font-bold tracking-wider">
                     {format(new Date(mission.startTime), 'MMM', { locale: fr })}
                   </div>
-                  <div className="text-xl md:text-2xl font-black text-gray-800 group-hover:text-primary-700 leading-none md:mt-1">
+                  <div className="text-xl md:text-2xl font-black text-gray-100 group-hover:text-primary-300 leading-none md:mt-1">
                     {format(new Date(mission.startTime), 'dd')}
                   </div>
-                  <div className="md:hidden h-6 w-[1px] bg-gray-300 mx-2"></div>
-                  <div className="md:hidden text-base font-bold text-gray-700">
+                  <div className="md:hidden h-6 w-[1px] bg-dark-200 mx-2"></div>
+                  <div className="md:hidden text-base font-bold text-gray-200">
                      {format(new Date(mission.startTime), 'HH:mm')}
                   </div>
                 </div>
@@ -220,23 +220,23 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                 {/* Content */}
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit(mission)}>
                   <div className="flex justify-between items-start gap-2">
-                    <h4 className="font-bold text-gray-900 text-base md:text-lg truncate group-hover:text-primary-700 transition-colors">{mission.title}</h4>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100 flex-shrink-0">
+                    <h4 className="font-bold text-gray-100 text-base md:text-lg truncate group-hover:text-primary-300 transition-colors">{mission.title}</h4>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30 flex-shrink-0">
                        {mission.totalEarnings?.toFixed(0)}€
                     </span>
                   </div>
                   
-                  <div className="flex flex-wrap gap-y-1.5 gap-x-3 mt-2 text-xs md:text-sm text-gray-500">
-                    <span className="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md border border-gray-100">
-                      <Clock size={12} className="text-gray-400" />
+                  <div className="flex flex-wrap gap-y-1.5 gap-x-3 mt-2 text-xs md:text-sm text-gray-400">
+                    <span className="flex items-center gap-1.5 bg-dark-50 px-2 py-0.5 rounded-md border border-dark-200">
+                      <Clock size={12} className="text-gray-500" />
                       {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <MapPin size={12} className="text-gray-400" />
+                      <MapPin size={12} className="text-gray-500" />
                       <span className="truncate max-w-[150px]">{mission.location}</span>
                     </span>
                      <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-medium">
-                       {mission.rateType === 'night' ? <Moon size={10} className="text-blue-400" /> : <Sun size={10} className="text-orange-400" />}
+                       {mission.rateType === 'night' ? <Moon size={10} className="text-primary-400" /> : <Sun size={10} className="text-orange-400" />}
                        {mission.rateType === 'night' ? 'Nuit' : 'Jour'}
                      </span>
                   </div>
@@ -249,7 +249,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                       e.stopPropagation();
                       onValidate(mission);
                     }}
-                    className="flex items-center gap-1.5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-3 py-1.5 rounded-lg font-semibold text-xs md:text-sm transition-all shadow-sm"
+                    className="flex items-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 px-3 py-1.5 rounded-lg font-semibold text-xs md:text-sm transition-all shadow-sm"
                     title="Valider les heures"
                   >
                     <CheckCircle size={14} />
@@ -263,21 +263,21 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
        {/* Data Persistence Section */}
-       <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 md:p-5">
+       <div className="bg-dark-50 rounded-2xl border border-dark-100 p-4 md:p-5">
           <div className="flex items-center gap-2.5 mb-3">
-             <div className="bg-gray-200 p-1.5 rounded-lg text-gray-600">
+             <div className="bg-dark-100 p-1.5 rounded-lg text-gray-300 border border-dark-200">
                <Database size={18} />
              </div>
-             <h3 className="text-base md:text-lg font-bold text-gray-800">Sauvegarde</h3>
+             <h3 className="text-base md:text-lg font-bold text-gray-100">Sauvegarde</h3>
           </div>
-          <p className="text-xs md:text-sm text-gray-600 mb-4">
+          <p className="text-xs md:text-sm text-gray-400 mb-4">
             Sauvegardez régulièrement vos données pour éviter toute perte.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-2.5">
             <button 
               onClick={backupData}
-              className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all flex-1 text-sm"
+              className="flex items-center justify-center gap-2 bg-dark-100 border border-dark-200 text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:bg-dark-200 hover:border-primary-500/30 transition-all flex-1 text-sm"
             >
               <Save size={16} />
               Sauvegarder
@@ -293,7 +293,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
               />
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all text-sm"
+                className="w-full flex items-center justify-center gap-2 bg-dark-100 border border-dark-200 text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:bg-dark-200 hover:border-primary-500/30 transition-all text-sm"
               >
                 <Upload size={16} />
                 Restaurer
@@ -306,16 +306,16 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = ({ icon, label, value, subtext, color, textColor }: any) => (
-  <div className={`p-4 md:p-5 rounded-xl border transition-all hover:shadow-md ${color} bg-opacity-50`}>
+  <div className={`p-4 md:p-5 rounded-xl border transition-all hover:shadow-lg hover:shadow-primary-500/10 ${color}`}>
     <div className="flex items-start justify-between mb-3">
-      <div className={`p-2.5 rounded-xl bg-white shadow-sm ${textColor}`}>
+      <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor}`}>
         {icon}
       </div>
     </div>
     <div>
-      <p className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
-      <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor} opacity-90`}>{label}</p>
-      <p className="text-[10px] md:text-xs text-gray-500 mt-1.5">{subtext}</p>
+      <p className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">{value}</p>
+      <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor}`}>{label}</p>
+      <p className="text-[10px] md:text-xs text-gray-400 mt-1.5">{subtext}</p>
     </div>
   </div>
 );

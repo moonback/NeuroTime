@@ -110,18 +110,18 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div className="bg-dark-50 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-dark-100">
         
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
+        <div className="flex justify-between items-center p-6 border-b border-dark-200 bg-dark-100">
           <div>
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Sparkles className="text-purple-600" />
+            <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
+              <Sparkles className="text-primary-400" />
               Scanner Planning IA
             </h2>
-            <p className="text-sm text-gray-500">Transformez une photo de votre agenda en missions.</p>
+            <p className="text-sm text-gray-400">Transformez une photo de votre agenda en missions.</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+          <button onClick={onClose} className="p-2 hover:bg-dark-200 rounded-full transition-colors text-gray-400">
             <X size={20} />
           </button>
         </div>
@@ -134,18 +134,18 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               <div 
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-2xl h-64 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                  previewUrl ? 'border-purple-200 bg-purple-50/30' : 'border-gray-300 hover:border-purple-400 hover:bg-gray-50'
+                  previewUrl ? 'border-primary-500/50 bg-primary-500/10' : 'border-dark-200 hover:border-primary-500/50 hover:bg-dark-100'
                 }`}
               >
                 {previewUrl ? (
                   <img src={previewUrl} alt="Preview" className="h-full w-full object-contain rounded-xl" />
                 ) : (
-                  <div className="text-center p-6 text-gray-500">
-                    <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Upload className="text-purple-600" size={32} />
+                  <div className="text-center p-6 text-gray-400">
+                    <div className="bg-primary-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary-500/30">
+                      <Upload className="text-primary-400" size={32} />
                     </div>
-                    <p className="font-medium">Cliquez pour ajouter une photo</p>
-                    <p className="text-xs mt-1">Format JPG, PNG</p>
+                    <p className="font-medium text-gray-300">Cliquez pour ajouter une photo</p>
+                    <p className="text-xs mt-1 text-gray-500">Format JPG, PNG</p>
                   </div>
                 )}
                 <input 
@@ -161,7 +161,7 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
                 <button
                   onClick={handleAnalyze}
                   disabled={isAnalyzing}
-                  className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-lg shadow-purple-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 rounded-xl bg-primary-500 hover:bg-primary-400 text-dark-300 font-bold shadow-lg shadow-primary-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                 >
                   {isAnalyzing ? <Loader2 className="animate-spin" /> : <Sparkles size={20} />}
                   {isAnalyzing ? 'Analyse en cours...' : 'Analyser avec Gemini'}
@@ -169,7 +169,7 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               )}
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
+                <div className="bg-red-500/20 text-red-300 border border-red-500/30 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
                   <AlertCircle size={20} />
                   {error}
                 </div>
@@ -177,12 +177,12 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
             </div>
 
             {/* Right Column: Results */}
-            <div className="flex flex-col h-full bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-200 bg-white">
-                <h3 className="font-bold text-gray-700 flex items-center gap-2">
+            <div className="flex flex-col h-full bg-dark-100 rounded-2xl border border-dark-200 overflow-hidden">
+              <div className="p-4 border-b border-dark-200 bg-dark-50">
+                <h3 className="font-bold text-gray-100 flex items-center gap-2">
                   Missions détectées
                   {extractedMissions.length > 0 && (
-                    <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs">
+                    <span className="bg-primary-500/20 text-primary-300 px-2 py-0.5 rounded-full text-xs border border-primary-500/30">
                       {extractedMissions.length}
                     </span>
                   )}
@@ -191,24 +191,24 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               
               <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                 {extractedMissions.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center p-8">
+                  <div className="h-full flex flex-col items-center justify-center text-gray-500 text-center p-8">
                     <ImageIcon size={48} className="mb-4 opacity-20" />
                     <p>Les missions extraites apparaîtront ici.</p>
                   </div>
                 ) : (
                   extractedMissions.map((m, idx) => (
-                    <div key={idx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-sm">
+                    <div key={idx} className="bg-dark-50 p-3 rounded-xl border border-dark-200 shadow-sm text-sm">
                       <div className="flex justify-between items-start mb-1">
-                        <span className="font-bold text-gray-800">{m.title}</span>
-                        <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600">
+                        <span className="font-bold text-gray-100">{m.title}</span>
+                        <span className="text-xs font-mono bg-dark-100 px-2 py-1 rounded text-gray-400 border border-dark-200">
                           {m.date}
                         </span>
                       </div>
-                      <div className="flex justify-between text-gray-500 mb-1">
+                      <div className="flex justify-between text-gray-400 mb-1">
                         <span>{m.startTime} - {m.endTime}</span>
                         <span>{m.client}</span>
                       </div>
-                      <div className="text-xs text-purple-600 bg-purple-50 inline-block px-2 py-0.5 rounded">
+                      <div className="text-xs text-primary-300 bg-primary-500/20 inline-block px-2 py-0.5 rounded border border-primary-500/30">
                         {m.location}
                       </div>
                     </div>
@@ -217,10 +217,10 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               </div>
 
               {extractedMissions.length > 0 && (
-                <div className="p-4 bg-white border-t border-gray-200">
+                <div className="p-4 bg-dark-50 border-t border-dark-200">
                   <button
                     onClick={handleConfirmImport}
-                    className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-500/20 flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl bg-green-500 hover:bg-green-400 text-dark-300 font-bold shadow-lg shadow-green-500/30 flex items-center justify-center gap-2"
                   >
                     <Check size={20} />
                     Valider & Importer

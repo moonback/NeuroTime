@@ -15,16 +15,24 @@
             },
             colors: {
               primary: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                200: '#bae6fd',
-                300: '#7dd3fc',
-                400: '#38bdf8',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                700: '#0369a1',
-                800: '#075985',
-                900: '#0c4a6e',
+                50: '#e0f7ff',
+                100: '#b3ebff',
+                200: '#80deff',
+                300: '#4dd0ff',
+                400: '#26c5ff',
+                500: '#00baff',
+                600: '#00a8f0',
+                700: '#0093e0',
+                800: '#007fd0',
+                900: '#005db3',
+              },
+              dark: {
+                50: '#1a1f2e',
+                100: '#151a27',
+                200: '#0f141f',
+                300: '#0a0e1a',
+                400: '#050812',
+                500: '#000000',
               }
             }
           }
@@ -36,27 +44,28 @@
         -webkit-tap-highlight-color: transparent;
       }
       body {
-        background-color: #fafbfc;
+        background-color: #0a0e1a;
+        color: #e2e8f0;
         font-feature-settings: "rlig" 1, "calt" 1;
       }
-      /* Custom scrollbar for better aesthetics */
+      /* Custom scrollbar for dark theme */
       ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: transparent; 
+        background: #1a1f2e; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #d1d5db; 
+        background: #3b4a63; 
         border-radius: 3px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #9ca3af; 
+        background: #4a5d7a; 
       }
       .custom-scrollbar {
         scrollbar-width: thin;
-        scrollbar-color: #d1d5db transparent;
+        scrollbar-color: #3b4a63 #1a1f2e;
       }
       /* Smooth animations */
       @keyframes fade-in {
@@ -75,6 +84,11 @@
       /* Safe area for mobile */
       .pb-safe {
         padding-bottom: env(safe-area-inset-bottom);
+      }
+      /* Selection color */
+      ::selection {
+        background-color: #00d4ff;
+        color: #0a0e1a;
       }
     </style>
   <script type="importmap">
