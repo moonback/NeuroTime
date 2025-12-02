@@ -207,11 +207,18 @@ const App: React.FC = () => {
       <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20 animate-slide-in-left">
         <div className="p-6 border-b border-primary-700/20 flex items-center gap-3 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-lg items-center justify-center relative z-10 animate-float">
-            <span className="text-2xl font-black text-white tracking-tight">N</span>
+          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-lg items-center justify-center relative z-10 animate-float overflow-hidden">
+            <img
+              src="/logo2.png"
+              alt="Logo NeuroTime"
+              className="h-9 w-9 object-contain"
+            />
           </span>
           <div className="relative z-10">
-            <h1 className="text-xl font-semibold tracking-tight text-primary-300 leading-tight">NeuroTime</h1>
+            <h1 className="text-xl font-semibold tracking-tight leading-tight">
+              <span className="text-[#008CFF] drop-shadow-[0_1px_5px_rgba(0,140,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
+              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_5px_rgba(118,204,255,0.2)]" style={{letterSpacing: "-0.5px"}}>Time</span>
+            </h1>
             <span className="text-[0.65rem] text-primary-400 mt-0.5 block font-medium opacity-80">Gestion</span>
           </div>
         </div>
