@@ -361,12 +361,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
-          <div>
+        <div className={`flex justify-between items-center p-4 md:p-6 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
             <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-300' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
@@ -374,7 +375,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-colors text-gray-400">
+          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-all text-gray-400 hover:scale-110 relative z-10">
             <X size={18} />
           </button>
         </div>
@@ -384,7 +385,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5">
+               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5 glass-light hover:border-primary-500/50 transition-all animate-slide-in-up">
                  <Copy size={14} className="text-primary-400" />
                  <select 
                    onChange={handleCopyFromMission}
@@ -680,10 +681,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
 
               {/* Smart Calculator Display */}
-              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
+              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 
                 {calculationMode === 'auto' ? (
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-3 md:space-y-4 relative z-10">
                     <div className="flex justify-between items-start gap-4">
                        <div>
                          <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
@@ -691,7 +693,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                        </div>
                        <div className="text-right">
                           <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'}`}>
+                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
                             {computedTotal.toFixed(2)} <Euro size={20} strokeWidth={2.5} />
                           </span>
                        </div>
@@ -808,24 +810,28 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4">
+          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base"
+              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base relative z-10"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm md:text-base ${
+              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
                 isConverting 
                 ? 'from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 shadow-green-500/30' 
                 : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 shadow-primary-500/30'
               }`}
             >
-               {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
-              {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <span className="relative z-10 flex items-center gap-2">
+                {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
+                {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+              </span>
             </button>
           </div>
         </form>
