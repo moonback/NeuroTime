@@ -73,7 +73,6 @@ NeuroTime est une application web moderne conçue pour les freelances du secteur
 - **Agenda** : Vue calendrier mensuelle interactive
 
 #### 🤖 Intelligence artificielle
-- **Scanner d'images** : Import automatique de plannings depuis photos
 - **Amélioration de descriptions** : Réécriture professionnelle des notes
 - **Résumé intelligent** : Analyse de l'activité avec recommandations
 
@@ -198,7 +197,6 @@ NeuroTime/
 │   ├── AuthModal.tsx       # Modal d'authentification
 │   ├── CalendarView.tsx     # Vue calendrier
 │   ├── Dashboard.tsx        # Tableau de bord
-│   ├── ImageImportModal.tsx # Import d'images IA
 │   ├── MissionForm.tsx     # Formulaire de mission
 │   └── MissionsList.tsx     # Liste des missions
 ├── services/                # Services métier

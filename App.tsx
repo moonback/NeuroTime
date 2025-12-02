@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, LogOut, User, DollarSign } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
-const ImageImportModal = lazy(() => import('./components/ImageImportModal'));
 const FinanceView = lazy(() => import('./components/FinanceView'));
 import AuthModal from './components/AuthModal';
 import { ToastContainer, useToast } from './components/Toast';
@@ -18,7 +17,6 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
   const [missions, setMissions] = useState<Mission[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
   
@@ -121,11 +119,6 @@ const App: React.FC = () => {
     }
     setEditingMission(null);
   }, [editingMission, toast]);
-
-  const handleBulkAddMissions = useCallback((newMissions: Mission[]) => {
-    setMissions(prev => [...prev, ...newMissions]);
-    toast.success(`${newMissions.length} mission${newMissions.length > 1 ? 's' : ''} importée${newMissions.length > 1 ? 's' : ''}`);
-  }, [toast]);
 
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
@@ -250,13 +243,6 @@ const App: React.FC = () => {
 
         <div className="p-4 space-y-2 border-t border-primary-500/20">
            <button 
-            onClick={() => setIsImportModalOpen(true)}
-            className="w-full glass-button text-primary-300 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
-          >
-            <Sparkles size={16} />
-            <span>Scanner IA</span>
-          </button>
-           <button 
             onClick={() => openNewMissionModal()}
             className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 glow-blue transition-all text-sm"
           >
@@ -344,13 +330,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-           <MobileNavButton 
-            active={false}
-            onClick={() => setIsImportModalOpen(true)}
-            icon={<Sparkles size={22} />} 
-            label="Scan IA"
-          />
-
           <MobileNavButton 
             active={view === 'calendar'} 
             onClick={() => setView('calendar')} 
@@ -374,12 +353,6 @@ const App: React.FC = () => {
           initialData={editingMission}
           defaultDate={selectedDateForNew}
           missions={missions}
-        />
-
-        <ImageImportModal 
-          isOpen={isImportModalOpen}
-          onClose={() => setIsImportModalOpen(false)}
-          onImport={handleBulkAddMissions}
         />
       </Suspense>
 

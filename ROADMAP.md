@@ -26,7 +26,6 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - ✅ Tableau de bord avec statistiques
 - ✅ Vue liste des missions avec filtres
 - ✅ Vue calendrier mensuelle
-- ✅ Import d'images par IA (Gemini)
 - ✅ Amélioration de descriptions par IA
 - ✅ Export CSV
 - ✅ Sauvegarde/Restauration JSON
