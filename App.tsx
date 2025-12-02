@@ -10,6 +10,7 @@ import AuthModal from './components/AuthModal';
 import { ToastContainer, useToast } from './components/Toast';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import SplashScreen from './components/SplashScreen';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
@@ -33,6 +34,9 @@ const App: React.FC = () => {
   
   // Toast notifications
   const toast = useToast();
+  
+  // Splash screen - se masque une fois l'auth vérifiée
+  const [showSplash, setShowSplash] = useState(true);
 
   // Vérifier l'authentification au démarrage
   useEffect(() => {
@@ -178,6 +182,17 @@ const App: React.FC = () => {
     setSelectedDateForNew(dateStr);
     setIsModalOpen(true);
   };
+
+  // Splash screen - s'affiche au démarrage jusqu'à ce que l'auth soit vérifiée
+  if (showSplash) {
+    return (
+      <SplashScreen 
+        onFinish={() => setShowSplash(false)}
+        minDisplayTime={1500}
+        ready={!authLoading}
+      />
+    );
+  }
 
   // Afficher le modal d'authentification si non connecté
   if (authLoading) {

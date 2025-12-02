@@ -7,16 +7,34 @@
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Application de gestion personnelle pour freelances - Suivi de missions, facturation et statistiques" />
-    <meta name="theme-color" content="#6366f1" />
+    <meta name="theme-color" content="#008CFF" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="NeuroTime" />
     
+    <!-- Splash Screen Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    
     <!-- Icons -->
     <link rel="icon" type="image/png" href="/icon-192x192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Splash Screen CSS (for native PWA splash) -->
+    <style>
+      /* Prevent flash of unstyled content before React loads */
+      body {
+        background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155);
+        margin: 0;
+        overflow: hidden;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
