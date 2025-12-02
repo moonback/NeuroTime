@@ -138,7 +138,19 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       
       // Gérer les créneaux horaires multiples ou un seul créneau
       if (initialData.timeSlots && initialData.timeSlots.length > 0) {
-        setTimeSlots(initialData.timeSlots);
+        // Filtrer les créneaux invalides et s'assurer qu'ils ont des valeurs valides
+        const validSlots = initialData.timeSlots.filter(slot => 
+          slot && slot.startTime && slot.endTime && 
+          slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
+        );
+        if (validSlots.length > 0) {
+          setTimeSlots(validSlots);
+        } else {
+          // Si tous les créneaux sont invalides, utiliser les heures de début/fin
+          setTimeSlots([
+            { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
+          ]);
+        }
       } else {
         // Compatibilité avec les anciennes missions (un seul créneau)
         setTimeSlots([
@@ -170,11 +182,32 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   // Auto-calculate logic pour plusieurs créneaux
   useEffect(() => {
-    if (calculationMode === 'auto' && timeSlots.length > 0) {
-      const result = calculateEarningsMultiple(date, timeSlots);
-      setDayHours(result.dayHours);
-      setNightHours(result.nightHours);
-      setComputedTotal(result.total);
+    if (calculationMode === 'auto' && timeSlots.length > 0 && date) {
+      // Vérifier que tous les créneaux ont des heures valides avant de calculer
+      const hasValidSlots = timeSlots.every(slot => 
+        slot.startTime && slot.endTime && 
+        slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
+      );
+      
+      if (hasValidSlots) {
+        try {
+          const result = calculateEarningsMultiple(date, timeSlots);
+          setDayHours(result.dayHours);
+          setNightHours(result.nightHours);
+          setComputedTotal(result.total);
+        } catch (error) {
+          console.error('Erreur lors du calcul automatique:', error);
+          // En cas d'erreur, réinitialiser les valeurs
+          setDayHours(0);
+          setNightHours(0);
+          setComputedTotal(0);
+        }
+      } else {
+        // Réinitialiser si les données ne sont pas valides
+        setDayHours(0);
+        setNightHours(0);
+        setComputedTotal(0);
+      }
     }
   }, [timeSlots, date, calculationMode]);
 
