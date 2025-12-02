@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User, DollarSign } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
 const ImageImportModal = lazy(() => import('./components/ImageImportModal'));
+const FinanceView = lazy(() => import('./components/FinanceView'));
 import AuthModal from './components/AuthModal';
 import { ToastContainer, useToast } from './components/Toast';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -239,6 +240,12 @@ const App: React.FC = () => {
             icon={<CalendarIcon size={20} />} 
             label="Agenda" 
           />
+          <NavButton 
+            active={view === 'finance'} 
+            onClick={() => setView('finance')} 
+            icon={<DollarSign size={20} />} 
+            label="Finance" 
+          />
         </nav>
 
         <div className="p-4 space-y-2 border-t border-primary-500/20">
@@ -303,6 +310,9 @@ const App: React.FC = () => {
                 onNewMission={openNewMissionModal}
               />
             )}
+            {view === 'finance' && (
+              <FinanceView missions={missions} />
+            )}
           </Suspense>
         </div>
       </main>
@@ -346,6 +356,12 @@ const App: React.FC = () => {
             onClick={() => setView('calendar')} 
             icon={<CalendarIcon size={22} />} 
             label="Agenda"
+          />
+          <MobileNavButton 
+            active={view === 'finance'} 
+            onClick={() => setView('finance')} 
+            icon={<DollarSign size={22} />} 
+            label="Finance"
           />
         </div>
       </nav>
