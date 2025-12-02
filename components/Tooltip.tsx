@@ -87,7 +87,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="fixed z-[200] px-3 py-2 text-xs font-medium text-gray-100 bg-dark-100 border border-dark-200 rounded-lg shadow-lg backdrop-blur-sm pointer-events-none animate-fade-in"
+          className="fixed z-[200] px-3 py-2 text-xs font-medium text-gray-100 glass-card rounded-lg shadow-lg pointer-events-none animate-fade-in"
           style={{
             top: `${tooltipPosition.top}px`,
             left: `${tooltipPosition.left}px`,
@@ -95,7 +95,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         >
           {content}
           <div
-            className={`absolute w-2 h-2 bg-dark-100 border-dark-200 transform rotate-45 ${
+            className={`absolute w-2 h-2 glass-card transform rotate-45 ${
               position === 'top' ? 'bottom-[-4px] left-1/2 -translate-x-1/2 border-r border-b' :
               position === 'bottom' ? 'top-[-4px] left-1/2 -translate-x-1/2 border-l border-t' :
               position === 'left' ? 'right-[-4px] top-1/2 -translate-y-1/2 border-r border-t' :

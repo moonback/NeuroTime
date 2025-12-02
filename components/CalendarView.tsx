@@ -15,6 +15,7 @@ import startOfWeek from 'date-fns/startOfWeek';
 import subMonths from 'date-fns/subMonths';
 import fr from 'date-fns/locale/fr';
 import { ChevronLeft, ChevronRight, MapPin, Trash2, Edit, Calendar, CheckCircle, Plus, Briefcase, Clock, Euro, Filter } from 'lucide-react';
+import { formatTimeSlots } from '../utils/timeSlots';
 
 interface CalendarViewProps {
   missions: Mission[];
@@ -92,12 +93,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6 h-full pb-24 md:pb-0 animate-fade-in">
       {/* Calendar Main Panel */}
-      <div className="flex-1 bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-5 lg:p-6 flex flex-col">
+      <div className="flex-1 glass-card rounded-2xl p-4 md:p-5 lg:p-6 flex flex-col">
         
         {/* Header with Navigation & Stats */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 md:mb-6 gap-3 md:gap-4">
           <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-start">
-             <div className="flex gap-0.5 bg-dark-100 p-0.5 rounded-lg border border-dark-200">
+             <div className="flex gap-0.5 glass-light p-0.5 rounded-lg border-primary-500/20">
               <button onClick={prevMonth} className="p-1.5 hover:bg-dark-200 hover:shadow-sm rounded-md transition-all text-gray-300">
                 <ChevronLeft size={18} />
               </button>
@@ -124,7 +125,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
              </div>
              
              {/* Filter Toggle */}
-             <div className="hidden md:flex bg-dark-100 rounded-lg p-0.5 border border-dark-200">
+             <div className="hidden md:flex glass-light rounded-lg p-0.5 border-primary-500/20">
                <button 
                 onClick={() => setFilterStatus(filterStatus === 'all' ? 'planned' : 'all')}
                 className={`p-1.5 rounded-md transition-all ${filterStatus !== 'all' ? 'bg-dark-200 shadow-sm text-primary-400' : 'text-gray-500 hover:text-gray-300'}`}
@@ -137,7 +138,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
         </div>
 
         {/* Days Header */}
-        <div className="grid grid-cols-7 mb-1.5 border-b border-dark-200 pb-1.5">
+        <div className="grid grid-cols-7 mb-1.5 border-b border-primary-500/20 pb-1.5">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
             <div key={day} className="text-center text-[9px] md:text-[10px] lg:text-xs font-bold text-gray-500 uppercase tracking-wider py-1">
               {day}
@@ -146,7 +147,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 grid-rows-6 gap-px bg-dark-100 border border-dark-200 rounded-lg overflow-hidden flex-1 min-h-[400px] md:min-h-[450px]">
+        <div className="grid grid-cols-7 grid-rows-6 gap-px glass-light border-primary-500/20 rounded-lg overflow-hidden flex-1 min-h-[400px] md:min-h-[450px]">
           {calendarDays.map((date) => {
             const dateKey = format(date, 'yyyy-MM-dd');
             const dayMissions = missionsByDate.get(dateKey) || [];
@@ -165,8 +166,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                 onClick={() => setSelectedDate(date)}
                 onDoubleClick={() => onNewMission(dateKey)}
                 className={`
-                  relative p-1 md:p-1.5 flex flex-col transition-all duration-200 cursor-pointer select-none bg-dark-50 hover:bg-dark-100
-                  ${!isCurrentMonth ? 'bg-dark-100/30 text-gray-500' : ''}
+                  relative p-1 md:p-1.5 flex flex-col transition-all duration-200 cursor-pointer select-none glass-light hover:glass-button
+                  ${!isCurrentMonth ? 'opacity-50 text-gray-500' : ''}
                   ${isSelected ? 'bg-primary-500/20 inset-0' : ''}
                 `}
               >
@@ -239,8 +240,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Side Panel */}
-      <div className="w-full lg:w-80 xl:w-96 bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-5 flex flex-col h-auto">
-        <div className="mb-4 md:mb-6 border-b border-dark-200 pb-3 md:pb-4">
+      <div className="w-full lg:w-80 xl:w-96 glass-card rounded-2xl p-4 md:p-5 flex flex-col h-auto">
+        <div className="mb-4 md:mb-6 border-b border-primary-500/20 pb-3 md:pb-4">
            <div className="flex justify-between items-center mb-3 md:mb-4">
              <div>
                 <h3 className="text-base md:text-lg font-bold text-gray-100 capitalize leading-tight">
@@ -259,11 +260,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
            
            {selectedMissions.length > 0 && (
              <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
-               <div className="flex-1 bg-dark-100 p-2 md:p-2.5 rounded-lg border border-dark-200 flex flex-col items-center">
+               <div className="flex-1 glass-light p-2 md:p-2.5 rounded-lg border-primary-500/20 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Revenu</span>
                  <p className="text-base md:text-lg font-bold text-gray-100">{dailyTotal.toFixed(0)}€</p>
                </div>
-               <div className="flex-1 bg-dark-100 p-2 md:p-2.5 rounded-lg border border-dark-200 flex flex-col items-center">
+               <div className="flex-1 glass-light p-2 md:p-2.5 rounded-lg border-primary-500/20 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Missions</span>
                  <p className="text-base md:text-lg font-bold text-gray-100">{selectedMissions.length}</p>
                </div>
@@ -274,7 +275,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
         <div className="flex-1 overflow-y-auto space-y-2.5 md:space-y-3 pr-1 custom-scrollbar min-h-[250px] md:min-h-[300px]">
           {selectedMissions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-3 opacity-60 py-8 md:py-10">
-              <div className="bg-dark-100 p-3 md:p-4 rounded-full border border-dark-200">
+              <div className="glass-light p-3 md:p-4 rounded-full border-primary-500/20">
                 <Calendar size={28} strokeWidth={1.5} />
               </div>
               <div className="text-center">
@@ -291,7 +292,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
             selectedMissions.map(mission => (
               <div 
                 key={mission.id} 
-                className="group relative bg-dark-100 rounded-lg p-2.5 md:p-3 border border-dark-200 shadow-sm hover:shadow-md hover:border-primary-500/50 transition-all duration-200"
+                className="group relative glass-light rounded-lg p-2.5 md:p-3 border-primary-500/20 hover:border-primary-500/50 hover:glow-blue transition-all duration-200"
               >
                 <div className="flex justify-between items-start mb-2">
                    <div className="flex items-start gap-2 overflow-hidden">
@@ -304,7 +305,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                         </div>
                       </div>
                    </div>
-                   <span className="font-bold text-xs text-gray-200 bg-dark-50 px-1.5 py-0.5 rounded border border-dark-200">
+                   <span className="font-bold text-xs text-gray-200 glass-light px-1.5 py-0.5 rounded border-primary-500/20">
                     {mission.totalEarnings?.toFixed(0)}€
                   </span>
                 </div>
@@ -315,7 +316,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                 </div>
 
                 
-                <div className="flex justify-end gap-1 pt-2 border-t border-dark-200">
+                <div className="flex justify-end gap-1 pt-2 border-t border-primary-500/20">
                    {mission.status === 'planned' && (
                        <button onClick={() => onValidate(mission)} className="text-green-400 hover:bg-green-500/20 p-1.5 rounded-lg transition-colors" title="Valider">
                         <CheckCircle size={14} />

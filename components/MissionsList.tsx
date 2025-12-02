@@ -43,7 +43,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
         </div>
         <button 
           onClick={onNew}
-          className="bg-primary-500 hover:bg-primary-400 text-dark-300 font-medium py-2 px-4 md:py-2.5 md:px-5 rounded-lg md:rounded-xl flex items-center gap-2 shadow-md shadow-primary-500/30 transition-all text-sm md:text-base"
+          className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-medium py-2 px-4 md:py-2.5 md:px-5 rounded-lg md:rounded-xl flex items-center gap-2 glow-blue transition-all text-sm md:text-base"
         >
           <Plus size={18} />
           <span>Nouvelle Mission</span>
@@ -51,7 +51,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-dark-50 rounded-xl md:rounded-2xl shadow-sm border border-dark-100 p-3 md:p-4 flex flex-col md:flex-row gap-3 md:gap-4 items-center justify-between">
+      <div className="glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col md:flex-row gap-3 md:gap-4 items-center justify-between">
         <div className="relative w-full md:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
           <input
@@ -59,7 +59,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
             placeholder="Rechercher..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+            className="w-full pl-9 pr-4 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
           />
         </div>
 
@@ -70,8 +70,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                 statusFilter === s 
-                  ? 'bg-primary-500 text-dark-300 shadow-sm' 
-                  : 'bg-dark-100 border border-dark-200 text-gray-400 hover:bg-dark-200 hover:text-gray-200'
+                  ? 'bg-primary-500 text-dark-300 shadow-sm glow-blue' 
+                  : 'glass-button text-gray-400 hover:text-primary-300'
               }`}
             >
               {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -81,7 +81,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Stats Summary for Selection */}
-      <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 bg-dark-50 p-2.5 md:p-3 rounded-lg border border-dark-100">
+      <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 glass-light p-2.5 md:p-3 rounded-lg">
         <Filter size={12} />
         <span><b className="text-gray-200">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
         <span className="w-1 h-1 bg-gray-600 rounded-full mx-1"></span>
@@ -91,7 +91,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* List / Table */}
-      <div className="bg-dark-50 rounded-xl md:rounded-2xl shadow-sm border border-dark-100 overflow-hidden">
+      <div className="glass-card rounded-xl md:rounded-2xl overflow-hidden">
         {filteredMissions.length === 0 ? (
           <div className="p-8 md:p-12 text-center text-gray-400">
             <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-dark-100 rounded-full flex items-center justify-center mb-3 md:mb-4 border border-dark-200">

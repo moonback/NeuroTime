@@ -163,7 +163,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <div className="flex gap-2">
             <button 
               onClick={downloadCSV}
-              className="flex items-center justify-center gap-2 bg-dark-50 hover:bg-dark-100 text-gray-200 border border-dark-100 px-4 py-2 rounded-lg font-medium shadow-sm transition-all text-sm"
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-4 py-2 rounded-lg font-medium transition-all text-sm"
               title="Exporter pour Excel"
             >
               <Download size={16} />
@@ -174,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </header>
 
       {/* AI Summary Card */}
-      <div className="bg-gradient-to-br from-primary-600/30 via-primary-500/40 to-primary-400/30 rounded-2xl p-5 md:p-6 text-gray-100 border border-primary-500/30 shadow-lg shadow-primary-500/20 relative overflow-hidden group">
+      <div className="glass-card bg-gradient-to-br from-primary-600/20 via-primary-500/30 to-primary-400/20 rounded-2xl p-5 md:p-6 text-gray-100 relative overflow-hidden group">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="bg-primary-500/30 p-1.5 rounded-lg backdrop-blur-sm border border-primary-400/40">
@@ -227,7 +227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <div className="bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-6">
+      <div className="glass-card rounded-2xl p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
             <span className="bg-dark-100 p-2 rounded-lg border border-dark-200">
@@ -241,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         </div>
 
         {upcomingMissions.length === 0 ? (
-          <div className="text-center py-10 md:py-12 bg-dark-100 rounded-xl border border-dashed border-dark-200">
+          <div className="text-center py-10 md:py-12 glass-light rounded-xl border border-dashed border-primary-500/20">
             <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-dark-50 rounded-full flex items-center justify-center shadow-sm mb-3 border border-dark-200">
               <CheckCircle className="text-green-400" size={20} />
             </div>
@@ -251,7 +251,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         ) : (
           <div className="grid gap-3">
             {upcomingMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl bg-dark-100/50 border border-dark-200 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-200">
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-primary-500/50 hover:glow-blue transition-all duration-200">
                 
                 {/* Date Badge */}
                 <div 
@@ -316,7 +316,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Completed Missions List */}
-      <div className="bg-dark-50 rounded-2xl shadow-sm border border-dark-100 p-4 md:p-6">
+      <div className="glass-card rounded-2xl p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
             <span className="bg-dark-100 p-2 rounded-lg border border-dark-200">
@@ -330,7 +330,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         </div>
 
         {recentCompletedMissions.length === 0 ? (
-          <div className="text-center py-10 md:py-12 bg-dark-100 rounded-xl border border-dashed border-dark-200">
+          <div className="text-center py-10 md:py-12 glass-light rounded-xl border border-dashed border-primary-500/20">
             <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-dark-50 rounded-full flex items-center justify-center shadow-sm mb-3 border border-dark-200">
               <CheckCircle className="text-gray-500" size={20} />
             </div>
@@ -340,7 +340,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         ) : (
           <div className="grid gap-3">
             {recentCompletedMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl bg-dark-100/50 border border-dark-200 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-200">
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-200">
                 
                 {/* Date Badge */}
                 <div 
@@ -398,7 +398,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
        {/* Data Persistence Section */}
-       <div className="bg-dark-50 rounded-2xl border border-dark-100 p-4 md:p-5">
+       <div className="glass-card rounded-2xl p-4 md:p-5">
           <div className="flex items-center gap-2.5 mb-3">
              <div className="bg-dark-100 p-1.5 rounded-lg text-gray-300 border border-dark-200">
                <Database size={18} />
@@ -412,7 +412,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           <div className="flex flex-col sm:flex-row gap-2.5">
             <button 
               onClick={backupData}
-              className="flex items-center justify-center gap-2 bg-dark-100 border border-dark-200 text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:bg-dark-200 hover:border-primary-500/30 transition-all flex-1 text-sm"
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:border-primary-500/50 transition-all flex-1 text-sm"
             >
               <Save size={16} />
               Sauvegarder
@@ -428,7 +428,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
               />
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 bg-dark-100 border border-dark-200 text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:bg-dark-200 hover:border-primary-500/30 transition-all text-sm"
+                className="w-full flex items-center justify-center gap-2 glass-button text-gray-200 font-medium py-2.5 px-4 rounded-lg hover:border-primary-500/50 transition-all text-sm"
               >
                 <Upload size={16} />
                 Restaurer
@@ -441,7 +441,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = memo(({ icon, label, value, subtext, color, textColor }: any) => (
-  <div className={`p-4 md:p-5 rounded-xl border transition-all hover:shadow-lg hover:shadow-primary-500/10 ${color}`}>
+  <div className={`p-4 md:p-5 rounded-xl glass-card transition-all hover:glow-blue ${color}`}>
     <div className="flex items-start justify-between mb-3">
       <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor}`}>
         {icon}

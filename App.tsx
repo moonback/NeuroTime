@@ -207,11 +207,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased">
+    <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-dark-50/80 backdrop-blur-xl border-r border-dark-100/60 fixed inset-y-0 z-20 shadow-lg shadow-black/20">
-        <div className="p-6 border-b border-dark-100/80">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 via-primary-300 to-primary-500 bg-clip-text text-transparent tracking-tight">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20">
+        <div className="p-6 border-b border-primary-500/20">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 via-primary-500 to-primary-300 bg-clip-text text-transparent tracking-tight text-glow-blue">
             NeuroTime
           </h1>
           <p className="text-xs text-gray-400 mt-1 font-medium">Gestion personnelle</p>
@@ -238,31 +238,31 @@ const App: React.FC = () => {
           />
         </nav>
 
-        <div className="p-4 space-y-2 border-t border-dark-100/80">
+        <div className="p-4 space-y-2 border-t border-primary-500/20">
            <button 
             onClick={() => setIsImportModalOpen(true)}
-            className="w-full bg-dark-100/50 hover:bg-dark-100 text-primary-300 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 border border-primary-500/30 transition-all text-sm"
+            className="w-full glass-button text-primary-300 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
           >
             <Sparkles size={16} />
             <span>Scanner IA</span>
           </button>
            <button 
             onClick={() => openNewMissionModal()}
-            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30 transition-all text-sm"
+            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 glow-blue transition-all text-sm"
           >
             <Plus size={18} />
             <span>Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
-          <div className="pt-2 border-t border-dark-100/80 mt-2">
+          <div className="pt-2 border-t border-primary-500/20 mt-2">
             <div className="flex items-center gap-2 px-2 py-2 mb-2 text-xs text-gray-400">
               <User size={14} />
               <span className="truncate">{user.email || 'Utilisateur'}</span>
             </div>
             <button 
               onClick={handleSignOut}
-              className="w-full bg-dark-100/50 hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 border border-dark-200 hover:border-red-500/30 transition-all text-sm"
+              className="w-full glass-button hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
             >
               <LogOut size={14} />
               <span>Déconnexion</span>
@@ -305,7 +305,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-dark-50/95 backdrop-blur-xl border-t border-dark-100/80 z-30 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/30 z-30 pb-safe">
         <div className="flex justify-around items-center px-2 py-2">
           <MobileNavButton 
             active={view === 'dashboard'} 
@@ -324,7 +324,7 @@ const App: React.FC = () => {
           <div className="relative -top-7">
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-gradient-to-br from-primary-500 to-primary-600 text-dark-300 p-3.5 rounded-full shadow-lg shadow-primary-500/50 transform active:scale-90 transition-all ring-4 ring-dark-50"
+              className="bg-gradient-to-br from-primary-500 to-primary-600 text-dark-300 p-3.5 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-50"
               aria-label="Nouvelle mission"
             >
               <Plus size={24} strokeWidth={2.5} />
@@ -376,7 +376,7 @@ const App: React.FC = () => {
       
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-4 right-4 z-40 bg-dark-100 border border-dark-200 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-xs text-gray-400">
+        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
           <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
           <span>Sauvegarde...</span>
         </div>
@@ -391,8 +391,8 @@ const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick:
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm ${
       active 
-        ? 'bg-primary-500/20 text-primary-300 font-semibold shadow-sm border border-primary-500/30' 
-        : 'text-gray-400 hover:bg-dark-100/50 hover:text-gray-200'
+        ? 'glass-button text-primary-300 font-semibold glow-blue' 
+        : 'text-gray-400 hover:glass-button hover:text-primary-300'
     }`}
   >
     {icon}

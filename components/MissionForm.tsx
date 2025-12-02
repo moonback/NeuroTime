@@ -287,10 +287,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="bg-dark-50 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] border border-dark-100">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh]">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-500/20 border-green-500/30' : 'bg-dark-100 border-dark-200'}`}>
+        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
           <div>
             <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-300' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
@@ -347,8 +347,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
                     }}
                     placeholder="Ex: Régie Son - Concert"
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                      errors.title ? 'border-red-500/50' : 'border-dark-200'
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                      errors.title ? 'border-red-500/50' : ''
                     }`}
                   />
                   {errors.title && (
@@ -477,7 +477,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   </div>
                   
                   {timeSlots.map((slot, index) => (
-                    <div key={index} className="bg-dark-100 rounded-lg p-3 md:p-4 border border-dark-200 space-y-3">
+                    <div key={index} className="glass-light rounded-lg p-3 md:p-4 border-primary-500/20 space-y-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gray-400">Créneau {index + 1}</span>
                         {timeSlots.length > 1 && (
@@ -499,8 +499,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.startTime}
                             onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
-                            className={`w-full px-3 py-2 bg-dark-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
-                              errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : 'border-dark-200'
+                            className={`w-full px-3 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-sm text-gray-100 ${
+                              errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
                             }`}
                           />
                           {errors[`timeSlot_${index}_start`] && (
@@ -516,8 +516,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.endTime}
                             onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
-                            className={`w-full px-3 py-2 bg-dark-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
-                              errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : 'border-dark-200'
+                            className={`w-full px-3 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-sm text-gray-100 ${
+                              errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
                             }`}
                           />
                           {errors[`timeSlot_${index}_end`] && (
@@ -539,7 +539,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
 
               {/* Smart Calculator Display */}
-              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-500/20 border-green-500/30' : 'bg-gradient-to-br from-dark-100 to-primary-500/10 border-dark-200'}`}>
+              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
                 
                 {calculationMode === 'auto' ? (
                   <div className="space-y-3 md:space-y-4">
@@ -558,7 +558,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
                     {/* Visual Bar Breakdown */}
                     {(dayHours > 0 || nightHours > 0) && (
-                      <div className="bg-dark-50 rounded-xl border border-dark-200 p-3 shadow-sm">
+                      <div className="glass-light rounded-xl border-primary-500/20 p-3">
                         <div className="flex h-3 w-full rounded-full overflow-hidden bg-dark-200 mb-3">
                           {dayHours > 0 && (
                             <div className="bg-orange-400 h-full" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
@@ -602,7 +602,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           step="1"
                           value={manualTotal}
                           onChange={(e) => setManualTotal(parseFloat(e.target.value))}
-                          className="w-full pl-4 pr-10 py-3 bg-dark-100 border border-dark-200 rounded-xl text-right font-bold text-xl focus:ring-2 focus:ring-primary-500 outline-none text-gray-100"
+                          className="w-full pl-4 pr-10 py-3 glass-light border-primary-500/20 rounded-xl text-right font-bold text-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-gray-100"
                         />
                         <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                        </div>
@@ -637,13 +637,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Notes rapides : monté les spots, câblage régie, fin 2h du mat..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-dark-100 border border-dark-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
+                  className="w-full px-4 py-3 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
                 />
               </div>
             </section>
 
             {/* Status Selector */}
-             <div className="flex gap-4 items-center bg-dark-100 p-3 rounded-xl border border-dark-200">
+             <div className="flex gap-4 items-center glass-light p-3 rounded-xl border-primary-500/20">
                <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
                <div className="flex gap-2">
                  {(['planned', 'completed', 'cancelled'] as const).map(s => (
@@ -656,7 +656,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold' 
                         : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
                         : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
-                      : 'bg-dark-50 border-dark-200 text-gray-400 hover:bg-dark-200 hover:text-gray-200'
+                      : 'glass-button text-gray-400 hover:text-primary-300'
                     }`}
                    >
                      {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -667,11 +667,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 md:p-6 border-t border-dark-200 bg-dark-100 flex gap-3 md:gap-4">
+          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl border border-dark-200 text-gray-200 font-semibold hover:bg-dark-200 hover:shadow-sm transition-all text-sm md:text-base"
+              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base"
             >
               Annuler
             </button>

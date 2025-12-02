@@ -27,7 +27,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-dark-300/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
         {spinner}
       </div>
     );
@@ -45,7 +45,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
   variant = 'rectangular',
 }) => {
-  const baseClasses = 'animate-pulse bg-dark-100 rounded';
+  const baseClasses = 'animate-pulse glass-light rounded';
   const variantClasses = {
     text: 'h-4',
     rectangular: 'h-20',

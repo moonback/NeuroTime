@@ -71,10 +71,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="bg-dark-50 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-dark-100">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-md overflow-hidden flex flex-col">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-4 md:p-6 border-b bg-dark-100 border-dark-200">
+        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/20 glass-light">
           <div>
             <h2 className="text-lg md:text-xl font-bold text-gray-100">
               {mode === 'login' ? 'Connexion' : 'Inscription'}
@@ -113,7 +113,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
             />
           </div>
 
@@ -128,7 +128,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'login' ? '••••••••' : 'Au moins 6 caractères'}
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
             />
           </div>
 
@@ -144,7 +144,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
               />
             </div>
           )}
@@ -153,10 +153,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm md:text-base ${
+            className={`w-full bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base ${
               loading
                 ? 'from-gray-500 to-gray-600 cursor-not-allowed'
-                : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 shadow-primary-500/30'
+                : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 glow-blue'
             }`}
           >
             {loading ? (

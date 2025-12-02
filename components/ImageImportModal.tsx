@@ -111,9 +111,9 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-dark-50 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-dark-100">
+      <div className="glass-strong rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         
-        <div className="flex justify-between items-center p-6 border-b border-dark-200 bg-dark-100">
+        <div className="flex justify-between items-center p-6 border-b border-primary-500/20 glass-light">
           <div>
             <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
               <Sparkles className="text-primary-400" />
@@ -134,7 +134,7 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               <div 
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-2xl h-64 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                  previewUrl ? 'border-primary-500/50 bg-primary-500/10' : 'border-dark-200 hover:border-primary-500/50 hover:bg-dark-100'
+                  previewUrl ? 'border-primary-500/50 bg-primary-500/10 glass-light' : 'border-primary-500/20 hover:border-primary-500/50 hover:glass-button'
                 }`}
               >
                 {previewUrl ? (
@@ -161,7 +161,7 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
                 <button
                   onClick={handleAnalyze}
                   disabled={isAnalyzing}
-                  className="w-full py-3 rounded-xl bg-primary-500 hover:bg-primary-400 text-dark-300 font-bold shadow-lg shadow-primary-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-bold glow-blue disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                 >
                   {isAnalyzing ? <Loader2 className="animate-spin" /> : <Sparkles size={20} />}
                   {isAnalyzing ? 'Analyse en cours...' : 'Analyser avec Gemini'}
@@ -177,8 +177,8 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
             </div>
 
             {/* Right Column: Results */}
-            <div className="flex flex-col h-full bg-dark-100 rounded-2xl border border-dark-200 overflow-hidden">
-              <div className="p-4 border-b border-dark-200 bg-dark-50">
+            <div className="flex flex-col h-full glass-card rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-primary-500/20 glass-light">
                 <h3 className="font-bold text-gray-100 flex items-center gap-2">
                   Missions détectées
                   {extractedMissions.length > 0 && (
@@ -197,10 +197,10 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
                   </div>
                 ) : (
                   extractedMissions.map((m, idx) => (
-                    <div key={idx} className="bg-dark-50 p-3 rounded-xl border border-dark-200 shadow-sm text-sm">
+                    <div key={idx} className="glass-light p-3 rounded-xl border-primary-500/20 text-sm">
                       <div className="flex justify-between items-start mb-1">
                         <span className="font-bold text-gray-100">{m.title}</span>
-                        <span className="text-xs font-mono bg-dark-100 px-2 py-1 rounded text-gray-400 border border-dark-200">
+                        <span className="text-xs font-mono glass-button px-2 py-1 rounded text-gray-400">
                           {m.date}
                         </span>
                       </div>
@@ -217,10 +217,10 @@ const ImageImportModal: React.FC<ImageImportModalProps> = ({ isOpen, onClose, on
               </div>
 
               {extractedMissions.length > 0 && (
-                <div className="p-4 bg-dark-50 border-t border-dark-200">
+                <div className="p-4 glass-light border-t border-primary-500/20">
                   <button
                     onClick={handleConfirmImport}
-                    className="w-full py-3 rounded-xl bg-green-500 hover:bg-green-400 text-dark-300 font-bold shadow-lg shadow-green-500/30 flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-dark-300 font-bold glow-blue flex items-center justify-center gap-2"
                   >
                     <Check size={20} />
                     Valider & Importer

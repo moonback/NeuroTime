@@ -40,7 +40,7 @@ const ToastComponent: React.FC<ToastProps> = ({ toast, onRemove }) => {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg backdrop-blur-sm min-w-[300px] max-w-[500px] animate-slide-in-right ${colors[toast.type]}`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg glass-card min-w-[300px] max-w-[500px] animate-slide-in-right ${colors[toast.type]}`}
       role="alert"
     >
       <div className="flex-shrink-0">{icons[toast.type]}</div>
