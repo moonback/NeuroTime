@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, LogOut, User, DollarSign, Columns } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, LogOut, User, DollarSign, Columns, Scan } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
@@ -7,6 +7,7 @@ const MissionsList = lazy(() => import('./components/MissionsList'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
 const FinanceView = lazy(() => import('./components/FinanceView'));
 const KanbanView = lazy(() => import('./components/KanbanView'));
+const ScanMissionForm = lazy(() => import('./components/ScanMissionForm'));
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   
   // Authentification
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -111,6 +113,10 @@ const App: React.FC = () => {
     }
     setEditingMission(null);
   }, [editingMission]);
+
+  const handleSaveScannedMissions = useCallback((newMissions: Mission[]) => {
+    setMissions(prev => [...prev, ...newMissions]);
+  }, []);
 
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
@@ -270,6 +276,13 @@ const App: React.FC = () => {
             <Plus size={18} className="relative z-10" />
             <span className="relative z-10">Nouvelle mission</span>
           </button>
+          <button 
+            onClick={() => setIsScanModalOpen(true)}
+            className="w-full glass-button hover:bg-primary-500/20 text-gray-300 hover:text-primary-300 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-primary-500/30 transition-all text-sm"
+          >
+            <Scan size={18} />
+            <span>Scanner une fiche</span>
+          </button>
           
           {/* User Info & Logout */}
           <div className="pt-2 border-t border-primary-500/20 mt-2">
@@ -389,6 +402,11 @@ const App: React.FC = () => {
           initialData={editingMission}
           defaultDate={selectedDateForNew}
           missions={missions}
+        />
+        <ScanMissionForm
+          isOpen={isScanModalOpen}
+          onClose={() => setIsScanModalOpen(false)}
+          onSave={handleSaveScannedMissions}
         />
       </Suspense>
 
