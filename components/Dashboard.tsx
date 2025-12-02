@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
-import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save } from 'lucide-react';
-import { format, isThisMonth } from 'date-fns';
+import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign } from 'lucide-react';
+import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, isSameMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
+import DashboardCharts from './DashboardCharts';
 
 interface DashboardProps {
   missions: Mission[];
@@ -85,6 +86,55 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       .slice(0, 5),
     [allCompletedMissions]
   );
+
+  // KPIs avancés
+  // Taux horaire moyen
+  const averageHourlyRate = useMemo(() => {
+    if (totalHours === 0) return 0;
+    return totalEarningsCompleted / totalHours;
+  }, [totalHours, totalEarningsCompleted]);
+
+  // Comparaison mensuelle (ce mois vs mois précédent)
+  const monthlyComparison = useMemo(() => {
+    const now = new Date();
+    const thisMonthStart = startOfMonth(now);
+    const thisMonthEnd = endOfMonth(now);
+    const lastMonthStart = startOfMonth(subMonths(now, 1));
+    const lastMonthEnd = endOfMonth(subMonths(now, 1));
+
+    const thisMonthRevenue = allCompletedMissions
+      .filter(m => {
+        const missionDate = new Date(m.endTime);
+        return missionDate >= thisMonthStart && missionDate <= thisMonthEnd;
+      })
+      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+
+    const lastMonthRevenue = allCompletedMissions
+      .filter(m => {
+        const missionDate = new Date(m.endTime);
+        return missionDate >= lastMonthStart && missionDate <= lastMonthEnd;
+      })
+      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+
+    const difference = thisMonthRevenue - lastMonthRevenue;
+    const percentage = lastMonthRevenue > 0 ? (difference / lastMonthRevenue) * 100 : 0;
+
+    return {
+      thisMonth: thisMonthRevenue,
+      lastMonth: lastMonthRevenue,
+      difference,
+      percentage: Math.round(percentage * 10) / 10,
+      isPositive: difference >= 0,
+    };
+  }, [allCompletedMissions]);
+
+  // Mission la plus rentable
+  const mostProfitableMission = useMemo(() => {
+    if (allCompletedMissions.length === 0) return null;
+    return allCompletedMissions.reduce((max, m) => 
+      (m.totalEarnings || 0) > (max.totalEarnings || 0) ? m : max
+    );
+  }, [allCompletedMissions]);
 
   useEffect(() => {
     if (missions.length > 0) {
@@ -200,6 +250,10 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           subtext={`Réalisé: ${totalEarningsCompleted.toFixed(0)}€ ${totalEarningsPlanned > 0 ? `+ Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€` : ''}`}
           color="bg-emerald-500/10 border-emerald-500/30"
           textColor="text-emerald-400"
+          trend={monthlyComparison.percentage !== 0 ? {
+            value: Math.abs(monthlyComparison.percentage),
+            isPositive: monthlyComparison.isPositive,
+          } : undefined}
         />
         <StatCard 
           icon={<Clock className="w-6 h-6 text-primary-400" />}
@@ -226,6 +280,39 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           textColor="text-orange-400"
         />
       </div>
+
+      {/* KPIs Avancés */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <StatCard 
+          icon={<DollarSign className="w-5 h-5 text-blue-400" />}
+          label="Taux horaire moyen"
+          value={`${averageHourlyRate.toFixed(2)} €/h`}
+          subtext="Revenus moyens par heure"
+          color="bg-blue-500/10 border-blue-500/30"
+          textColor="text-blue-400"
+        />
+        <StatCard 
+          icon={monthlyComparison.isPositive ? <TrendingUp className="w-5 h-5 text-green-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
+          label="Évolution mensuelle"
+          value={`${monthlyComparison.isPositive ? '+' : ''}${monthlyComparison.percentage.toFixed(1)}%`}
+          subtext={`vs mois précédent (${monthlyComparison.lastMonth.toFixed(0)}€)`}
+          color={monthlyComparison.isPositive ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"}
+          textColor={monthlyComparison.isPositive ? "text-green-400" : "text-red-400"}
+        />
+        {mostProfitableMission && (
+          <StatCard 
+            icon={<Award className="w-5 h-5 text-yellow-400" />}
+            label="Mission la plus rentable"
+            value={`${mostProfitableMission.totalEarnings?.toFixed(0) || 0} €`}
+            subtext={mostProfitableMission.title}
+            color="bg-yellow-500/10 border-yellow-500/30"
+            textColor="text-yellow-400"
+          />
+        )}
+      </div>
+
+      {/* Graphiques */}
+      <DashboardCharts missions={missions} />
 
       {/* Upcoming / Planned Missions List */}
       <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
@@ -443,7 +530,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   );
 };
 
-const StatCard = memo(({ icon, label, value, subtext, color, textColor }: any) => (
+const StatCard = memo(({ icon, label, value, subtext, color, textColor, trend }: any) => (
   <div className={`p-4 md:p-5 rounded-xl glass-card transition-all hover:glow-blue ${color} group relative overflow-hidden animate-slide-in-up`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     <div className="relative z-10">
@@ -451,6 +538,12 @@ const StatCard = memo(({ icon, label, value, subtext, color, textColor }: any) =
         <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor} group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
+        {trend && (
+          <div className={`flex items-center gap-1 text-xs font-semibold ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+            {trend.isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+            {trend.value}%
+          </div>
+        )}
       </div>
       <div>
         <p className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight group-hover:scale-105 transition-transform duration-300">{value}</p>
