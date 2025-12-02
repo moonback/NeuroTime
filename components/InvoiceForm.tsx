@@ -4,7 +4,6 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { generateDocumentNumber } from '../services/pdfService';
-import { useToast } from './Toast';
 
 interface InvoiceFormProps {
   isOpen: boolean;
@@ -28,8 +27,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showMissionSelector, setShowMissionSelector] = useState(false);
-
-  const toast = useToast();
 
   useEffect(() => {
     if (initialData) {
@@ -185,7 +182,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
     e.preventDefault();
     
     if (!validate()) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
+      // Erreurs de validation affichées dans le formulaire
       return;
     }
 

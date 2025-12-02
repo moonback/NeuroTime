@@ -8,7 +8,6 @@ const MissionForm = lazy(() => import('./components/MissionForm'));
 const FinanceView = lazy(() => import('./components/FinanceView'));
 const KanbanView = lazy(() => import('./components/KanbanView'));
 import AuthModal from './components/AuthModal';
-import { ToastContainer, useToast } from './components/Toast';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
@@ -32,9 +31,6 @@ const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Toast notifications
-  const toast = useToast();
   
   // Splash screen - se masque une fois l'auth vérifiée
   const [showSplash, setShowSplash] = useState(true);
@@ -77,17 +73,15 @@ const App: React.FC = () => {
           const data = await loadMissions();
           setMissions(data);
           setIsLoaded(true);
-          toast.success(`${data.length} mission${data.length > 1 ? 's' : ''} chargée${data.length > 1 ? 's' : ''}`);
         } catch (error) {
           console.error('Erreur lors du chargement:', error);
-          toast.error('Erreur lors du chargement des missions. Vérifiez votre connexion.');
         } finally {
           setIsLoading(false);
         }
       };
       loadData();
     }
-  }, [user, isLoaded, toast]);
+  }, [user, isLoaded]);
 
   // Save data whenever it changes, BUT only if initial load is done
   useEffect(() => {
@@ -98,12 +92,6 @@ const App: React.FC = () => {
           await saveMissions(missions);
         } catch (error: any) {
           console.error('Erreur lors de la sauvegarde:', error);
-          const errorMessage = error?.message || 'Erreur inconnue';
-          if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-            toast.warning('Sauvegarde en cours... (mode hors ligne)');
-          } else {
-            toast.error('Erreur lors de la sauvegarde. Les données sont sauvegardées localement.');
-          }
         } finally {
           setIsSaving(false);
         }
@@ -113,18 +101,16 @@ const App: React.FC = () => {
       const timeoutId = setTimeout(saveData, 500);
       return () => clearTimeout(timeoutId);
     }
-  }, [missions, isLoaded, toast]);
+  }, [missions, isLoaded]);
 
   const handleSaveMission = useCallback((mission: Mission) => {
     if (editingMission) {
       setMissions(prev => prev.map(m => m.id === mission.id ? mission : m));
-      toast.success('Mission modifiée avec succès');
     } else {
       setMissions(prev => [...prev, mission]);
-      toast.success('Mission créée avec succès');
     }
     setEditingMission(null);
-  }, [editingMission, toast]);
+  }, [editingMission]);
 
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
@@ -143,23 +129,20 @@ const App: React.FC = () => {
   const handleDeleteMission = useCallback((id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette mission ?")) {
       setMissions(prev => prev.filter(m => m.id !== id));
-      toast.success('Mission supprimée');
     }
-  }, [toast]);
+  }, []);
 
   const handleStatusChange = useCallback((missionId: string, newStatus: 'planned' | 'completed' | 'cancelled') => {
     setMissions(prev => prev.map(m => 
       m.id === missionId ? { ...m, status: newStatus } : m
     ));
-    toast.success('Statut de la mission mis à jour');
-  }, [toast]);
+  }, []);
 
   const handleImportData = useCallback((importedMissions: Mission[]) => {
     if (window.confirm(`Attention, l'importation va remplacer vos ${missions.length} missions actuelles par ${importedMissions.length} missions importées. Continuer ?`)) {
       setMissions(importedMissions);
-      toast.success('Données restaurées avec succès !');
     }
-  }, [missions, toast]);
+  }, [missions]);
 
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
@@ -178,12 +161,11 @@ const App: React.FC = () => {
         await signOut();
         setMissions([]);
         setIsLoaded(false);
-        toast.info('Déconnexion réussie');
       } catch (error) {
-        toast.error('Erreur lors de la déconnexion');
+        console.error('Erreur lors de la déconnexion:', error);
       }
     }
-  }, [toast]);
+  }, []);
 
   const openNewMissionModal = (dateStr?: string) => {
     setEditingMission(null);
@@ -225,7 +207,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10">
+    <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20 animate-slide-in-left">
         <div className="p-6 border-b border-primary-700/20 flex items-center gap-3 relative overflow-hidden">
@@ -307,7 +289,7 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300">
+      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300 overflow-y-auto">
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in">
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
@@ -416,9 +398,6 @@ const App: React.FC = () => {
         onSuccess={handleAuthSuccess}
         initialMode="login"
       />
-      
-      {/* Toast notifications */}
-      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
       
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />

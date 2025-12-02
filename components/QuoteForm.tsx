@@ -3,7 +3,6 @@ import { Quote, QuoteItem, Mission } from '../types';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { generateDocumentNumber } from '../services/pdfService';
-import { useToast } from './Toast';
 
 interface QuoteFormProps {
   isOpen: boolean;
@@ -27,7 +26,6 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ isOpen, onClose, onSave, initialD
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const toast = useToast();
 
   useEffect(() => {
     if (initialData) {
@@ -137,7 +135,7 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ isOpen, onClose, onSave, initialD
     e.preventDefault();
     
     if (!validate()) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
+      // Erreurs de validation affichées dans le formulaire
       return;
     }
 

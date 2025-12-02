@@ -8,7 +8,6 @@ import { loadQuotes, saveQuote, deleteQuote } from '../services/financialService
 import { loadPayments, savePayment, deletePayment, loadPaymentsByInvoice } from '../services/financialService';
 import { generateFinancialReport } from '../services/financialService';
 import { generateInvoicePDF, generateQuotePDF, generateDocumentNumber } from '../services/pdfService';
-import { useToast } from './Toast';
 import InvoiceForm from './InvoiceForm';
 import QuoteForm from './QuoteForm';
 import PaymentForm from './PaymentForm';
@@ -33,8 +32,6 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<string | null>(null);
-  
-  const toast = useToast();
 
   useEffect(() => {
     loadData();
@@ -52,7 +49,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       setQuotes(quotesData);
       setPayments(paymentsData);
     } catch (error) {
-      toast.error('Erreur lors du chargement des données financières');
+      console.error('Erreur lors du chargement des données financières:', error);
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +61,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       await loadData();
       setIsInvoiceFormOpen(false);
       setEditingInvoice(null);
-      toast.success('Facture enregistrée avec succès');
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde de la facture');
+      console.error('Erreur lors de la sauvegarde de la facture:', error);
     }
   };
 
@@ -76,9 +72,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       await loadData();
       setIsQuoteFormOpen(false);
       setEditingQuote(null);
-      toast.success('Devis enregistré avec succès');
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde du devis');
+      console.error('Erreur lors de la sauvegarde du devis:', error);
     }
   };
 
@@ -89,9 +84,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       setIsPaymentFormOpen(false);
       setEditingPayment(null);
       setSelectedInvoiceForPayment(null);
-      toast.success('Paiement enregistré avec succès');
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde du paiement');
+      console.error('Erreur lors de la sauvegarde du paiement:', error);
     }
   };
 
@@ -100,9 +94,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       try {
         await deleteInvoice(id);
         await loadData();
-        toast.success('Facture supprimée');
       } catch (error) {
-        toast.error('Erreur lors de la suppression');
+        console.error('Erreur lors de la suppression:', error);
       }
     }
   };
@@ -112,9 +105,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       try {
         await deleteQuote(id);
         await loadData();
-        toast.success('Devis supprimé');
       } catch (error) {
-        toast.error('Erreur lors de la suppression');
+        console.error('Erreur lors de la suppression:', error);
       }
     }
   };
@@ -124,9 +116,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
       try {
         await deletePayment(id);
         await loadData();
-        toast.success('Paiement supprimé');
       } catch (error) {
-        toast.error('Erreur lors de la suppression');
+        console.error('Erreur lors de la suppression:', error);
       }
     }
   };
@@ -135,9 +126,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
     try {
       const pdf = generateInvoicePDF(invoice);
       pdf.save(`facture-${invoice.invoiceNumber}.pdf`);
-      toast.success('PDF généré avec succès');
     } catch (error) {
-      toast.error('Erreur lors de la génération du PDF');
+      console.error('Erreur lors de la génération du PDF:', error);
     }
   };
 
@@ -145,9 +135,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({ missions }) => {
     try {
       const pdf = generateQuotePDF(quote);
       pdf.save(`devis-${quote.quoteNumber}.pdf`);
-      toast.success('PDF généré avec succès');
     } catch (error) {
-      toast.error('Erreur lors de la génération du PDF');
+      console.error('Erreur lors de la génération du PDF:', error);
     }
   };
 

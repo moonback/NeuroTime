@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Payment, Invoice } from '../types';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';
-import { useToast } from './Toast';
 
 interface PaymentFormProps {
   isOpen: boolean;
@@ -23,7 +22,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ isOpen, onClose, onSave, init
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const toast = useToast();
 
   useEffect(() => {
     if (initialData) {
@@ -71,7 +69,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ isOpen, onClose, onSave, init
     e.preventDefault();
     
     if (!validate()) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
+      // Erreurs de validation affichées dans le formulaire
       return;
     }
 

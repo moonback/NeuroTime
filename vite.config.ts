@@ -64,6 +64,13 @@ export default defineConfig(({ mode }) => {
           },
           workbox: {
             globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+            // Ignorer les fichiers de développement Vite
+            globIgnores: ['**/node_modules/**/*', '**/@vite/**/*', '**/@react-refresh/**/*'],
+            // Désactiver les warnings en développement
+            mode: mode === 'development' ? 'development' : 'production',
+            // Ne pas précacher les fichiers de développement
+            navigateFallback: null,
+            navigateFallbackDenylist: [/^\/@/, /^\/node_modules/],
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -121,7 +128,9 @@ export default defineConfig(({ mode }) => {
           },
           devOptions: {
             enabled: true,
-            type: 'module'
+            type: 'module',
+            // Réduire les warnings en développement
+            suppressWarnings: true
           }
         })
       ],
