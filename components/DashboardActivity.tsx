@@ -92,58 +92,55 @@ const DashboardActivity: React.FC<DashboardActivityProps> = ({ missions, onEdit 
 
   if (recentActivity.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
-            <Clock className="w-5 h-5 text-indigo-400" />
-          </div>
-          <h3 className="text-lg md:text-xl font-bold text-gray-100">Activité récente</h3>
-        </div>
-        <div className="text-center py-8 text-gray-400">
-          <p>Aucune activité récente</p>
-        </div>
+      <div className="text-center py-8 text-gray-400">
+        <p>Aucune activité récente</p>
       </div>
     );
   }
 
   return (
-    <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-      <div className="flex items-center gap-2.5 mb-6">
-        <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
-          <Clock className="w-5 h-5 text-indigo-400" />
-        </div>
-        <h3 className="text-lg md:text-xl font-bold text-gray-100">Activité récente</h3>
-      </div>
-
-      <div className="space-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {recentActivity.map((activity, index) => (
           <div
             key={activity.id}
-            className="flex items-start gap-3 p-3 bg-dark-50 rounded-lg hover:bg-dark-100 transition-colors cursor-pointer group"
+            className="group relative p-4 bg-dark-50 rounded-xl border border-dark-200 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 cursor-pointer overflow-hidden animate-slide-in-up"
             onClick={() => onEdit(activity.mission)}
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <div className={`p-2 rounded-lg border ${getActivityColor(activity.type)} flex-shrink-0`}>
-              {getActivityIcon(activity.type)}
-            </div>
+            {/* Gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <p className="text-sm font-semibold text-gray-200 truncate group-hover:text-primary-300 transition-colors">
-                  {activity.mission.title}
-                </p>
+            <div className="relative z-10">
+              {/* Icon and Type */}
+              <div className="flex items-start justify-between mb-3">
+                <div className={`p-2.5 rounded-lg border ${getActivityColor(activity.type)}`}>
+                  {getActivityIcon(activity.type)}
+                </div>
                 {activity.mission.status === 'completed' && activity.mission.totalEarnings && (
-                  <span className="text-xs font-semibold text-green-400 flex-shrink-0">
+                  <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded-md border border-green-500/30">
                     {activity.mission.totalEarnings.toFixed(0)}€
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 mb-1">{activity.label}</p>
-              <p className="text-xs text-gray-500">{formatTime(activity.timestamp)}</p>
+              
+              {/* Title */}
+              <h4 className="text-sm font-bold text-gray-200 mb-2 line-clamp-2 group-hover:text-primary-300 transition-colors min-h-[2.5rem]">
+                {activity.mission.title}
+              </h4>
+              
+              {/* Label */}
+              <p className="text-xs text-gray-400 mb-2 font-medium">
+                {activity.label}
+              </p>
+              
+              {/* Timestamp */}
+              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-dark-200">
+                <Clock className="w-3 h-3 text-gray-500" />
+                <p className="text-xs text-gray-500">{formatTime(activity.timestamp)}</p>
+              </div>
             </div>
           </div>
         ))}
-      </div>
     </div>
   );
 };

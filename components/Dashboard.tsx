@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
-import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign } from 'lucide-react';
+import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, isSameMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
@@ -21,6 +21,9 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onImport }) => {
   const [summary, setSummary] = useState<string>('Analyse de vos activités en cours...');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isActivityExpanded, setIsActivityExpanded] = useState(false);
+  const [isUpcomingExpanded, setIsUpcomingExpanded] = useState(false);
+  const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
   
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
   // Missions terminées : toutes celles avec status 'completed'
@@ -328,23 +331,65 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Activité récente */}
-      <DashboardActivity missions={missions} onEdit={onEdit} />
+      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+        <button
+          onClick={() => setIsActivityExpanded(!isActivityExpanded)}
+          className="w-full flex items-center justify-between mb-6 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
+              <Clock className="w-5 h-5 text-indigo-400" />
+            </div>
+            <h3 className="text-lg md:text-xl font-bold text-gray-100">Activité récente</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs md:text-sm text-gray-400">
+              {isActivityExpanded ? 'Réduire' : 'Déplier'}
+            </span>
+            {isActivityExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+        </button>
+        {isActivityExpanded && (
+          <div className="animate-slide-in-up">
+            <DashboardActivity missions={missions} onEdit={onEdit} />
+          </div>
+        )}
+      </div>
 
       {/* Upcoming / Planned Missions List */}
       <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
+        <button
+          onClick={() => setIsUpcomingExpanded(!isUpcomingExpanded)}
+          className="w-full flex items-center justify-between mb-6 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex items-center gap-2.5">
             <span className="bg-dark-100 p-2 rounded-lg border border-dark-200 group-hover:border-primary-500/50 transition-colors">
                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-primary-400" />
             </span>
-            <span>À venir</span>
-          </h3>
-          <span className="text-xs md:text-sm text-gray-300 font-medium bg-dark-100 px-2.5 py-1 rounded-full border border-dark-200">
-            {upcomingMissions.length} en attente
-          </span>
-        </div>
-
-        {upcomingMissions.length === 0 ? (
+            <h3 className="text-lg md:text-xl font-bold text-gray-100">À venir</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs md:text-sm text-gray-300 font-medium bg-dark-100 px-2.5 py-1 rounded-full border border-dark-200">
+              {upcomingMissions.length} en attente
+            </span>
+            <span className="text-xs md:text-sm text-gray-400">
+              {isUpcomingExpanded ? 'Réduire' : 'Déplier'}
+            </span>
+            {isUpcomingExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+        </button>
+        
+        {isUpcomingExpanded && (
+          <div className="animate-slide-in-up">
+            {upcomingMissions.length === 0 ? (
           <div className="text-center py-10 md:py-12 glass-light rounded-xl border border-dashed border-primary-500/20">
             <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-dark-50 rounded-full flex items-center justify-center shadow-sm mb-3 border border-dark-200">
               <CheckCircle className="text-green-400" size={20} />
@@ -417,24 +462,41 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
               </div>
             ))}
           </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* Completed Missions List */}
       <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
+        <button
+          onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
+          className="w-full flex items-center justify-between mb-6 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex items-center gap-2.5">
             <span className="bg-dark-100 p-2 rounded-lg border border-dark-200 group-hover:border-green-500/50 transition-colors">
                <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
             </span>
-            <span>Missions terminées</span>
-          </h3>
-          <span className="text-xs md:text-sm text-gray-300 font-medium bg-dark-100 px-2.5 py-1 rounded-full border border-dark-200">
-            {allCompletedMissions.length} au total
-          </span>
-        </div>
-
-        {recentCompletedMissions.length === 0 ? (
+            <h3 className="text-lg md:text-xl font-bold text-gray-100">Missions terminées</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs md:text-sm text-gray-300 font-medium bg-dark-100 px-2.5 py-1 rounded-full border border-dark-200">
+              {allCompletedMissions.length} au total
+            </span>
+            <span className="text-xs md:text-sm text-gray-400">
+              {isCompletedExpanded ? 'Réduire' : 'Déplier'}
+            </span>
+            {isCompletedExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+        </button>
+        
+        {isCompletedExpanded && (
+          <div className="animate-slide-in-up">
+            {recentCompletedMissions.length === 0 ? (
           <div className="text-center py-10 md:py-12 glass-light rounded-xl border border-dashed border-primary-500/20">
             <div className="mx-auto w-10 h-10 md:w-12 md:h-12 bg-dark-50 rounded-full flex items-center justify-center shadow-sm mb-3 border border-dark-200">
               <CheckCircle className="text-gray-500" size={20} />
@@ -499,6 +561,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                 </div>
               </div>
             ))}
+          </div>
+            )}
           </div>
         )}
       </div>
