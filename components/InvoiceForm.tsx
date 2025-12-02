@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Invoice, InvoiceItem, Mission } from '../types';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
+import fr from 'date-fns/locale/fr';
 import { generateDocumentNumber } from '../services/pdfService';
 import { useToast } from './Toast';
 
@@ -15,7 +16,7 @@ interface InvoiceFormProps {
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, initialData, missions }) => {
   const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [missionId, setMissionId] = useState<string>('');
+  const [selectedMissionIds, setSelectedMissionIds] = useState<string[]>([]);
   const [client, setClient] = useState('');
   const [clientAddress, setClientAddress] = useState('');
   const [clientEmail, setClientEmail] = useState('');
@@ -26,13 +27,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
   const [status, setStatus] = useState<'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'>('draft');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showMissionSelector, setShowMissionSelector] = useState(false);
 
   const toast = useToast();
 
   useEffect(() => {
     if (initialData) {
       setInvoiceNumber(initialData.invoiceNumber);
-      setMissionId(initialData.missionId || '');
+      // Pour les factures existantes, on garde la première mission si elle existe
+      setSelectedMissionIds(initialData.missionId ? [initialData.missionId] : []);
       setClient(initialData.client);
       setClientAddress(initialData.clientAddress || '');
       setClientEmail(initialData.clientEmail || '');
@@ -47,7 +50,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
       const year = new Date().getFullYear();
       const sequence = Math.floor(Math.random() * 1000) + 1;
       setInvoiceNumber(generateDocumentNumber('FAC', year, sequence));
-      setMissionId('');
+      setSelectedMissionIds([]);
       setClient('');
       setClientAddress('');
       setClientEmail('');
@@ -57,25 +60,68 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
       setTaxRate(0);
       setStatus('draft');
       setNotes('');
+      setShowMissionSelector(true);
     }
   }, [initialData, isOpen]);
 
+  // Fonction pour synchroniser les articles avec les missions sélectionnées
   useEffect(() => {
-    if (missionId) {
-      const mission = missions.find(m => m.id === missionId);
-      if (mission) {
-        setClient(mission.client || '');
-        // Ajouter automatiquement un article basé sur la mission
-        const missionItem: InvoiceItem = {
-          description: `${mission.title} - ${mission.location}`,
-          quantity: 1,
-          unitPrice: mission.totalEarnings,
-          total: mission.totalEarnings
-        };
-        setItems([missionItem]);
-      }
+    if (selectedMissionIds.length === 0) {
+      // Si aucune mission sélectionnée, ne rien faire (garder les articles manuels)
+      return;
     }
-  }, [missionId, missions]);
+
+    const selectedMissions = missions.filter(m => selectedMissionIds.includes(m.id));
+    
+    if (selectedMissions.length === 0) return;
+
+    // Déterminer le client (utiliser le premier ou vérifier si tous ont le même)
+    const firstMission = selectedMissions[0];
+    const allSameClient = selectedMissions.every(m => m.client === firstMission.client);
+    
+    if (allSameClient && firstMission.client && !client) {
+      setClient(firstMission.client);
+    }
+
+    // Créer des articles pour chaque mission sélectionnée
+    const missionItems: InvoiceItem[] = selectedMissions.map(mission => ({
+      description: `${mission.title} - ${mission.location}${mission.description ? ` (${mission.description})` : ''}`,
+      quantity: 1,
+      unitPrice: mission.totalEarnings,
+      total: mission.totalEarnings
+    }));
+
+    // Mettre à jour les articles : garder les articles manuels et remplacer les articles de missions
+    setItems(prevItems => {
+      // Identifier les articles qui correspondent à des missions (pour les remplacer)
+      const missionItemDescriptions = new Set(
+        selectedMissions.map(m => `${m.title} - ${m.location}`)
+      );
+      
+      // Garder uniquement les articles manuels (ceux qui ne correspondent pas à des missions)
+      const existingManualItems = prevItems.filter(item => {
+        const isMissionItem = Array.from(missionItemDescriptions).some(desc => 
+          item.description.startsWith(desc)
+        );
+        return !isMissionItem && item.description.trim() !== '';
+      });
+      
+      // Combiner les articles manuels avec les nouveaux articles de missions
+      return [...existingManualItems, ...missionItems];
+    });
+  }, [selectedMissionIds, missions]);
+
+  const handleMissionToggle = (missionId: string) => {
+    setSelectedMissionIds(prev => {
+      if (prev.includes(missionId)) {
+        // Retirer la mission (le useEffect s'occupera de mettre à jour les articles)
+        return prev.filter(id => id !== missionId);
+      } else {
+        // Ajouter la mission (le useEffect s'occupera de mettre à jour les articles)
+        return [...prev, missionId];
+      }
+    });
+  };
 
   const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
     const newItems = [...items];
@@ -146,7 +192,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
     const invoice: Invoice = {
       id: initialData?.id || crypto.randomUUID(),
       invoiceNumber,
-      missionId: missionId || undefined,
+      missionId: selectedMissionIds.length > 0 ? selectedMissionIds[0] : undefined, // Garder la première pour compatibilité
       client,
       clientAddress: clientAddress || undefined,
       clientEmail: clientEmail || undefined,
@@ -203,22 +249,71 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, onSave, init
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Mission (optionnel)
+                Missions ({selectedMissionIds.length} sélectionnée{selectedMissionIds.length > 1 ? 's' : ''})
               </label>
-              <select
-                value={missionId}
-                onChange={(e) => setMissionId(e.target.value)}
-                className="glass-button w-full px-4 py-2 rounded-lg"
+              <button
+                type="button"
+                onClick={() => setShowMissionSelector(!showMissionSelector)}
+                className="glass-button w-full px-4 py-2 rounded-lg flex items-center justify-between hover:bg-primary-500/20 transition-all"
               >
-                <option value="">Aucune mission</option>
-                {missions.map(mission => (
-                  <option key={mission.id} value={mission.id}>
-                    {mission.title} - {mission.client}
-                  </option>
-                ))}
-              </select>
+                <span>
+                  {selectedMissionIds.length > 0 
+                    ? `${selectedMissionIds.length} mission${selectedMissionIds.length > 1 ? 's' : ''} sélectionnée${selectedMissionIds.length > 1 ? 's' : ''}`
+                    : 'Sélectionner des missions'
+                  }
+                </span>
+                <Plus size={18} className={showMissionSelector ? 'rotate-45' : ''} />
+              </button>
             </div>
           </div>
+
+          {showMissionSelector && (
+            <div className="glass-card p-4 max-h-64 overflow-y-auto">
+              <h3 className="text-sm font-semibold text-primary-300 mb-3">Sélectionner les missions à facturer</h3>
+              <div className="space-y-2">
+                {missions.filter(m => m.status === 'completed').length === 0 ? (
+                  <p className="text-gray-400 text-sm">Aucune mission terminée disponible</p>
+                ) : (
+                  missions
+                    .filter(m => m.status === 'completed')
+                    .map(mission => (
+                      <label
+                        key={mission.id}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary-500/10 cursor-pointer transition-all"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedMissionIds.includes(mission.id)}
+                          onChange={() => handleMissionToggle(mission.id)}
+                          className="w-4 h-4 rounded border-primary-500 text-primary-500 focus:ring-primary-500 focus:ring-2"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-300">{mission.title}</p>
+                          <p className="text-xs text-gray-400">
+                            {mission.client} • {format(new Date(mission.endTime), 'dd MMM yyyy', { locale: fr })} • {mission.totalEarnings.toFixed(2)} €
+                          </p>
+                        </div>
+                      </label>
+                    ))
+                )}
+              </div>
+              {selectedMissionIds.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-primary-500/20">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMissionIds([]);
+                      setItems([{ description: '', quantity: 1, unitPrice: 0, total: 0 }]);
+                      setClient('');
+                    }}
+                    className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Tout désélectionner
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
