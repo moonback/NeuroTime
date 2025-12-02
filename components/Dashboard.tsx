@@ -155,7 +155,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
   return (
     <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in-up">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">Tableau de bord</h1>
           <p className="text-gray-400 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
@@ -174,10 +174,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </header>
 
       {/* AI Summary Card */}
-      <div className="glass-card bg-gradient-to-br from-primary-600/20 via-primary-500/30 to-primary-400/20 rounded-2xl p-5 md:p-6 text-gray-100 relative overflow-hidden group">
+      <div className="glass-card bg-gradient-to-br from-primary-600/20 via-primary-500/30 to-primary-400/20 rounded-2xl p-5 md:p-6 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
-            <span className="bg-primary-500/30 p-1.5 rounded-lg backdrop-blur-sm border border-primary-400/40">
+            <span className="bg-primary-500/30 p-1.5 rounded-lg backdrop-blur-sm border border-primary-400/40 animate-pulse-glow">
                <SparklesIcon className="w-4 h-4 text-primary-300" />
             </span>
             <h3 className="font-semibold text-base md:text-lg tracking-wide text-primary-300">Assistant Intelligent</h3>
@@ -186,8 +187,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/10 blur-3xl group-hover:opacity-20 transition-opacity duration-700"></div>
-        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/20 blur-2xl"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/10 blur-3xl group-hover:opacity-30 group-hover:scale-110 transition-all duration-700"></div>
+        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/20 blur-2xl animate-float"></div>
       </div>
 
       {/* Statistics Grid */}
@@ -227,10 +228,10 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <div className="glass-card rounded-2xl p-4 md:p-6">
+      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
-            <span className="bg-dark-100 p-2 rounded-lg border border-dark-200">
+            <span className="bg-dark-100 p-2 rounded-lg border border-dark-200 group-hover:border-primary-500/50 transition-colors">
                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-primary-400" />
             </span>
             <span>À venir</span>
@@ -250,13 +251,14 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </div>
         ) : (
           <div className="grid gap-3">
-            {upcomingMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-primary-500/50 hover:glow-blue transition-all duration-200">
+            {upcomingMissions.map((mission, index) => (
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-primary-500/50 hover:glow-blue transition-all duration-300 animate-slide-in-up relative overflow-hidden" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 
                 {/* Date Badge */}
                 <div 
                   onClick={() => onEdit(mission)}
-                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-dark-50 p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-dark-200 group-hover:bg-primary-500/20 group-hover:border-primary-500/50 transition-colors shadow-sm"
+                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-dark-50 p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-dark-200 group-hover:bg-primary-500/20 group-hover:border-primary-500/50 transition-all duration-300 shadow-sm relative z-10 group-hover:scale-105"
                 >
                   <div className="text-[10px] md:text-xs text-gray-400 group-hover:text-primary-300 uppercase font-bold tracking-wider">
                     {format(new Date(mission.startTime), 'MMM', { locale: fr })}
@@ -316,10 +318,10 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Completed Missions List */}
-      <div className="glass-card rounded-2xl p-4 md:p-6">
+      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg md:text-xl font-bold text-gray-100 flex items-center gap-2.5">
-            <span className="bg-dark-100 p-2 rounded-lg border border-dark-200">
+            <span className="bg-dark-100 p-2 rounded-lg border border-dark-200 group-hover:border-green-500/50 transition-colors">
                <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
             </span>
             <span>Missions terminées</span>
@@ -339,13 +341,14 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </div>
         ) : (
           <div className="grid gap-3">
-            {recentCompletedMissions.map((mission) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-200">
+            {recentCompletedMissions.map((mission, index) => (
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 animate-slide-in-up relative overflow-hidden" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-transparent to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 
                 {/* Date Badge */}
                 <div 
                   onClick={() => onEdit(mission)}
-                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-dark-50 p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-dark-200 group-hover:bg-green-500/20 group-hover:border-green-500/50 transition-colors shadow-sm"
+                  className="flex cursor-pointer md:flex-col items-center gap-2 md:gap-0 bg-dark-50 p-2.5 md:p-3 rounded-lg min-w-[70px] md:min-w-[80px] text-center border border-dark-200 group-hover:bg-green-500/20 group-hover:border-green-500/50 transition-all duration-300 shadow-sm relative z-10 group-hover:scale-105"
                 >
                   <div className="text-[10px] md:text-xs text-gray-400 group-hover:text-green-300 uppercase font-bold tracking-wider">
                     {format(new Date(mission.endTime), 'MMM', { locale: fr })}
@@ -398,9 +401,9 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
        {/* Data Persistence Section */}
-       <div className="glass-card rounded-2xl p-4 md:p-5">
+       <div className="glass-card rounded-2xl p-4 md:p-5 animate-slide-in-up">
           <div className="flex items-center gap-2.5 mb-3">
-             <div className="bg-dark-100 p-1.5 rounded-lg text-gray-300 border border-dark-200">
+             <div className="bg-dark-100 p-1.5 rounded-lg text-gray-300 border border-dark-200 group-hover:border-primary-500/50 transition-colors">
                <Database size={18} />
              </div>
              <h3 className="text-base md:text-lg font-bold text-gray-100">Sauvegarde</h3>
@@ -441,16 +444,19 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = memo(({ icon, label, value, subtext, color, textColor }: any) => (
-  <div className={`p-4 md:p-5 rounded-xl glass-card transition-all hover:glow-blue ${color}`}>
-    <div className="flex items-start justify-between mb-3">
-      <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor}`}>
-        {icon}
+  <div className={`p-4 md:p-5 rounded-xl glass-card transition-all hover:glow-blue ${color} group relative overflow-hidden animate-slide-in-up`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    <div className="relative z-10">
+      <div className="flex items-start justify-between mb-3">
+        <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor} group-hover:scale-110 transition-transform duration-300`}>
+          {icon}
+        </div>
       </div>
-    </div>
-    <div>
-      <p className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">{value}</p>
-      <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor}`}>{label}</p>
-      <p className="text-[10px] md:text-xs text-gray-400 mt-1.5">{subtext}</p>
+      <div>
+        <p className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight group-hover:scale-105 transition-transform duration-300">{value}</p>
+        <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor}`}>{label}</p>
+        <p className="text-[10px] md:text-xs text-gray-400 mt-1.5">{subtext}</p>
+      </div>
     </div>
   </div>
 ));

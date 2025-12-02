@@ -70,12 +70,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-md overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-md overflow-hidden flex flex-col animate-scale-in">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/20 glass-light">
-          <div>
+        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/20 glass-light relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
             <h2 className="text-lg md:text-xl font-bold text-gray-100">
               {mode === 'login' ? 'Connexion' : 'Inscription'}
             </h2>
@@ -87,7 +88,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </div>
           <button 
             onClick={onClose} 
-            className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-colors text-gray-400"
+            className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-all text-gray-400 hover:scale-110 relative z-10"
           >
             <X size={18} />
           </button>
@@ -153,22 +154,23 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base ${
+            className={`w-full bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
               loading
                 ? 'from-gray-500 to-gray-600 cursor-not-allowed'
                 : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 glow-blue'
             }`}
           >
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
             {loading ? (
-              <>
+              <span className="relative z-10 flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-dark-300 border-t-transparent rounded-full animate-spin" />
                 <span>{mode === 'login' ? 'Connexion...' : 'Inscription...'}</span>
-              </>
+              </span>
             ) : (
-              <>
+              <span className="relative z-10 flex items-center gap-2">
                 {mode === 'login' ? <LogIn size={16} /> : <UserPlus size={16} />}
                 <span>{mode === 'login' ? 'Se connecter' : 'S\'inscrire'}</span>
-              </>
+              </span>
             )}
           </button>
 

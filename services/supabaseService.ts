@@ -258,3 +258,177 @@ export const deleteMissionFromSupabase = async (missionId: string): Promise<void
   }
 };
 
+// ==================== GESTION DES CLIENTS ====================
+
+export interface Client {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+// Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL) pour les clients
+const clientToDb = (client: Client, userId: string) => ({
+  id: client.id,
+  user_id: userId,
+  name: client.name,
+  created_at: client.createdAt,
+});
+
+const dbToClient = (dbRow: any): Client => ({
+  id: dbRow.id,
+  name: dbRow.name,
+  createdAt: dbRow.created_at,
+});
+
+// Charger tous les clients depuis Supabase
+export const loadClientsFromSupabase = async (): Promise<Client[]> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    console.error('Impossible de se connecter à Supabase');
+    return [];
+  }
+
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('user_id', userId)
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Erreur lors du chargement des clients:', error);
+      return [];
+    }
+
+    return (data || []).map(dbToClient);
+  } catch (error) {
+    console.error('Erreur lors du chargement des clients depuis Supabase:', error);
+    return [];
+  }
+};
+
+// Ajouter un client dans Supabase
+export const addClientToSupabase = async (name: string): Promise<Client> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    throw new Error('Impossible de se connecter à Supabase');
+  }
+
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('Utilisateur non connecté');
+  }
+
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw new Error('Le nom du client ne peut pas être vide');
+  }
+
+  try {
+    // Vérifier si le client existe déjà (insensible à la casse)
+    const { data: existing } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('user_id', userId)
+      .ilike('name', trimmedName)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      throw new Error('Ce client existe déjà');
+    }
+
+    const newClient: Client = {
+      id: crypto.randomUUID(),
+      name: trimmedName,
+      createdAt: new Date().toISOString(),
+    };
+
+    const clientDb = clientToDb(newClient, userId);
+    const { data, error } = await supabase
+      .from('clients')
+      .insert([clientDb])
+      .select()
+      .single();
+
+    if (error) {
+      // Si c'est une erreur de contrainte unique, c'est un doublon
+      if (error.code === '23505') {
+        throw new Error('Ce client existe déjà');
+      }
+      console.error('Erreur lors de l\'ajout du client:', error);
+      throw error;
+    }
+
+    return dbToClient(data);
+  } catch (error: any) {
+    console.error('Erreur lors de l\'ajout du client dans Supabase:', error);
+    throw error;
+  }
+};
+
+// Synchroniser les clients avec les missions (ajouter les clients trouvés dans les missions)
+export const syncClientsWithMissionsInSupabase = async (missions: { client: string }[]): Promise<void> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    console.error('Impossible de se connecter à Supabase');
+    return;
+  }
+
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.error('Utilisateur non connecté');
+    return;
+  }
+
+  try {
+    // Récupérer les clients existants
+    const { data: existingClients } = await supabase
+      .from('clients')
+      .select('name')
+      .eq('user_id', userId);
+
+    const existingNames = new Set(
+      (existingClients || []).map(c => c.name.toLowerCase())
+    );
+
+    // Extraire les noms de clients uniques des missions
+    const clientNames = new Set<string>();
+    missions.forEach(mission => {
+      if (mission.client && mission.client.trim()) {
+        clientNames.add(mission.client.trim());
+      }
+    });
+
+    // Ajouter les nouveaux clients
+    const clientsToAdd: any[] = [];
+    clientNames.forEach(name => {
+      if (!existingNames.has(name.toLowerCase())) {
+        clientsToAdd.push({
+          id: crypto.randomUUID(),
+          user_id: userId,
+          name: name,
+          created_at: new Date().toISOString(),
+        });
+      }
+    });
+
+    if (clientsToAdd.length > 0) {
+      const { error } = await supabase
+        .from('clients')
+        .insert(clientsToAdd);
+
+      if (error) {
+        console.error('Erreur lors de la synchronisation des clients:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de la synchronisation des clients avec les missions:', error);
+  }
+};
+

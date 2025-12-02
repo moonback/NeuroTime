@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, LogOut, User, DollarSign } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
-const ImageImportModal = lazy(() => import('./components/ImageImportModal'));
+const FinanceView = lazy(() => import('./components/FinanceView'));
 import AuthModal from './components/AuthModal';
 import { ToastContainer, useToast } from './components/Toast';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
@@ -17,7 +18,6 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
   const [missions, setMissions] = useState<Mission[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
   
@@ -121,11 +121,6 @@ const App: React.FC = () => {
     setEditingMission(null);
   }, [editingMission, toast]);
 
-  const handleBulkAddMissions = useCallback((newMissions: Mission[]) => {
-    setMissions(prev => [...prev, ...newMissions]);
-    toast.success(`${newMissions.length} mission${newMissions.length > 1 ? 's' : ''} importée${newMissions.length > 1 ? 's' : ''}`);
-  }, [toast]);
-
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
     setSelectedDateForNew(undefined);
@@ -209,12 +204,13 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20">
-        <div className="p-6 border-b border-primary-700/20 flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-md items-center justify-center">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20 animate-slide-in-left">
+        <div className="p-6 border-b border-primary-700/20 flex items-center gap-3 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-lg items-center justify-center relative z-10 animate-float">
             <span className="text-2xl font-black text-white tracking-tight">N</span>
           </span>
-          <div>
+          <div className="relative z-10">
             <h1 className="text-xl font-semibold tracking-tight text-primary-300 leading-tight">NeuroTime</h1>
             <span className="text-[0.65rem] text-primary-400 mt-0.5 block font-medium opacity-80">Gestion</span>
           </div>
@@ -239,22 +235,22 @@ const App: React.FC = () => {
             icon={<CalendarIcon size={20} />} 
             label="Agenda" 
           />
+          <NavButton 
+            active={view === 'finance'} 
+            onClick={() => setView('finance')} 
+            icon={<DollarSign size={20} />} 
+            label="Finance" 
+          />
         </nav>
 
         <div className="p-4 space-y-2 border-t border-primary-500/20">
            <button 
-            onClick={() => setIsImportModalOpen(true)}
-            className="w-full glass-button text-primary-300 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
-          >
-            <Sparkles size={16} />
-            <span>Scanner IA</span>
-          </button>
-           <button 
             onClick={() => openNewMissionModal()}
-            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 glow-blue transition-all text-sm"
+            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group"
           >
-            <Plus size={18} />
-            <span>Nouvelle mission</span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+            <Plus size={18} className="relative z-10" />
+            <span className="relative z-10">Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
@@ -276,7 +272,7 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300">
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in">
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
               <Dashboard 
@@ -303,12 +299,15 @@ const App: React.FC = () => {
                 onNewMission={openNewMissionModal}
               />
             )}
+            {view === 'finance' && (
+              <FinanceView missions={missions} />
+            )}
           </Suspense>
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/30 z-30 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/30 z-30 pb-safe animate-slide-up">
         <div className="flex justify-around items-center px-2 py-2">
           <MobileNavButton 
             active={view === 'dashboard'} 
@@ -327,25 +326,25 @@ const App: React.FC = () => {
           <div className="relative -top-7">
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-gradient-to-br from-primary-500 to-primary-600 text-dark-300 p-3.5 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-50"
+              className="bg-gradient-to-br from-primary-500 to-primary-600 text-dark-300 p-3.5 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-50 hover:scale-110 relative overflow-hidden group"
               aria-label="Nouvelle mission"
             >
-              <Plus size={24} strokeWidth={2.5} />
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <Plus size={24} strokeWidth={2.5} className="relative z-10" />
             </button>
           </div>
-
-           <MobileNavButton 
-            active={false}
-            onClick={() => setIsImportModalOpen(true)}
-            icon={<Sparkles size={22} />} 
-            label="Scan IA"
-          />
 
           <MobileNavButton 
             active={view === 'calendar'} 
             onClick={() => setView('calendar')} 
             icon={<CalendarIcon size={22} />} 
             label="Agenda"
+          />
+          <MobileNavButton 
+            active={view === 'finance'} 
+            onClick={() => setView('finance')} 
+            icon={<DollarSign size={22} />} 
+            label="Finance"
           />
         </div>
       </nav>
@@ -359,12 +358,6 @@ const App: React.FC = () => {
           defaultDate={selectedDateForNew}
           missions={missions}
         />
-
-        <ImageImportModal 
-          isOpen={isImportModalOpen}
-          onClose={() => setIsImportModalOpen(false)}
-          onImport={handleBulkAddMissions}
-        />
       </Suspense>
 
       <AuthModal 
@@ -377,9 +370,12 @@ const App: React.FC = () => {
       {/* Toast notifications */}
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
       
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
+      
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
+        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400 animate-slide-in-up animate-glass-shine">
           <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
           <span>Sauvegarde...</span>
         </div>
@@ -392,14 +388,17 @@ const App: React.FC = () => {
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm ${
+    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm relative overflow-hidden group ${
       active 
         ? 'glass-button text-primary-300 font-semibold glow-blue' 
         : 'text-gray-400 hover:glass-button hover:text-primary-300'
     }`}
   >
-    {icon}
-    <span>{label}</span>
+    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/10 via-primary-400/20 to-primary-500/10 translate-x-[-100%] transition-transform duration-500 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
+    <span className="relative z-10 flex items-center gap-3">
+      {icon}
+      <span>{label}</span>
+    </span>
   </button>
 );
 

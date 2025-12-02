@@ -14,6 +14,15 @@ export interface PriceDetails {
 
 // Calculer les gains pour un seul créneau horaire
 export const calculateEarnings = (dateStr: string, startTime: string, endTime: string): PriceDetails => {
+  // Vérifier que les paramètres sont valides avant de créer les dates
+  if (!dateStr || !startTime || !endTime) {
+    throw new Error(`Dates ou heures invalides: date="${dateStr}", début="${startTime}", fin="${endTime}"`);
+  }
+  
+  if (dateStr.trim() === '' || startTime.trim() === '' || endTime.trim() === '') {
+    throw new Error(`Dates ou heures invalides: date="${dateStr}", début="${startTime}", fin="${endTime}"`);
+  }
+  
   // Utiliser le fuseau horaire local du navigateur
   // Format: YYYY-MM-DD pour dateStr, HH:mm pour les heures
   const start = new Date(`${dateStr}T${startTime}`);
@@ -26,7 +35,7 @@ export const calculateEarnings = (dateStr: string, startTime: string, endTime: s
   
   // Vérifier que les dates sont valides
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    throw new Error('Dates ou heures invalides');
+    throw new Error(`Dates ou heures invalides: date="${dateStr}", début="${startTime}", fin="${endTime}"`);
   }
 
   let current = new Date(start);
@@ -66,14 +75,36 @@ export const calculateEarnings = (dateStr: string, startTime: string, endTime: s
 
 // Calculer les gains pour plusieurs créneaux horaires
 export const calculateEarningsMultiple = (dateStr: string, timeSlots: { startTime: string; endTime: string }[]): PriceDetails => {
+  // Vérifier que la date est valide
+  if (!dateStr || dateStr.trim() === '') {
+    throw new Error('Date invalide pour le calcul des gains');
+  }
+  
+  // Vérifier qu'il y a au moins un créneau
+  if (!timeSlots || timeSlots.length === 0) {
+    throw new Error('Aucun créneau horaire fourni pour le calcul');
+  }
+  
   let totalDayHours = 0;
   let totalNightHours = 0;
   
-  // Calculer pour chaque créneau
+  // Calculer pour chaque créneau (ignorer les créneaux invalides)
   for (const slot of timeSlots) {
-    const slotResult = calculateEarnings(dateStr, slot.startTime, slot.endTime);
-    totalDayHours += slotResult.dayHours;
-    totalNightHours += slotResult.nightHours;
+    // Vérifier que le créneau a des valeurs valides
+    if (!slot || !slot.startTime || !slot.endTime || 
+        slot.startTime.trim() === '' || slot.endTime.trim() === '') {
+      console.warn('Créneau horaire ignoré (valeurs manquantes):', slot);
+      continue;
+    }
+    
+    try {
+      const slotResult = calculateEarnings(dateStr, slot.startTime, slot.endTime);
+      totalDayHours += slotResult.dayHours;
+      totalNightHours += slotResult.nightHours;
+    } catch (error) {
+      console.error('Erreur lors du calcul pour un créneau:', slot, error);
+      throw error; // Propager l'erreur pour que l'appelant puisse la gérer
+    }
   }
   
   const total = (totalDayHours * RATE_DAY) + (totalNightHours * RATE_NIGHT);

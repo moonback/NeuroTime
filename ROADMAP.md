@@ -26,7 +26,6 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - ✅ Tableau de bord avec statistiques
 - ✅ Vue liste des missions avec filtres
 - ✅ Vue calendrier mensuelle
-- ✅ Import d'images par IA (Gemini)
 - ✅ Amélioration de descriptions par IA
 - ✅ Export CSV
 - ✅ Sauvegarde/Restauration JSON
@@ -77,11 +76,11 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 ### Nouvelles fonctionnalités
 
 #### 💰 Gestion financière
-- [ ] **Facturation** : Génération automatique de factures PDF
-- [ ] **Devis** : Création et suivi des devis
-- [ ] **Paiements** : Suivi des paiements reçus/en attente
-- [ ] **Rapports** : Rapports mensuels/annuels détaillés
-- [ ] **Graphiques** : Visualisation des revenus (Chart.js/Recharts)
+- [x] **Facturation** : Génération automatique de factures PDF ✅
+- [x] **Devis** : Création et suivi des devis ✅
+- [x] **Paiements** : Suivi des paiements reçus/en attente ✅
+- [x] **Rapports** : Rapports mensuels/annuels détaillés ✅
+- [x] **Graphiques** : Visualisation des revenus (Chart.js/Recharts) ✅
 
 #### 📊 Analytics avancés
 - [ ] **Statistiques détaillées** : Revenus par client, par type de mission
@@ -122,7 +121,7 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - [ ] **RTL** : Support des langues RTL
 
 #### 📱 Applications natives
-- [ ] **PWA complète** : Installation sur mobile/desktop
+- [x] **PWA complète** : Installation sur mobile/desktop ✅
 - [ ] **App iOS** : Application native (React Native)
 - [ ] **App Android** : Application native (React Native)
 - [ ] **Widgets** : Widgets pour iOS/Android

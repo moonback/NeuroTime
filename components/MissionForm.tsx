@@ -5,6 +5,7 @@ import { enhanceDescription } from '../services/geminiService';
 import { calculateEarnings, calculateEarningsMultiple, RATE_DAY, RATE_NIGHT } from '../utils/calculations';
 import { TimeSlot } from '../types';
 import { Tooltip } from './Tooltip';
+import { getAllClients, addClient, Client, syncClientsWithMissions } from '../services/clientService';
 
 interface MissionFormProps {
   isOpen: boolean;
@@ -40,6 +41,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [status, setStatus] = useState<'planned' | 'completed' | 'cancelled'>('planned');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Client management
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isAddingNewClient, setIsAddingNewClient] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
   
   // Validation
   const validateForm = useMemo(() => {
@@ -101,6 +107,22 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     return newErrors;
   }, [title, client, location, date, timeSlots, calculationMode, manualTotal]);
 
+  // Load clients when form opens
+  useEffect(() => {
+    if (isOpen && missions) {
+      const loadClients = async () => {
+        try {
+          await syncClientsWithMissions(missions);
+          const allClients = await getAllClients(missions);
+          setClients(allClients);
+        } catch (error) {
+          console.error('Erreur lors du chargement des clients:', error);
+        }
+      };
+      loadClients();
+    }
+  }, [isOpen, missions]);
+
   // Initialize form
   useEffect(() => {
     if (initialData) {
@@ -116,7 +138,19 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       
       // Gérer les créneaux horaires multiples ou un seul créneau
       if (initialData.timeSlots && initialData.timeSlots.length > 0) {
-        setTimeSlots(initialData.timeSlots);
+        // Filtrer les créneaux invalides et s'assurer qu'ils ont des valeurs valides
+        const validSlots = initialData.timeSlots.filter(slot => 
+          slot && slot.startTime && slot.endTime && 
+          slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
+        );
+        if (validSlots.length > 0) {
+          setTimeSlots(validSlots);
+        } else {
+          // Si tous les créneaux sont invalides, utiliser les heures de début/fin
+          setTimeSlots([
+            { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
+          ]);
+        }
       } else {
         // Compatibilité avec les anciennes missions (un seul créneau)
         setTimeSlots([
@@ -132,22 +166,48 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       } else {
         setCalculationMode('auto');
       }
+      
+      setIsAddingNewClient(false);
+      setNewClientName('');
     } else {
       resetForm();
       if (defaultDate) {
         setDate(defaultDate);
       }
+      setIsAddingNewClient(false);
+      setNewClientName('');
     }
   }, [initialData, isOpen, defaultDate]);
 
 
   // Auto-calculate logic pour plusieurs créneaux
   useEffect(() => {
-    if (calculationMode === 'auto' && timeSlots.length > 0) {
-      const result = calculateEarningsMultiple(date, timeSlots);
-      setDayHours(result.dayHours);
-      setNightHours(result.nightHours);
-      setComputedTotal(result.total);
+    if (calculationMode === 'auto' && timeSlots.length > 0 && date) {
+      // Vérifier que tous les créneaux ont des heures valides avant de calculer
+      const hasValidSlots = timeSlots.every(slot => 
+        slot.startTime && slot.endTime && 
+        slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
+      );
+      
+      if (hasValidSlots) {
+        try {
+          const result = calculateEarningsMultiple(date, timeSlots);
+          setDayHours(result.dayHours);
+          setNightHours(result.nightHours);
+          setComputedTotal(result.total);
+        } catch (error) {
+          console.error('Erreur lors du calcul automatique:', error);
+          // En cas d'erreur, réinitialiser les valeurs
+          setDayHours(0);
+          setNightHours(0);
+          setComputedTotal(0);
+        }
+      } else {
+        // Réinitialiser si les données ne sont pas valides
+        setDayHours(0);
+        setNightHours(0);
+        setComputedTotal(0);
+      }
     }
   }, [timeSlots, date, calculationMode]);
 
@@ -164,6 +224,48 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     setStatus('planned');
     setCalculationMode('auto');
     setManualTotal(0);
+    setIsAddingNewClient(false);
+    setNewClientName('');
+  };
+  
+  // Handle adding new client
+  const handleAddNewClient = async () => {
+    if (!newClientName.trim()) {
+      setErrors(prev => ({ ...prev, newClient: 'Le nom du client est requis' }));
+      return;
+    }
+    
+    try {
+      const newClient = await addClient(newClientName.trim());
+      const updatedClients = await getAllClients(missions || []);
+      setClients(updatedClients);
+      setClient(newClient.name);
+      setIsAddingNewClient(false);
+      setNewClientName('');
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.newClient;
+        return newErrors;
+      });
+    } catch (error: any) {
+      setErrors(prev => ({ ...prev, newClient: error.message || 'Erreur lors de l\'ajout du client' }));
+    }
+  };
+  
+  // Handle client selection change
+  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === '__new__') {
+      setIsAddingNewClient(true);
+      setClient('');
+    } else {
+      setClient(value);
+      setIsAddingNewClient(false);
+      setNewClientName('');
+    }
+    if (errors.client) {
+      setErrors(prev => ({ ...prev, client: '' }));
+    }
   };
   
   // Fonctions pour gérer les créneaux horaires
@@ -228,6 +330,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Vérifier si on est en train d'ajouter un nouveau client mais qu'il n'a pas été ajouté
+    if (isAddingNewClient && !newClientName.trim()) {
+      setErrors(prev => ({ ...prev, newClient: 'Veuillez ajouter le nouveau client ou annuler' }));
+      return;
+    }
+    
     // Valider le formulaire
     if (Object.keys(validateForm).length > 0) {
       setErrors(validateForm);
@@ -286,12 +394,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-4 md:p-6 border-b ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
-          <div>
+        <div className={`flex justify-between items-center p-4 md:p-6 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
             <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-300' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
@@ -299,7 +408,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-colors text-gray-400">
+          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-all text-gray-400 hover:scale-110 relative z-10">
             <X size={18} />
           </button>
         </div>
@@ -309,7 +418,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5">
+               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5 glass-light hover:border-primary-500/50 transition-all animate-slide-in-up">
                  <Copy size={14} className="text-primary-400" />
                  <select 
                    onChange={handleCopyFromMission}
@@ -360,22 +469,88 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                 <div className="space-y-1.5">
                   <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
                     Client
-                    <Tooltip content="Nom de l'entreprise ou du client pour cette mission">
+                    <Tooltip content="Sélectionnez un client existant ou ajoutez-en un nouveau">
                       <AlertCircle size={12} className="text-gray-500 cursor-help" />
                     </Tooltip>
                   </label>
-                  <input
-                    type="text"
-                    value={client}
-                    onChange={(e) => {
-                      setClient(e.target.value);
-                      if (errors.client) setErrors(prev => ({ ...prev, client: '' }));
-                    }}
-                    placeholder="Ex: Event Pro Agency"
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                      errors.client ? 'border-red-500/50' : 'border-dark-200'
-                    }`}
-                  />
+                  
+                  {!isAddingNewClient ? (
+                    <div className="flex gap-2">
+                      <select
+                        value={client}
+                        onChange={handleClientChange}
+                        className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 ${
+                          errors.client ? 'border-red-500/50' : 'border-dark-200'
+                        }`}
+                      >
+                        <option value="">Sélectionner un client...</option>
+                        {clients.map(c => (
+                          <option key={c.id} value={c.name} className="bg-dark-50">
+                            {c.name}
+                          </option>
+                        ))}
+                        <option value="__new__" className="bg-primary-500/20 text-primary-300 font-medium">
+                          + Ajouter un nouveau client
+                        </option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newClientName}
+                          onChange={(e) => {
+                            setNewClientName(e.target.value);
+                            if (errors.newClient) setErrors(prev => ({ ...prev, newClient: '' }));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddNewClient();
+                            } else if (e.key === 'Escape') {
+                              setIsAddingNewClient(false);
+                              setNewClientName('');
+                            }
+                          }}
+                          placeholder="Nom du nouveau client"
+                          autoFocus
+                          className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                            errors.newClient ? 'border-red-500/50' : 'border-dark-200'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddNewClient}
+                          className="px-3 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
+                        >
+                          <CheckCircle size={14} />
+                          Ajouter
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingNewClient(false);
+                            setNewClientName('');
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.newClient;
+                              return newErrors;
+                            });
+                          }}
+                          className="px-3 py-2 bg-dark-200 hover:bg-dark-300 text-gray-400 border border-dark-300 rounded-lg text-xs font-medium transition-all"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      {errors.newClient && (
+                        <p className="text-xs text-red-400 flex items-center gap-1">
+                          <AlertCircle size={12} /> {errors.newClient}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
                   {errors.client && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.client}
@@ -539,10 +714,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
 
               {/* Smart Calculator Display */}
-              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
+              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 
                 {calculationMode === 'auto' ? (
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-3 md:space-y-4 relative z-10">
                     <div className="flex justify-between items-start gap-4">
                        <div>
                          <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
@@ -550,7 +726,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                        </div>
                        <div className="text-right">
                           <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'}`}>
+                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
                             {computedTotal.toFixed(2)} <Euro size={20} strokeWidth={2.5} />
                           </span>
                        </div>
@@ -667,24 +843,28 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4">
+          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base"
+              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base relative z-10"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm md:text-base ${
+              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
                 isConverting 
                 ? 'from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 shadow-green-500/30' 
                 : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 shadow-primary-500/30'
               }`}
             >
-               {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
-              {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <span className="relative z-10 flex items-center gap-2">
+                {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
+                {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+              </span>
             </button>
           </div>
         </form>
