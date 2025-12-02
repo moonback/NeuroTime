@@ -210,11 +210,14 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20">
-        <div className="p-6 border-b border-primary-500/20">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 via-primary-500 to-primary-300 bg-clip-text text-transparent tracking-tight text-glow-blue">
-            NeuroTime
-          </h1>
-          <p className="text-xs text-gray-400 mt-1 font-medium">Gestion personnelle</p>
+        <div className="p-6 border-b border-primary-700/20 flex items-center gap-3">
+          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-md items-center justify-center">
+            <span className="text-2xl font-black text-white tracking-tight">N</span>
+          </span>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-primary-300 leading-tight">NeuroTime</h1>
+            <span className="text-[0.65rem] text-primary-400 mt-0.5 block font-medium opacity-80">Gestion</span>
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5">
