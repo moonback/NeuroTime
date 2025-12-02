@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#grad)"/>
+  <g transform="translate(128, 128)">
+    <!-- Horloge -->
+    <circle cx="128" cy="128" r="100" fill="none" stroke="white" stroke-width="12" opacity="0.9"/>
+    <line x1="128" y1="128" x2="128" y2="80" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+    <line x1="128" y1="128" x2="176" y2="128" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+    <!-- Neuron/cerveau stylisé -->
+    <circle cx="128" cy="128" r="16" fill="white" opacity="0.9"/>
+    <circle cx="80" cy="96" r="12" fill="white" opacity="0.7"/>
+    <circle cx="176" cy="96" r="12" fill="white" opacity="0.7"/>
+    <circle cx="80" cy="160" r="12" fill="white" opacity="0.7"/>
+    <circle cx="176" cy="160" r="12" fill="white" opacity="0.7"/>
+    <line x1="128" y1="128" x2="80" y2="96" stroke="white" stroke-width="4" opacity="0.5"/>
+    <line x1="128" y1="128" x2="176" y2="96" stroke="white" stroke-width="4" opacity="0.5"/>
+    <line x1="128" y1="128" x2="80" y2="160" stroke="white" stroke-width="4" opacity="0.5"/>
+    <line x1="128" y1="128" x2="176" y2="160" stroke="white" stroke-width="4" opacity="0.5"/>
+  </g>
+</svg>
+

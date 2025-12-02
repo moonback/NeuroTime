@@ -9,6 +9,7 @@ const FinanceView = lazy(() => import('./components/FinanceView'));
 import AuthModal from './components/AuthModal';
 import { ToastContainer, useToast } from './components/Toast';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
@@ -368,6 +369,9 @@ const App: React.FC = () => {
       
       {/* Toast notifications */}
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
       
       {/* Saving indicator */}
       {isSaving && (

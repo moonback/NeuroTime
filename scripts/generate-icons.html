@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur d'icônes PWA</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #4f46e5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Générateur d'icônes PWA pour NeuroTime</h1>
+  <p>Cliquez sur les boutons pour télécharger les icônes dans différentes tailles.</p>
+  
+  <div id="canvases"></div>
+  
+  <script>
+    const sizes = [
+      { name: 'apple-touch-icon', size: 180 },
+      { name: 'icon-192x192', size: 192 },
+      { name: 'icon-512x512', size: 512 }
+    ];
+    
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      
+      // Gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#6366f1');
+      gradient.addColorStop(1, '#8b5cf6');
+      
+      // Rounded rectangle background
+      const radius = size * 0.22;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(radius, 0);
+      ctx.lineTo(size - radius, 0);
+      ctx.quadraticCurveTo(size, 0, size, radius);
+      ctx.lineTo(size, size - radius);
+      ctx.quadraticCurveTo(size, size, size - radius, size);
+      ctx.lineTo(radius, size);
+      ctx.quadraticCurveTo(0, size, 0, size - radius);
+      ctx.lineTo(0, radius);
+      ctx.quadraticCurveTo(0, 0, radius, 0);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Scale factor
+      const scale = size / 512;
+      const center = size / 2;
+      
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.scale(scale, scale);
+      ctx.translate(-256, -256);
+      
+      // Clock circle
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 12 * (512 / size);
+      ctx.beginPath();
+      ctx.arc(256, 256, 100, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Clock hands
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 10 * (512 / size);
+      ctx.lineCap = 'round';
+      
+      // Hour hand
+      ctx.beginPath();
+      ctx.moveTo(256, 256);
+      ctx.lineTo(256, 176);
+      ctx.stroke();
+      
+      // Minute hand
+      ctx.lineWidth = 8 * (512 / size);
+      ctx.beginPath();
+      ctx.moveTo(256, 256);
+      ctx.lineTo(304, 256);
+      ctx.stroke();
+      
+      // Center dot
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(256, 256, 16, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Neuron nodes
+      const nodes = [
+        { x: 208, y: 224, r: 12 },
+        { x: 304, y: 224, r: 12 },
+        { x: 208, y: 288, r: 12 },
+        { x: 304, y: 288, r: 12 }
+      ];
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Connections
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 4 * (512 / size);
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.moveTo(256, 256);
+        ctx.lineTo(node.x, node.y);
+        ctx.stroke();
+      });
+      
+      ctx.restore();
+    }
+    
+    sizes.forEach(({ name, size }) => {
+      const canvas = document.createElement('canvas');
+      canvas.id = name;
+      drawIcon(canvas, size);
+      
+      const container = document.createElement('div');
+      container.innerHTML = `
+        <h3>${name} (${size}x${size})</h3>
+        ${canvas.outerHTML}
+        <button onclick="downloadIcon('${name}', ${size})">Télécharger ${name}.png</button>
+      `;
+      document.getElementById('canvases').appendChild(container);
+    });
+    
+    function downloadIcon(name, size) {
+      const canvas = document.getElementById(name);
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+  </script>
+</body>
+</html>
+

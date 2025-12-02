@@ -121,7 +121,7 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - [ ] **RTL** : Support des langues RTL
 
 #### 📱 Applications natives
-- [ ] **PWA complète** : Installation sur mobile/desktop
+- [x] **PWA complète** : Installation sur mobile/desktop ✅
 - [ ] **App iOS** : Application native (React Native)
 - [ ] **App Android** : Application native (React Native)
 - [ ] **Widgets** : Widgets pour iOS/Android
