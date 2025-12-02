@@ -1,0 +1,198 @@
+import {
+  loadClientsFromSupabase,
+  addClientToSupabase,
+  syncClientsWithMissionsInSupabase,
+  Client
+} from './supabaseService';
+
+export type { Client };
+
+const STORAGE_KEY = 'neurotime_clients_v1';
+
+// Charger les clients depuis le localStorage (fallback)
+const loadClientsFromLocal = (): Client[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des clients depuis localStorage:', error);
+  }
+  return [];
+};
+
+// Sauvegarder les clients dans le localStorage (fallback)
+const saveClientsToLocal = (clients: Client[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde des clients dans localStorage:', error);
+  }
+};
+
+// Extraire les clients uniques depuis les missions
+export const extractClientsFromMissions = (missions: { client: string }[]): Client[] => {
+  const clientNames = new Set<string>();
+  
+  missions.forEach(mission => {
+    if (mission.client && mission.client.trim()) {
+      clientNames.add(mission.client.trim());
+    }
+  });
+  
+  return Array.from(clientNames).map(name => ({
+    id: crypto.randomUUID(),
+    name,
+    createdAt: new Date().toISOString()
+  }));
+};
+
+// Obtenir tous les clients (depuis Supabase avec fallback localStorage + extraction depuis missions)
+export const getAllClients = async (missions: { client: string }[] = []): Promise<Client[]> => {
+  // Essayer d'abord Supabase
+  try {
+    const supabaseClients = await loadClientsFromSupabase();
+    if (supabaseClients.length > 0) {
+      // Synchroniser avec localStorage pour le fallback
+      saveClientsToLocal(supabaseClients);
+      return supabaseClients.sort((a, b) => 
+        a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+      );
+    }
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Erreur inconnue';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      console.warn('Erreur réseau lors du chargement des clients depuis Supabase, utilisation du localStorage:', error);
+    } else {
+      console.error('Erreur lors du chargement des clients depuis Supabase:', error);
+    }
+  }
+  
+  // Fallback sur localStorage
+  const localClients = loadClientsFromLocal();
+  const extractedClients = extractClientsFromMissions(missions);
+  
+  // Créer un Map pour éviter les doublons
+  const clientsMap = new Map<string, Client>();
+  
+  // D'abord ajouter les clients stockés localement
+  localClients.forEach(client => {
+    clientsMap.set(client.name.toLowerCase(), client);
+  });
+  
+  // Ensuite ajouter les clients extraits (sans écraser les existants)
+  extractedClients.forEach(client => {
+    const key = client.name.toLowerCase();
+    if (!clientsMap.has(key)) {
+      clientsMap.set(key, client);
+    }
+  });
+  
+  return Array.from(clientsMap.values()).sort((a, b) => 
+    a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+  );
+};
+
+// Ajouter un nouveau client (Supabase avec fallback localStorage)
+export const addClient = async (name: string): Promise<Client> => {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw new Error('Le nom du client ne peut pas être vide');
+  }
+  
+  // Essayer d'abord Supabase
+  try {
+    const newClient = await addClientToSupabase(trimmedName);
+    // Sauvegarder aussi dans localStorage pour le fallback
+    const localClients = loadClientsFromLocal();
+    localClients.push(newClient);
+    saveClientsToLocal(localClients);
+    return newClient;
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Erreur inconnue';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      console.warn('Erreur réseau lors de l\'ajout du client dans Supabase, utilisation du localStorage:', error);
+      // Fallback sur localStorage
+      return addClientToLocal(trimmedName);
+    } else {
+      // Si c'est une erreur de validation (client existe déjà), la propager
+      throw error;
+    }
+  }
+};
+
+// Ajouter un client dans localStorage (fallback)
+const addClientToLocal = (name: string): Client => {
+  const existingClients = loadClientsFromLocal();
+  
+  // Vérifier si le client existe déjà (insensible à la casse)
+  const exists = existingClients.some(
+    c => c.name.toLowerCase() === name.toLowerCase()
+  );
+  
+  if (exists) {
+    throw new Error('Ce client existe déjà');
+  }
+  
+  const newClient: Client = {
+    id: crypto.randomUUID(),
+    name: name,
+    createdAt: new Date().toISOString()
+  };
+  
+  existingClients.push(newClient);
+  saveClientsToLocal(existingClients);
+  
+  return newClient;
+};
+
+// Synchroniser les clients avec les missions (ajouter les nouveaux clients trouvés dans les missions)
+export const syncClientsWithMissions = async (missions: { client: string }[]): Promise<void> => {
+  // Essayer d'abord Supabase
+  try {
+    await syncClientsWithMissionsInSupabase(missions);
+    // Recharger les clients depuis Supabase pour mettre à jour le localStorage
+    const supabaseClients = await loadClientsFromSupabase();
+    if (supabaseClients.length > 0) {
+      saveClientsToLocal(supabaseClients);
+    }
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Erreur inconnue';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      console.warn('Erreur réseau lors de la synchronisation des clients avec Supabase, utilisation du localStorage:', error);
+      // Fallback sur localStorage
+      syncClientsWithMissionsLocal(missions);
+    } else {
+      console.error('Erreur lors de la synchronisation des clients avec les missions:', error);
+      // Fallback sur localStorage en cas d'erreur
+      syncClientsWithMissionsLocal(missions);
+    }
+  }
+};
+
+// Synchroniser les clients avec les missions dans localStorage (fallback)
+const syncClientsWithMissionsLocal = (missions: { client: string }[]): void => {
+  const existingClients = loadClientsFromLocal();
+  const clientNames = new Set(existingClients.map(c => c.name.toLowerCase()));
+  
+  missions.forEach(mission => {
+    if (mission.client && mission.client.trim()) {
+      const clientName = mission.client.trim();
+      if (!clientNames.has(clientName.toLowerCase())) {
+        // Ajouter le nouveau client
+        existingClients.push({
+          id: crypto.randomUUID(),
+          name: clientName,
+          createdAt: new Date().toISOString()
+        });
+        clientNames.add(clientName.toLowerCase());
+      }
+    }
+  });
+  
+  if (existingClients.length > loadClientsFromLocal().length) {
+    saveClientsToLocal(existingClients);
+  }
+};
+

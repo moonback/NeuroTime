@@ -5,6 +5,7 @@ import { enhanceDescription } from '../services/geminiService';
 import { calculateEarnings, calculateEarningsMultiple, RATE_DAY, RATE_NIGHT } from '../utils/calculations';
 import { TimeSlot } from '../types';
 import { Tooltip } from './Tooltip';
+import { getAllClients, addClient, Client, syncClientsWithMissions } from '../services/clientService';
 
 interface MissionFormProps {
   isOpen: boolean;
@@ -40,6 +41,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [status, setStatus] = useState<'planned' | 'completed' | 'cancelled'>('planned');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Client management
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isAddingNewClient, setIsAddingNewClient] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
   
   // Validation
   const validateForm = useMemo(() => {
@@ -101,6 +107,22 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     return newErrors;
   }, [title, client, location, date, timeSlots, calculationMode, manualTotal]);
 
+  // Load clients when form opens
+  useEffect(() => {
+    if (isOpen && missions) {
+      const loadClients = async () => {
+        try {
+          await syncClientsWithMissions(missions);
+          const allClients = await getAllClients(missions);
+          setClients(allClients);
+        } catch (error) {
+          console.error('Erreur lors du chargement des clients:', error);
+        }
+      };
+      loadClients();
+    }
+  }, [isOpen, missions]);
+
   // Initialize form
   useEffect(() => {
     if (initialData) {
@@ -132,11 +154,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       } else {
         setCalculationMode('auto');
       }
+      
+      setIsAddingNewClient(false);
+      setNewClientName('');
     } else {
       resetForm();
       if (defaultDate) {
         setDate(defaultDate);
       }
+      setIsAddingNewClient(false);
+      setNewClientName('');
     }
   }, [initialData, isOpen, defaultDate]);
 
@@ -164,6 +191,48 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     setStatus('planned');
     setCalculationMode('auto');
     setManualTotal(0);
+    setIsAddingNewClient(false);
+    setNewClientName('');
+  };
+  
+  // Handle adding new client
+  const handleAddNewClient = async () => {
+    if (!newClientName.trim()) {
+      setErrors(prev => ({ ...prev, newClient: 'Le nom du client est requis' }));
+      return;
+    }
+    
+    try {
+      const newClient = await addClient(newClientName.trim());
+      const updatedClients = await getAllClients(missions || []);
+      setClients(updatedClients);
+      setClient(newClient.name);
+      setIsAddingNewClient(false);
+      setNewClientName('');
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.newClient;
+        return newErrors;
+      });
+    } catch (error: any) {
+      setErrors(prev => ({ ...prev, newClient: error.message || 'Erreur lors de l\'ajout du client' }));
+    }
+  };
+  
+  // Handle client selection change
+  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === '__new__') {
+      setIsAddingNewClient(true);
+      setClient('');
+    } else {
+      setClient(value);
+      setIsAddingNewClient(false);
+      setNewClientName('');
+    }
+    if (errors.client) {
+      setErrors(prev => ({ ...prev, client: '' }));
+    }
   };
   
   // Fonctions pour gérer les créneaux horaires
@@ -227,6 +296,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Vérifier si on est en train d'ajouter un nouveau client mais qu'il n'a pas été ajouté
+    if (isAddingNewClient && !newClientName.trim()) {
+      setErrors(prev => ({ ...prev, newClient: 'Veuillez ajouter le nouveau client ou annuler' }));
+      return;
+    }
     
     // Valider le formulaire
     if (Object.keys(validateForm).length > 0) {
@@ -360,22 +435,88 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                 <div className="space-y-1.5">
                   <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
                     Client
-                    <Tooltip content="Nom de l'entreprise ou du client pour cette mission">
+                    <Tooltip content="Sélectionnez un client existant ou ajoutez-en un nouveau">
                       <AlertCircle size={12} className="text-gray-500 cursor-help" />
                     </Tooltip>
                   </label>
-                  <input
-                    type="text"
-                    value={client}
-                    onChange={(e) => {
-                      setClient(e.target.value);
-                      if (errors.client) setErrors(prev => ({ ...prev, client: '' }));
-                    }}
-                    placeholder="Ex: Event Pro Agency"
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                      errors.client ? 'border-red-500/50' : 'border-dark-200'
-                    }`}
-                  />
+                  
+                  {!isAddingNewClient ? (
+                    <div className="flex gap-2">
+                      <select
+                        value={client}
+                        onChange={handleClientChange}
+                        className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 ${
+                          errors.client ? 'border-red-500/50' : 'border-dark-200'
+                        }`}
+                      >
+                        <option value="">Sélectionner un client...</option>
+                        {clients.map(c => (
+                          <option key={c.id} value={c.name} className="bg-dark-50">
+                            {c.name}
+                          </option>
+                        ))}
+                        <option value="__new__" className="bg-primary-500/20 text-primary-300 font-medium">
+                          + Ajouter un nouveau client
+                        </option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newClientName}
+                          onChange={(e) => {
+                            setNewClientName(e.target.value);
+                            if (errors.newClient) setErrors(prev => ({ ...prev, newClient: '' }));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddNewClient();
+                            } else if (e.key === 'Escape') {
+                              setIsAddingNewClient(false);
+                              setNewClientName('');
+                            }
+                          }}
+                          placeholder="Nom du nouveau client"
+                          autoFocus
+                          className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                            errors.newClient ? 'border-red-500/50' : 'border-dark-200'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddNewClient}
+                          className="px-3 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
+                        >
+                          <CheckCircle size={14} />
+                          Ajouter
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingNewClient(false);
+                            setNewClientName('');
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.newClient;
+                              return newErrors;
+                            });
+                          }}
+                          className="px-3 py-2 bg-dark-200 hover:bg-dark-300 text-gray-400 border border-dark-300 rounded-lg text-xs font-medium transition-all"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      {errors.newClient && (
+                        <p className="text-xs text-red-400 flex items-center gap-1">
+                          <AlertCircle size={12} /> {errors.newClient}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
                   {errors.client && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.client}
