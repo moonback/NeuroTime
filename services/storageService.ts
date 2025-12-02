@@ -8,42 +8,57 @@ const STORAGE_KEY = 'eventflow_missions_v1';
 
 // Fonction de sauvegarde avec fallback sur localStorage
 export const saveMissions = async (missions: Mission[]): Promise<void> => {
+  // Toujours sauvegarder dans localStorage d'abord pour garantir la persistance
   try {
-    // Essayer d'abord Supabase
-    await saveMissionsToSupabase(missions);
-    // Sauvegarder aussi dans localStorage comme backup
     localStorage.setItem(STORAGE_KEY, JSON.stringify(missions));
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde dans Supabase, utilisation du localStorage:', error);
-    // Fallback sur localStorage en cas d'erreur
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(missions));
-    } catch (localError) {
-      console.error('Failed to save missions to local storage', localError);
+  } catch (localError) {
+    console.error('Failed to save missions to local storage', localError);
+    throw new Error('Impossible de sauvegarder les données localement');
+  }
+  
+  // Essayer ensuite Supabase (non bloquant)
+  try {
+    await saveMissionsToSupabase(missions);
+  } catch (error: any) {
+    // Ne pas faire échouer la sauvegarde si Supabase échoue
+    const errorMessage = error?.message || 'Erreur inconnue';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      console.warn('Erreur réseau lors de la sauvegarde Supabase, données sauvegardées localement:', error);
+      // Les données sont déjà dans localStorage, on continue
+    } else {
+      console.error('Erreur lors de la sauvegarde dans Supabase:', error);
     }
   }
 };
 
 // Fonction de chargement avec fallback sur localStorage
 export const loadMissions = async (): Promise<Mission[]> => {
-  try {
-    // Essayer d'abord Supabase
-    const missions = await loadMissionsFromSupabase();
-    if (missions.length > 0) {
-      // Synchroniser avec localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(missions));
-      return missions;
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement depuis Supabase, utilisation du localStorage:', error);
-  }
-  
-  // Fallback sur localStorage
+  // Charger d'abord depuis localStorage pour un affichage immédiat
+  let localMissions: Mission[] = [];
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    localMissions = data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Failed to load missions', error);
-    return [];
+    console.error('Failed to load missions from localStorage', error);
   }
+  
+  // Essayer ensuite Supabase pour synchroniser
+  try {
+    const supabaseMissions = await loadMissionsFromSupabase();
+    if (supabaseMissions.length > 0) {
+      // Synchroniser avec localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(supabaseMissions));
+      return supabaseMissions;
+    }
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Erreur inconnue';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      console.warn('Erreur réseau lors du chargement Supabase, utilisation des données locales:', error);
+    } else {
+      console.error('Erreur lors du chargement depuis Supabase, utilisation du localStorage:', error);
+    }
+  }
+  
+  // Retourner les données locales si Supabase n'a pas fonctionné
+  return localMissions;
 };

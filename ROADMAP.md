@@ -43,17 +43,17 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 
 #### 🎨 Interface utilisateur
 - [ ] Thème clair/sombre (toggle)
-- [ ] Animations et transitions plus fluides
-- [ ] Meilleure gestion des états de chargement
-- [ ] Messages d'erreur plus explicites
-- [ ] Tooltips et aide contextuelle
+- [x] Animations et transitions plus fluides ✅
+- [x] Meilleure gestion des états de chargement ✅
+- [x] Messages d'erreur plus explicites ✅
+- [x] Tooltips et aide contextuelle ✅
 
 #### 🐛 Corrections
-- [ ] Correction du calcul CA pour missions terminées
-- [ ] Gestion des fuseaux horaires
-- [ ] Validation des formulaires améliorée
-- [ ] Gestion des erreurs réseau
-- [ ] Optimisation des performances
+- [x] Correction du calcul CA pour missions terminées ✅
+- [x] Gestion des fuseaux horaires ✅
+- [x] Validation des formulaires améliorée ✅
+- [x] Gestion des erreurs réseau ✅
+- [x] Optimisation des performances ✅
 
 #### 📱 Mobile
 - [ ] Amélioration de la navigation mobile

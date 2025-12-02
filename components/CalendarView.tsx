@@ -14,7 +14,7 @@ import startOfMonth from 'date-fns/startOfMonth';
 import startOfWeek from 'date-fns/startOfWeek';
 import subMonths from 'date-fns/subMonths';
 import fr from 'date-fns/locale/fr';
-import { ChevronLeft, ChevronRight, MapPin, Trash2, Edit, Calendar, CheckCircle, Plus, Briefcase, Clock, Euro, Filter, Truck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Trash2, Edit, Calendar, CheckCircle, Plus, Briefcase, Clock, Euro, Filter } from 'lucide-react';
 
 interface CalendarViewProps {
   missions: Mission[];
@@ -300,7 +300,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                         <h4 className="font-bold text-gray-100 text-sm truncate">{mission.title}</h4>
                         <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-0.5 font-medium">
                           <Clock size={10} />
-                          {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
+                          {formatTimeSlots(mission)}
                         </div>
                       </div>
                    </div>
@@ -314,23 +314,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                    <span className="truncate">{mission.client}</span>
                 </div>
 
-                {/* Logistics Info in Side Panel */}
-                {(mission.logistics?.deliveryTime || mission.logistics?.pickupTime) && (
-                  <div className="mb-2 pl-4 text-[10px] text-gray-500 space-y-1">
-                    {mission.logistics.deliveryTime && (
-                       <div className="flex items-center gap-1">
-                         <Truck size={10} className="text-primary-400" />
-                         <span>Liv: {format(new Date(mission.logistics.deliveryTime), 'dd/MM HH:mm')}</span>
-                       </div>
-                    )}
-                     {mission.logistics.pickupTime && (
-                       <div className="flex items-center gap-1">
-                         <Truck size={10} className="text-orange-400" />
-                         <span>Rep: {format(new Date(mission.logistics.pickupTime), 'dd/MM HH:mm')}</span>
-                       </div>
-                    )}
-                  </div>
-                )}
                 
                 <div className="flex justify-end gap-1 pt-2 border-t border-dark-200">
                    {mission.status === 'planned' && (

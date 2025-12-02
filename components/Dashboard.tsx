@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
 import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save } from 'lucide-react';
 import { format, isThisMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
+import { formatTimeSlots } from '../utils/timeSlots';
 
 interface DashboardProps {
   missions: Mission[];
@@ -18,44 +19,72 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
   // Missions terminées : toutes celles avec status 'completed'
-  const allCompletedMissions = missions.filter(m => m.status === 'completed');
+  const allCompletedMissions = useMemo(() => 
+    missions.filter(m => m.status === 'completed'),
+    [missions]
+  );
   
   // Missions du mois en cours (pour les statistiques mensuelles)
   // Pour les missions terminées : on vérifie si elles se sont terminées ce mois-ci
   // Pour les missions planifiées : on vérifie si elles commencent ce mois-ci
-  const thisMonthCompletedMissions = allCompletedMissions.filter(m => 
-    isThisMonth(new Date(m.endTime))
+  const thisMonthCompletedMissions = useMemo(() => 
+    allCompletedMissions.filter(m => 
+      isThisMonth(new Date(m.endTime))
+    ),
+    [allCompletedMissions]
   );
-  const thisMonthPlannedMissions = missions.filter(m => 
-    m.status === 'planned' && isThisMonth(new Date(m.startTime))
+  
+  const thisMonthPlannedMissions = useMemo(() => 
+    missions.filter(m => 
+      m.status === 'planned' && isThisMonth(new Date(m.startTime))
+    ),
+    [missions]
   );
   
   // Heures et gains de TOUTES les missions terminées (réalisé total)
-  const totalHours = allCompletedMissions.reduce((acc, m) => {
-    const start = new Date(m.startTime).getTime();
-    const end = new Date(m.endTime).getTime();
-    return acc + (end - start) / (1000 * 60 * 60);
-  }, 0);
+  const totalHours = useMemo(() => 
+    allCompletedMissions.reduce((acc, m) => {
+      const start = new Date(m.startTime).getTime();
+      const end = new Date(m.endTime).getTime();
+      return acc + (end - start) / (1000 * 60 * 60);
+    }, 0),
+    [allCompletedMissions]
+  );
 
   // CA réalisé : TOUTES les missions terminées (pas seulement celles du mois)
-  const totalEarningsCompleted = allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+  const totalEarningsCompleted = useMemo(() => 
+    allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
+    [allCompletedMissions]
+  );
   
   // Gains prévisionnels des missions planifiées du mois en cours
-  const totalEarningsPlanned = thisMonthPlannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+  const totalEarningsPlanned = useMemo(() => 
+    thisMonthPlannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
+    [thisMonthPlannedMissions]
+  );
   
   // Total = Réalisé (toutes missions terminées) + Prévisionnel (missions planifiées du mois)
-  const totalEarnings = totalEarningsCompleted + totalEarningsPlanned;
-  
+  const totalEarnings = useMemo(() => 
+    totalEarningsCompleted + totalEarningsPlanned,
+    [totalEarningsCompleted, totalEarningsPlanned]
+  );
+
   // Upcoming includes planned missions in the future OR today
-  const upcomingMissions = missions
-    .filter(m => m.status === 'planned')
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-    .slice(0, 4);
+  const upcomingMissions = useMemo(() => 
+    missions
+      .filter(m => m.status === 'planned')
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      .slice(0, 4),
+    [missions]
+  );
 
   // Missions terminées récentes (les 5 plus récentes)
-  const recentCompletedMissions = allCompletedMissions
-    .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
-    .slice(0, 5);
+  const recentCompletedMissions = useMemo(() => 
+    allCompletedMissions
+      .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+      .slice(0, 5),
+    [allCompletedMissions]
+  );
 
   useEffect(() => {
     if (missions.length > 0) {
@@ -411,7 +440,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   );
 };
 
-const StatCard = ({ icon, label, value, subtext, color, textColor }: any) => (
+const StatCard = memo(({ icon, label, value, subtext, color, textColor }: any) => (
   <div className={`p-4 md:p-5 rounded-xl border transition-all hover:shadow-lg hover:shadow-primary-500/10 ${color}`}>
     <div className="flex items-start justify-between mb-3">
       <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor}`}>
@@ -424,7 +453,8 @@ const StatCard = ({ icon, label, value, subtext, color, textColor }: any) => (
       <p className="text-[10px] md:text-xs text-gray-400 mt-1.5">{subtext}</p>
     </div>
   </div>
-);
+));
+StatCard.displayName = 'StatCard';
 
 const SparklesIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>

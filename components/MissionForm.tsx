@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Mission } from '../types';
-import { X, Sparkles, MapPin, Calculator, Calendar, Briefcase, Euro, Moon, Sun, CheckCircle, Truck, ArrowRight, Copy } from 'lucide-react';
+import { X, Sparkles, MapPin, Calculator, Calendar, Briefcase, Euro, Moon, Sun, CheckCircle, ArrowRight, Copy, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { enhanceDescription } from '../services/geminiService';
-import { calculateEarnings, RATE_DAY, RATE_NIGHT } from '../utils/calculations';
+import { calculateEarnings, calculateEarningsMultiple, RATE_DAY, RATE_NIGHT } from '../utils/calculations';
+import { TimeSlot } from '../types';
+import { Tooltip } from './Tooltip';
 
 interface MissionFormProps {
   isOpen: boolean;
@@ -20,18 +22,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   
-  // Time fields
+  // Time fields - Support multiple time slots
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('18:00');
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
+    { startTime: '09:00', endTime: '18:00' }
+  ]);
   
-  // Logistics fields
-  const [showLogistics, setShowLogistics] = useState(false);
-  const [deliveryDate, setDeliveryDate] = useState('');
-  const [deliveryTime, setDeliveryTime] = useState('');
-  const [pickupDate, setPickupDate] = useState('');
-  const [pickupTime, setPickupTime] = useState('');
-
   // Financial fields
   const [calculationMode, setCalculationMode] = useState<'auto' | 'manual'>('auto');
   const [manualTotal, setManualTotal] = useState<number>(0);
@@ -43,6 +39,67 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   
   const [status, setStatus] = useState<'planned' | 'completed' | 'cancelled'>('planned');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Validation
+  const validateForm = useMemo(() => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!title.trim()) {
+      newErrors.title = 'Le titre est requis';
+    } else if (title.length < 3) {
+      newErrors.title = 'Le titre doit contenir au moins 3 caractères';
+    }
+    
+    if (!client.trim()) {
+      newErrors.client = 'Le client est requis';
+    }
+    
+    if (!location.trim()) {
+      newErrors.location = 'Le lieu est requis';
+    }
+    
+    if (!date) {
+      newErrors.date = 'La date est requise';
+    }
+    
+    // Validation des créneaux horaires
+    if (timeSlots.length === 0) {
+      newErrors.timeSlots = 'Au moins un créneau horaire est requis';
+    }
+    
+    timeSlots.forEach((slot, index) => {
+      if (!slot.startTime) {
+        newErrors[`timeSlot_${index}_start`] = 'Heure de début requise';
+      }
+      if (!slot.endTime) {
+        newErrors[`timeSlot_${index}_end`] = 'Heure de fin requise';
+      }
+      
+      if (slot.startTime && slot.endTime) {
+        const start = new Date(`${date}T${slot.startTime}`);
+        let end = new Date(`${date}T${slot.endTime}`);
+        if (end <= start) {
+          end.setDate(end.getDate() + 1);
+        }
+        
+        const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        if (diffHours > 24) {
+          newErrors[`timeSlot_${index}_end`] = 'La durée ne peut pas dépasser 24 heures';
+        }
+        if (diffHours < 0.5) {
+          newErrors[`timeSlot_${index}_end`] = 'La durée minimale est de 30 minutes';
+        }
+      }
+    });
+    
+    // Validation manuelle
+    if (calculationMode === 'manual' && manualTotal <= 0) {
+      newErrors.manualTotal = 'Le montant doit être supérieur à 0';
+    }
+    
+    return newErrors;
+  }, [title, client, location, date, timeSlots, calculationMode, manualTotal]);
 
   // Initialize form
   useEffect(() => {
@@ -56,31 +113,18 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       const end = new Date(initialData.endTime);
       
       setDate(formatDateForInput(start));
-      setStartTime(formatTimeForInput(start));
-      setEndTime(formatTimeForInput(end));
+      
+      // Gérer les créneaux horaires multiples ou un seul créneau
+      if (initialData.timeSlots && initialData.timeSlots.length > 0) {
+        setTimeSlots(initialData.timeSlots);
+      } else {
+        // Compatibilité avec les anciennes missions (un seul créneau)
+        setTimeSlots([
+          { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
+        ]);
+      }
       
       setStatus(initialData.status);
-
-      // Logistics init
-      if (initialData.logistics?.deliveryTime || initialData.logistics?.pickupTime) {
-        setShowLogistics(true);
-        if (initialData.logistics.deliveryTime) {
-          const d = new Date(initialData.logistics.deliveryTime);
-          setDeliveryDate(formatDateForInput(d));
-          setDeliveryTime(formatTimeForInput(d));
-        }
-        if (initialData.logistics.pickupTime) {
-          const p = new Date(initialData.logistics.pickupTime);
-          setPickupDate(formatDateForInput(p));
-          setPickupTime(formatTimeForInput(p));
-        }
-      } else {
-        setShowLogistics(false);
-        setDeliveryDate('');
-        setDeliveryTime('');
-        setPickupDate('');
-        setPickupTime('');
-      }
 
       if (initialData.rateType === 'custom') {
         setCalculationMode('manual');
@@ -96,24 +140,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     }
   }, [initialData, isOpen, defaultDate]);
 
-  // Sync Logistics Default Dates when Main Date changes
-  useEffect(() => {
-    if (!initialData && !deliveryDate) setDeliveryDate(date);
-    if (!initialData && !pickupDate) {
-        // Default pickup next day or same day? Let's say same day initially
-        setPickupDate(date);
-    }
-  }, [date, initialData, deliveryDate, pickupDate]);
 
-  // Auto-calculate logic
+  // Auto-calculate logic pour plusieurs créneaux
   useEffect(() => {
-    if (calculationMode === 'auto') {
-      const result = calculateEarnings(date, startTime, endTime);
+    if (calculationMode === 'auto' && timeSlots.length > 0) {
+      const result = calculateEarningsMultiple(date, timeSlots);
       setDayHours(result.dayHours);
       setNightHours(result.nightHours);
       setComputedTotal(result.total);
     }
-  }, [startTime, endTime, date, calculationMode]);
+  }, [timeSlots, date, calculationMode]);
 
   const formatDateForInput = (d: Date) => d.toISOString().split('T')[0];
   const formatTimeForInput = (d: Date) => d.toTimeString().slice(0, 5);
@@ -124,16 +160,35 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     setLocation('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
-    setStartTime('14:00');
-    setEndTime('23:00');
+    setTimeSlots([{ startTime: '09:00', endTime: '18:00' }]);
     setStatus('planned');
     setCalculationMode('auto');
     setManualTotal(0);
-    setShowLogistics(false);
-    setDeliveryDate('');
-    setDeliveryTime('');
-    setPickupDate('');
-    setPickupTime('');
+  };
+  
+  // Fonctions pour gérer les créneaux horaires
+  const addTimeSlot = () => {
+    setTimeSlots([...timeSlots, { startTime: '09:00', endTime: '18:00' }]);
+  };
+  
+  const removeTimeSlot = (index: number) => {
+    if (timeSlots.length > 1) {
+      setTimeSlots(timeSlots.filter((_, i) => i !== index));
+    }
+  };
+  
+  const updateTimeSlot = (index: number, field: 'startTime' | 'endTime', value: string) => {
+    const updated = [...timeSlots];
+    updated[index] = { ...updated[index], [field]: value };
+    setTimeSlots(updated);
+    // Effacer les erreurs pour ce champ
+    if (errors[`timeSlot_${index}_${field}`]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`timeSlot_${index}_${field}`];
+        return newErrors;
+      });
+    }
   };
 
   const handleCopyFromMission = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -144,10 +199,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       setClient(model.client);
       setLocation(model.location);
       // We keep the current date, but copy the times
-      const start = new Date(model.startTime);
-      const end = new Date(model.endTime);
-      setStartTime(formatTimeForInput(start));
-      setEndTime(formatTimeForInput(end));
+      if (model.timeSlots && model.timeSlots.length > 0) {
+        setTimeSlots(model.timeSlots);
+      } else {
+        const start = new Date(model.startTime);
+        const end = new Date(model.endTime);
+        setTimeSlots([{ startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }]);
+      }
       
       // Optional: Copy description? 
       // setDescription(model.description);
@@ -169,23 +227,27 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const startIso = new Date(`${date}T${startTime}`).toISOString();
-    let endObj = new Date(`${date}T${endTime}`);
-    const startObj = new Date(`${date}T${startTime}`);
+    
+    // Valider le formulaire
+    if (Object.keys(validateForm).length > 0) {
+      setErrors(validateForm);
+      return;
+    }
+    
+    setErrors({});
+    
+    // Calculer startTime et endTime pour compatibilité (premier et dernier créneau)
+    const firstSlot = timeSlots[0];
+    const lastSlot = timeSlots[timeSlots.length - 1];
+    
+    const startIso = new Date(`${date}T${firstSlot.startTime}`).toISOString();
+    let endObj = new Date(`${date}T${lastSlot.endTime}`);
+    const startObj = new Date(`${date}T${firstSlot.startTime}`);
     
     if (endObj <= startObj) {
       endObj.setDate(endObj.getDate() + 1);
     }
     const endIso = endObj.toISOString();
-
-    // Handle Logistics
-    let logistics = undefined;
-    if (showLogistics) {
-      logistics = {
-        deliveryTime: (deliveryDate && deliveryTime) ? new Date(`${deliveryDate}T${deliveryTime}`).toISOString() : undefined,
-        pickupTime: (pickupDate && pickupTime) ? new Date(`${pickupDate}T${pickupTime}`).toISOString() : undefined
-      };
-    }
 
     const finalTotal = calculationMode === 'auto' ? computedTotal : manualTotal;
     
@@ -202,8 +264,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       client,
       location,
       description,
-      startTime: startIso,
-      endTime: endIso,
+      startTime: startIso, // Pour compatibilité
+      endTime: endIso, // Pour compatibilité
+      timeSlots: timeSlots.length > 1 ? timeSlots : undefined, // Stocker seulement si plusieurs créneaux
       status: status,
       rateType: finalRateType,
       hourlyRate: calculationMode === 'auto' ? RATE_DAY : 0, 
@@ -211,8 +274,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       details: {
         dayHours,
         nightHours
-      },
-      logistics
+      }
     };
 
     onSave(newMission);
@@ -270,40 +332,83 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-700">Titre de la mission</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
+                    Titre de la mission
+                    <Tooltip content="Nom descriptif de votre mission (ex: Régie Son, Accueil VIP)">
+                      <AlertCircle size={12} className="text-gray-500 cursor-help" />
+                    </Tooltip>
+                  </label>
                   <input
                     type="text"
                     required
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+                    }}
                     placeholder="Ex: Régie Son - Concert"
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                      errors.title ? 'border-red-500/50' : 'border-dark-200'
+                    }`}
                   />
+                  {errors.title && (
+                    <p className="text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle size={12} /> {errors.title}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200">Client</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
+                    Client
+                    <Tooltip content="Nom de l'entreprise ou du client pour cette mission">
+                      <AlertCircle size={12} className="text-gray-500 cursor-help" />
+                    </Tooltip>
+                  </label>
                   <input
                     type="text"
                     value={client}
-                    onChange={(e) => setClient(e.target.value)}
+                    onChange={(e) => {
+                      setClient(e.target.value);
+                      if (errors.client) setErrors(prev => ({ ...prev, client: '' }));
+                    }}
                     placeholder="Ex: Event Pro Agency"
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                      errors.client ? 'border-red-500/50' : 'border-dark-200'
+                    }`}
                   />
+                  {errors.client && (
+                    <p className="text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle size={12} /> {errors.client}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
                   <MapPin size={12} className="text-gray-500" /> Lieu
+                  <Tooltip content="Adresse ou lieu de la mission">
+                    <AlertCircle size={12} className="text-gray-500 cursor-help ml-1" />
+                  </Tooltip>
                 </label>
                 <input
                   type="text"
                   required
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                    if (errors.location) setErrors(prev => ({ ...prev, location: '' }));
+                  }}
                   placeholder="Ex: Paris La Défense Arena"
-                  className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                  className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                    errors.location ? 'border-red-500/50' : 'border-dark-200'
+                  }`}
                 />
+                {errors.location && (
+                  <p className="text-xs text-red-400 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.location}
+                  </p>
+                )}
               </div>
             </section>
 
@@ -335,36 +440,101 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+              <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-700">Date</label>
+                  <label className="text-xs md:text-sm font-medium text-gray-200">Date</label>
                   <input
                     type="date"
                     required
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100"
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
+                    }}
+                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
+                      errors.date ? 'border-red-500/50' : 'border-dark-200'
+                    }`}
                   />
+                  {errors.date && (
+                    <p className="text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle size={12} /> {errors.date}
+                    </p>
+                  )}
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200">Début</label>
-                  <input
-                    type="time"
-                    required
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${isConverting ? 'border-orange-500/50 bg-orange-500/20 font-bold' : 'border-dark-200'}`}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200">Fin</label>
-                  <input
-                    type="time"
-                    required
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                     className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${isConverting ? 'border-orange-500/50 bg-orange-500/20 font-bold' : 'border-dark-200'}`}
-                  />
+                
+                {/* Créneaux horaires multiples */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs md:text-sm font-medium text-gray-200">Créneaux horaires</label>
+                    <button
+                      type="button"
+                      onClick={addTimeSlot}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all"
+                    >
+                      <Plus size={14} />
+                      Ajouter un créneau
+                    </button>
+                  </div>
+                  
+                  {timeSlots.map((slot, index) => (
+                    <div key={index} className="bg-dark-100 rounded-lg p-3 md:p-4 border border-dark-200 space-y-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-gray-400">Créneau {index + 1}</span>
+                        {timeSlots.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTimeSlot(index)}
+                            className="p-1.5 hover:bg-red-500/20 text-red-400 rounded transition-colors"
+                            title="Supprimer ce créneau"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400">Début</label>
+                          <input
+                            type="time"
+                            required
+                            value={slot.startTime}
+                            onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
+                            className={`w-full px-3 py-2 bg-dark-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
+                              errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : 'border-dark-200'
+                            }`}
+                          />
+                          {errors[`timeSlot_${index}_start`] && (
+                            <p className="text-xs text-red-400 flex items-center gap-1">
+                              <AlertCircle size={10} /> {errors[`timeSlot_${index}_start`]}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400">Fin</label>
+                          <input
+                            type="time"
+                            required
+                            value={slot.endTime}
+                            onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
+                            className={`w-full px-3 py-2 bg-dark-50 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
+                              errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : 'border-dark-200'
+                            }`}
+                          />
+                          {errors[`timeSlot_${index}_end`] && (
+                            <p className="text-xs text-red-400 flex items-center gap-1">
+                              <AlertCircle size={10} /> {errors[`timeSlot_${index}_end`]}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {errors.timeSlots && (
+                    <p className="text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle size={12} /> {errors.timeSlots}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -440,70 +610,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                    </div>
                 )}
               </div>
-            </section>
-
-            <hr className="border-gray-100" />
-            
-            {/* LOGISTICS SECTION */}
-            <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <Truck size={14} /> Logistique
-                </h3>
-                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={showLogistics} 
-                    onChange={(e) => setShowLogistics(e.target.checked)}
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" 
-                  />
-                  <span>Horaires spéciaux (Livraison/Reprise)</span>
-                </label>
-              </div>
-
-              {showLogistics && (
-                <div className="bg-dark-100 rounded-xl p-4 border border-dark-200 animate-fade-in space-y-4">
-                   {/* Delivery */}
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="flex items-center gap-2 text-sm font-medium text-gray-200 md:col-span-2">
-                        <div className="w-2 h-2 rounded-full bg-primary-400"></div> Livraison / Install
-                     </div>
-                     <input
-                        type="date"
-                        value={deliveryDate}
-                        onChange={(e) => setDeliveryDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
-                      />
-                      <input
-                        type="time"
-                        value={deliveryTime}
-                        onChange={(e) => setDeliveryTime(e.target.value)}
-                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
-                      />
-                   </div>
-
-                   <div className="border-t border-dark-200"></div>
-
-                   {/* Pickup */}
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="flex items-center gap-2 text-sm font-medium text-gray-200 md:col-span-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-400"></div> Reprise / Démontage
-                     </div>
-                     <input
-                        type="date"
-                        value={pickupDate}
-                        onChange={(e) => setPickupDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
-                      />
-                      <input
-                        type="time"
-                        value={pickupTime}
-                        onChange={(e) => setPickupTime(e.target.value)}
-                        className="w-full px-3 py-2 bg-dark-50 border border-dark-200 rounded-lg text-sm text-gray-100"
-                      />
-                   </div>
-                </div>
-              )}
             </section>
 
             <hr className="border-gray-100" />

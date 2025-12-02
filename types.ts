@@ -1,12 +1,20 @@
+export interface TimeSlot {
+  startTime: string; // Format HH:mm
+  endTime: string; // Format HH:mm
+}
+
 export interface Mission {
   id: string;
   title: string;
   client: string;
   location: string;
   description: string;
-  startTime: string; // ISO String
-  endTime: string; // ISO String
+  startTime: string; // ISO String (pour compatibilité, correspond au premier créneau)
+  endTime: string; // ISO String (pour compatibilité, correspond au dernier créneau)
   status: 'planned' | 'completed' | 'cancelled';
+  
+  // Créneaux horaires multiples (nouveau)
+  timeSlots?: TimeSlot[]; // Tableau de créneaux horaires pour la même journée
   
   // Nouveaux champs financiers
   rateType: 'day' | 'night' | 'mixed' | 'custom';

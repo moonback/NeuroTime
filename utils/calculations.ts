@@ -12,13 +12,21 @@ export interface PriceDetails {
   rateType: 'day' | 'night' | 'mixed';
 }
 
+// Calculer les gains pour un seul créneau horaire
 export const calculateEarnings = (dateStr: string, startTime: string, endTime: string): PriceDetails => {
+  // Utiliser le fuseau horaire local du navigateur
+  // Format: YYYY-MM-DD pour dateStr, HH:mm pour les heures
   const start = new Date(`${dateStr}T${startTime}`);
   let end = new Date(`${dateStr}T${endTime}`);
   
   // Si l'heure de fin est avant ou égale à l'heure de début, c'est le lendemain
   if (end <= start) {
     end.setDate(end.getDate() + 1);
+  }
+  
+  // Vérifier que les dates sont valides
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new Error('Dates ou heures invalides');
   }
 
   let current = new Date(start);
@@ -51,6 +59,32 @@ export const calculateEarnings = (dateStr: string, startTime: string, endTime: s
   return {
     dayHours,
     nightHours,
+    total: Math.round(total * 100) / 100,
+    rateType
+  };
+};
+
+// Calculer les gains pour plusieurs créneaux horaires
+export const calculateEarningsMultiple = (dateStr: string, timeSlots: { startTime: string; endTime: string }[]): PriceDetails => {
+  let totalDayHours = 0;
+  let totalNightHours = 0;
+  
+  // Calculer pour chaque créneau
+  for (const slot of timeSlots) {
+    const slotResult = calculateEarnings(dateStr, slot.startTime, slot.endTime);
+    totalDayHours += slotResult.dayHours;
+    totalNightHours += slotResult.nightHours;
+  }
+  
+  const total = (totalDayHours * RATE_DAY) + (totalNightHours * RATE_NIGHT);
+  
+  let rateType: 'day' | 'night' | 'mixed' = 'day';
+  if (totalDayHours > 0 && totalNightHours > 0) rateType = 'mixed';
+  else if (totalNightHours > 0) rateType = 'night';
+  
+  return {
+    dayHours: Math.round(totalDayHours * 100) / 100,
+    nightHours: Math.round(totalNightHours * 100) / 100,
     total: Math.round(total * 100) / 100,
     rateType
   };

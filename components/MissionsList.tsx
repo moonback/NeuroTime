@@ -3,6 +3,7 @@ import { Mission } from '../types';
 import { format } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro } from 'lucide-react';
+import { formatTimeSlots } from '../utils/timeSlots';
 
 interface MissionsListProps {
   missions: Mission[];
@@ -120,7 +121,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                         <span className="font-bold text-gray-100 text-sm md:text-base">{format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
                         <span className="text-[10px] md:text-xs text-gray-400 flex items-center gap-1 mt-0.5">
                           <Clock size={10} />
-                          {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
+                          {formatTimeSlots(mission)}
                         </span>
                       </div>
                     </td>

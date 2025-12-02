@@ -8,22 +8,35 @@ const getSupabaseClient = () => {
 };
 
 // Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL)
-const missionToDb = (mission: Mission, userId?: string) => ({
-  id: mission.id,
-  user_id: userId || null,
-  title: mission.title,
-  client: mission.client,
-  location: mission.location,
-  description: mission.description,
-  start_time: mission.startTime,
-  end_time: mission.endTime,
-  status: mission.status,
-  rate_type: mission.rateType,
-  hourly_rate: mission.hourlyRate,
-  total_earnings: mission.totalEarnings,
-  details: mission.details,
-  logistics: mission.logistics,
-});
+const missionToDb = (mission: Mission, userId?: string) => {
+  const dbRow: any = {
+    id: mission.id,
+    user_id: userId || null,
+    title: mission.title,
+    client: mission.client,
+    location: mission.location,
+    description: mission.description,
+    start_time: mission.startTime,
+    end_time: mission.endTime,
+    status: mission.status,
+    rate_type: mission.rateType,
+    hourly_rate: mission.hourlyRate,
+    total_earnings: mission.totalEarnings,
+    details: mission.details,
+  };
+  
+  // Ajouter logistics seulement s'il existe (pour compatibilité avec anciennes bases)
+  if (mission.logistics !== undefined) {
+    dbRow.logistics = mission.logistics;
+  }
+  
+  // Ajouter time_slots seulement s'il existe (pour compatibilité avec anciennes bases)
+  if (mission.timeSlots !== undefined) {
+    dbRow.time_slots = mission.timeSlots.length > 1 ? mission.timeSlots : null;
+  }
+  
+  return dbRow;
+};
 
 const dbToMission = (dbRow: any): Mission => ({
   id: dbRow.id,
@@ -39,6 +52,7 @@ const dbToMission = (dbRow: any): Mission => ({
   totalEarnings: dbRow.total_earnings,
   details: dbRow.details,
   logistics: dbRow.logistics,
+  timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
 });
 
 // Obtenir l'ID de l'utilisateur connecté
@@ -91,9 +105,21 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
     // Utiliser upsert pour insérer ou mettre à jour les missions
     if (missions.length > 0) {
       const missionsDb = missions.map(m => missionToDb(m, userId));
+      
+      // Filtrer les colonnes undefined pour éviter les erreurs si les colonnes n'existent pas encore
+      const missionsDbFiltered = missionsDb.map(mission => {
+        const filtered: any = {};
+        Object.keys(mission).forEach(key => {
+          if (mission[key] !== undefined) {
+            filtered[key] = mission[key];
+          }
+        });
+        return filtered;
+      });
+      
       const { error: upsertError } = await supabase
         .from('missions')
-        .upsert(missionsDb, { onConflict: 'id' });
+        .upsert(missionsDbFiltered, { onConflict: 'id' });
 
       if (upsertError) {
         console.error('Erreur lors de la sauvegarde des missions:', upsertError);

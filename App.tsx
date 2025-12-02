@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, Sparkles, LogOut, User } from 'lucide-react';
-import Dashboard from './components/Dashboard';
-import CalendarView from './components/CalendarView';
-import MissionsList from './components/MissionsList';
-import MissionForm from './components/MissionForm';
-import ImageImportModal from './components/ImageImportModal';
+// Lazy loading pour optimiser les performances
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const CalendarView = lazy(() => import('./components/CalendarView'));
+const MissionsList = lazy(() => import('./components/MissionsList'));
+const MissionForm = lazy(() => import('./components/MissionForm'));
+const ImageImportModal = lazy(() => import('./components/ImageImportModal'));
 import AuthModal from './components/AuthModal';
+import { ToastContainer, useToast } from './components/Toast';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
@@ -25,6 +28,11 @@ const App: React.FC = () => {
   
   // État pour éviter d'écraser le localStorage au démarrage avant le chargement
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Toast notifications
+  const toast = useToast();
 
   // Vérifier l'authentification au démarrage
   useEffect(() => {
@@ -59,35 +67,64 @@ const App: React.FC = () => {
   useEffect(() => {
     if (user && !isLoaded) {
       const loadData = async () => {
-        const data = await loadMissions();
-        setMissions(data);
-        setIsLoaded(true);
+        setIsLoading(true);
+        try {
+          const data = await loadMissions();
+          setMissions(data);
+          setIsLoaded(true);
+          toast.success(`${data.length} mission${data.length > 1 ? 's' : ''} chargée${data.length > 1 ? 's' : ''}`);
+        } catch (error) {
+          console.error('Erreur lors du chargement:', error);
+          toast.error('Erreur lors du chargement des missions. Vérifiez votre connexion.');
+        } finally {
+          setIsLoading(false);
+        }
       };
       loadData();
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, toast]);
 
   // Save data whenever it changes, BUT only if initial load is done
   useEffect(() => {
-    if (isLoaded) {
-      saveMissions(missions).catch(error => {
-        console.error('Erreur lors de la sauvegarde:', error);
-      });
+    if (isLoaded && missions.length > 0) {
+      const saveData = async () => {
+        setIsSaving(true);
+        try {
+          await saveMissions(missions);
+        } catch (error: any) {
+          console.error('Erreur lors de la sauvegarde:', error);
+          const errorMessage = error?.message || 'Erreur inconnue';
+          if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+            toast.warning('Sauvegarde en cours... (mode hors ligne)');
+          } else {
+            toast.error('Erreur lors de la sauvegarde. Les données sont sauvegardées localement.');
+          }
+        } finally {
+          setIsSaving(false);
+        }
+      };
+      
+      // Debounce pour éviter trop de sauvegardes
+      const timeoutId = setTimeout(saveData, 500);
+      return () => clearTimeout(timeoutId);
     }
-  }, [missions, isLoaded]);
+  }, [missions, isLoaded, toast]);
 
-  const handleSaveMission = (mission: Mission) => {
+  const handleSaveMission = useCallback((mission: Mission) => {
     if (editingMission) {
       setMissions(prev => prev.map(m => m.id === mission.id ? mission : m));
+      toast.success('Mission modifiée avec succès');
     } else {
       setMissions(prev => [...prev, mission]);
+      toast.success('Mission créée avec succès');
     }
     setEditingMission(null);
-  };
+  }, [editingMission, toast]);
 
-  const handleBulkAddMissions = (newMissions: Mission[]) => {
+  const handleBulkAddMissions = useCallback((newMissions: Mission[]) => {
     setMissions(prev => [...prev, ...newMissions]);
-  };
+    toast.success(`${newMissions.length} mission${newMissions.length > 1 ? 's' : ''} importée${newMissions.length > 1 ? 's' : ''}`);
+  }, [toast]);
 
   const handleEditMission = (mission: Mission) => {
     setEditingMission(mission);
@@ -103,18 +140,19 @@ const App: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteMission = (id: string) => {
+  const handleDeleteMission = useCallback((id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette mission ?")) {
       setMissions(prev => prev.filter(m => m.id !== id));
+      toast.success('Mission supprimée');
     }
-  };
+  }, [toast]);
 
-  const handleImportData = (importedMissions: Mission[]) => {
+  const handleImportData = useCallback((importedMissions: Mission[]) => {
     if (window.confirm(`Attention, l'importation va remplacer vos ${missions.length} missions actuelles par ${importedMissions.length} missions importées. Continuer ?`)) {
       setMissions(importedMissions);
-      alert("Données restaurées avec succès !");
+      toast.success('Données restaurées avec succès !');
     }
-  };
+  }, [missions, toast]);
 
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
@@ -127,13 +165,18 @@ const App: React.FC = () => {
     loadData();
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-      await signOut();
-      setMissions([]);
-      setIsLoaded(false);
+      try {
+        await signOut();
+        setMissions([]);
+        setIsLoaded(false);
+        toast.info('Déconnexion réussie');
+      } catch (error) {
+        toast.error('Erreur lors de la déconnexion');
+      }
     }
-  };
+  }, [toast]);
 
   const openNewMissionModal = (dateStr?: string) => {
     setEditingMission(null);
@@ -143,14 +186,11 @@ const App: React.FC = () => {
 
   // Afficher le modal d'authentification si non connecté
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-dark-300 text-gray-100 font-sans flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Chargement...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Chargement..." />;
+  }
+  
+  if (isLoading && !isLoaded) {
+    return <LoadingSpinner fullScreen text="Chargement des missions..." />;
   }
 
   if (!user) {
@@ -234,31 +274,33 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300">
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-          {view === 'dashboard' && (
-            <Dashboard 
-              missions={missions} 
-              onEdit={handleEditMission} 
-              onValidate={handleValidateMission}
-              onImport={handleImportData}
-            />
-          )}
-          {view === 'missions' && (
-            <MissionsList 
-              missions={missions} 
-              onEdit={handleEditMission} 
-              onDelete={handleDeleteMission} 
-              onNew={() => openNewMissionModal()}
-            />
-          )}
-          {view === 'calendar' && (
-            <CalendarView 
-              missions={missions} 
-              onEdit={handleEditMission} 
-              onDelete={handleDeleteMission} 
-              onValidate={handleValidateMission}
-              onNewMission={openNewMissionModal}
-            />
-          )}
+          <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
+            {view === 'dashboard' && (
+              <Dashboard 
+                missions={missions} 
+                onEdit={handleEditMission} 
+                onValidate={handleValidateMission}
+                onImport={handleImportData}
+              />
+            )}
+            {view === 'missions' && (
+              <MissionsList 
+                missions={missions} 
+                onEdit={handleEditMission} 
+                onDelete={handleDeleteMission} 
+                onNew={() => openNewMissionModal()}
+              />
+            )}
+            {view === 'calendar' && (
+              <CalendarView 
+                missions={missions} 
+                onEdit={handleEditMission} 
+                onDelete={handleDeleteMission} 
+                onValidate={handleValidateMission}
+                onNewMission={openNewMissionModal}
+              />
+            )}
+          </Suspense>
         </div>
       </main>
 
@@ -305,20 +347,22 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <MissionForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={handleSaveMission}
-        initialData={editingMission}
-        defaultDate={selectedDateForNew}
-        missions={missions}
-      />
+      <Suspense fallback={null}>
+        <MissionForm 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={handleSaveMission}
+          initialData={editingMission}
+          defaultDate={selectedDateForNew}
+          missions={missions}
+        />
 
-      <ImageImportModal 
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onImport={handleBulkAddMissions}
-      />
+        <ImageImportModal 
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImport={handleBulkAddMissions}
+        />
+      </Suspense>
 
       <AuthModal 
         isOpen={isAuthModalOpen && !user} 
@@ -326,6 +370,17 @@ const App: React.FC = () => {
         onSuccess={handleAuthSuccess}
         initialMode="login"
       />
+      
+      {/* Toast notifications */}
+      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
+      
+      {/* Saving indicator */}
+      {isSaving && (
+        <div className="fixed bottom-4 right-4 z-40 bg-dark-100 border border-dark-200 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-xs text-gray-400">
+          <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <span>Sauvegarde...</span>
+        </div>
+      )}
     </div>
   );
 };

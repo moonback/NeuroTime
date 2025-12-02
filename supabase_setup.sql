@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS missions (
   total_earnings NUMERIC(10, 2) DEFAULT 0,
   details JSONB,
   logistics JSONB,
+  time_slots JSONB, -- Tableau de créneaux horaires [{startTime: "HH:mm", endTime: "HH:mm"}]
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -75,4 +76,8 @@ CREATE TRIGGER update_missions_updated_at
 -- Note: Les noms de colonnes utilisent snake_case (start_time, end_time)
 -- mais le code TypeScript utilise camelCase (startTime, endTime)
 -- Le service Supabase gérera la conversion automatiquement
+--
+-- Migration pour ajouter time_slots (si la table existe déjà)
+-- Exécutez cette commande si vous avez déjà une table missions :
+-- ALTER TABLE missions ADD COLUMN IF NOT EXISTS time_slots JSONB;
 

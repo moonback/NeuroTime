@@ -17,6 +17,8 @@ Ce guide vous explique comment configurer Supabase pour sauvegarder vos missions
 3. Collez-le dans l'éditeur SQL et exécutez-le
 4. Vérifiez que la table `missions` a été créée dans **Table Editor**
 
+**Note pour les bases existantes :** Si vous avez déjà une table `missions`, exécutez également le script `supabase_migration_time_slots.sql` pour ajouter le support des créneaux horaires multiples.
+
 ### 3. Activer RLS (Row Level Security)
 
 Le script SQL active RLS et crée des politiques de sécurité qui permettent à chaque utilisateur de voir uniquement ses propres missions. Cela garantit que :
