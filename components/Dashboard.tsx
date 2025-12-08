@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
-import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
@@ -19,6 +19,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onImport }) => {
   const [summary, setSummary] = useState<string>('Analyse de vos activités en cours...');
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isActivityExpanded, setIsActivityExpanded] = useState(false);
   const [isUpcomingExpanded, setIsUpcomingExpanded] = useState(false);
@@ -180,13 +181,28 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     );
   }, [allCompletedMissions]);
 
-  useEffect(() => {
-    if (missions.length > 0) {
-      generateSummary(missions).then(setSummary);
-    } else {
+  const refreshSummary = useCallback(async () => {
+    if (missions.length === 0) {
       setSummary("Aucune mission enregistrée. Commencez par noter vos heures !");
+      return;
     }
-  }, [missions.length]);
+
+    setIsSummaryLoading(true);
+    setSummary('Analyse de vos activités en cours...');
+    try {
+      const generatedSummary = await generateSummary(missions);
+      setSummary(generatedSummary);
+    } catch (error) {
+      console.warn('Erreur lors du rafraîchissement du résumé IA', error);
+      setSummary("Impossible de rafraîchir le résumé pour le moment.");
+    } finally {
+      setIsSummaryLoading(false);
+    }
+  }, [missions]);
+
+  useEffect(() => {
+    refreshSummary();
+  }, [refreshSummary]);
 
   const downloadCSV = () => {
     const headers = ['Titre', 'Client', 'Date', 'Début', 'Fin', 'Lieu', 'Tarif Type', 'Taux/h', 'Total (€)', 'Statut'];
@@ -338,11 +354,23 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       <div className="glass-card bg-gradient-to-br from-primary-600/25 via-primary-500/30 to-primary-400/20 rounded-2xl p-6 md:p-8 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine mb-6 border-primary-500/30">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="bg-primary-500/35 p-2 rounded-xl backdrop-blur-sm border border-primary-400/50 animate-pulse-glow shadow-lg shadow-primary-500/30">
-               <SparklesIcon className="w-5 h-5 text-primary-200" />
-            </span>
-            <h3 className="font-bold text-lg md:text-xl tracking-wide text-primary-200">Assistant Intelligent</h3>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <span className="bg-primary-500/35 p-2 rounded-xl backdrop-blur-sm border border-primary-400/50 animate-pulse-glow shadow-lg shadow-primary-500/30">
+                 <SparklesIcon className="w-5 h-5 text-primary-200" />
+              </span>
+              <h3 className="font-bold text-lg md:text-xl tracking-wide text-primary-200">Assistant Intelligent</h3>
+            </div>
+            <button
+              type="button"
+              onClick={refreshSummary}
+              disabled={isSummaryLoading || missions.length === 0}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg glass-button text-xs md:text-sm font-semibold text-primary-100 border border-primary-400/40 hover:border-primary-300/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Rafraîchir l'analyse IA"
+            >
+              <RefreshCcw className={`w-4 h-4 ${isSummaryLoading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isSummaryLoading ? 'Analyse...' : 'Rafraîchir'}</span>
+            </button>
           </div>
           <p className="text-gray-100 leading-relaxed text-sm md:text-base font-medium max-w-2xl">{summary}</p>
         </div>
