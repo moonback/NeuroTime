@@ -658,17 +658,17 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in-up mb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-100 tracking-tight mb-2">Tableau de bord</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Tableau de bord</h1>
           <p className="text-gray-300 text-sm md:text-base font-medium">Vue d'ensemble de votre activité</p>
-          <div className="mt-3 inline-flex items-center gap-2.5 rounded-full bg-primary-500/15 border border-primary-500/40 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-lg shadow-primary-500/10">
-            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-md shadow-green-400/50" />
+          <div className="mt-3 inline-flex items-center gap-2.5 rounded-full bg-primary-500/12 border border-primary-500/30 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-md shadow-primary-500/8">
+            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/40" />
             Mise à jour temps réel sur vos missions planifiées et réalisées
           </div>
         </div>
         <div className="flex gap-2.5 flex-wrap">
           <button 
             onClick={downloadCSV}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
             title="Exporter pour Excel"
           >
             <Download size={16} strokeWidth={2.5} />
@@ -677,7 +677,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </button>
           <button 
             onClick={downloadCompletedReportMD}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
             title="Exporter les missions terminées en Markdown"
           >
             <FileText size={16} strokeWidth={2.5} />
@@ -686,7 +686,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </button>
           <button 
             onClick={downloadCompletedReportPDF}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
             title="Exporter les missions terminées en PDF (pour paiement)"
           >
             <File size={16} strokeWidth={2.5} />
@@ -698,44 +698,44 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
       {/* Vue d'ensemble rapide */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 animate-slide-in-up mb-6">
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-primary-500/25 bg-gradient-to-br from-primary-600/25 via-primary-500/15 to-primary-400/10 hover:from-primary-600/30 hover:via-primary-500/20 hover:to-primary-400/15 transition-all">
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-primary-500/20 bg-gradient-to-br from-primary-600/20 via-primary-500/12 to-primary-400/8 hover:from-primary-600/25 hover:via-primary-500/18 hover:to-primary-400/12 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary-500/25 border border-primary-500/50 shadow-lg shadow-primary-500/20">
+              <div className="p-2.5 rounded-xl bg-primary-500/20 border border-primary-500/40 shadow-md shadow-primary-500/15">
                 <Clock className="w-5 h-5 text-primary-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-bold text-primary-100 tracking-wide">Aujourd'hui</p>
+              <p className="text-sm font-semibold text-primary-100 tracking-wide">Aujourd'hui</p>
             </div>
-            <span className="text-xs font-semibold text-gray-200 bg-primary-500/20 border border-primary-500/40 px-2.5 py-1 rounded-full">{todayMissions.length} mission(s)</span>
+            <span className="text-xs font-medium text-gray-200 bg-primary-500/15 border border-primary-500/30 px-2.5 py-1 rounded-full">{todayMissions.length} mission(s)</span>
           </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{todayHours.toFixed(1)}h</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{todayHours.toFixed(1)}h</p>
           <p className="text-xs text-gray-300 font-medium">Temps prévu ou réalisé sur la journée</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-emerald-500/25 bg-gradient-to-br from-emerald-600/20 via-emerald-500/15 to-emerald-400/10 hover:from-emerald-600/25 hover:via-emerald-500/20 hover:to-emerald-400/15 transition-all">
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-emerald-500/20 bg-gradient-to-br from-emerald-600/18 via-emerald-500/12 to-emerald-400/8 hover:from-emerald-600/22 hover:via-emerald-500/18 hover:to-emerald-400/12 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/25 border border-emerald-500/50 shadow-lg shadow-emerald-500/20">
+              <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 shadow-md shadow-emerald-500/15">
                 <TrendingUp className="w-5 h-5 text-emerald-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-bold text-emerald-100 tracking-wide">Cette semaine</p>
+              <p className="text-sm font-semibold text-emerald-100 tracking-wide">Cette semaine</p>
             </div>
-            <span className="text-xs font-semibold text-gray-200 bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-1 rounded-full">{thisWeekMissions.length} mission(s)</span>
+            <span className="text-xs font-medium text-gray-200 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-full">{thisWeekMissions.length} mission(s)</span>
           </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{thisWeekHours.toFixed(1)}h</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{thisWeekHours.toFixed(1)}h</p>
           <p className="text-xs text-gray-300 font-medium">Charge totale entre lundi et dimanche</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-orange-500/25 bg-gradient-to-br from-orange-600/20 via-orange-500/15 to-orange-400/10 hover:from-orange-600/25 hover:via-orange-500/20 hover:to-orange-400/15 transition-all">
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-orange-500/20 bg-gradient-to-br from-orange-600/18 via-orange-500/12 to-orange-400/8 hover:from-orange-600/22 hover:via-orange-500/18 hover:to-orange-400/12 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-orange-500/25 border border-orange-500/50 shadow-lg shadow-orange-500/20">
+              <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 shadow-md shadow-orange-500/15">
                 <Calendar className="w-5 h-5 text-orange-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-bold text-orange-100 tracking-wide">Prochaine mission</p>
+              <p className="text-sm font-semibold text-orange-100 tracking-wide">Prochaine mission</p>
             </div>
             {nextMission ? (
-              <span className="text-xs font-semibold text-orange-100 bg-orange-500/25 border border-orange-500/50 px-2.5 py-1 rounded-full shadow-md">
+              <span className="text-xs font-medium text-orange-100 bg-orange-500/20 border border-orange-500/40 px-2.5 py-1 rounded-full shadow-sm">
                 {format(new Date(nextMission.startTime), 'dd MMM', { locale: fr })}
               </span>
             ) : (
@@ -744,7 +744,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </div>
           {nextMission ? (
             <div className="mt-3 space-y-2">
-              <p className="text-lg md:text-xl font-bold text-gray-100 line-clamp-1 tracking-tight">{nextMission.title}</p>
+              <p className="text-lg md:text-xl font-bold text-gray-50 line-clamp-1 tracking-tight">{nextMission.title}</p>
               <p className="text-sm text-gray-300 flex items-center gap-2 font-medium">
                 <Clock size={14} className="text-gray-400" strokeWidth={2} />
                 {format(new Date(nextMission.startTime), 'HH:mm')} • {nextMission.location}

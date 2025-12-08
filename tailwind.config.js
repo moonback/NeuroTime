@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
         primary: {
@@ -23,13 +23,34 @@ export default {
           900: '#005c99',
         },
         dark: {
-          50: '#1a1f2e',
-          100: '#151a27',
-          200: '#0f141f',
-          300: '#0a0e1a',
-          400: '#050812',
-          500: '#000000',
+          50: '#1e2332',
+          100: '#1a1f2e',
+          200: '#151a27',
+          300: '#0f141f',
+          400: '#0a0e1a',
+          500: '#050812',
+          600: '#000000',
         }
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'glow': '0 0 20px rgba(0, 212, 255, 0.3)',
+        'glow-lg': '0 0 40px rgba(0, 212, 255, 0.4)',
+      },
+      animation: {
+        'fade-in-slow': 'fade-in 0.6s ease-out',
+        'slide-up-slow': 'slide-up 0.6s ease-out',
       }
     },
   },

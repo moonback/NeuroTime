@@ -70,14 +70,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
       <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-md overflow-hidden flex flex-col animate-scale-in">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/20 glass-light relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/15 glass-light relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
           <div className="relative z-10">
-            <h2 className="text-lg md:text-xl font-bold text-gray-100">
+            <h2 className="text-lg md:text-xl font-bold text-gray-50">
               {mode === 'login' ? 'Connexion' : 'Inscription'}
             </h2>
             <p className="text-[10px] md:text-xs mt-0.5 text-gray-400">
@@ -88,7 +88,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </div>
           <button 
             onClick={onClose} 
-            className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-all text-gray-400 hover:scale-110 relative z-10"
+            className="p-1.5 md:p-2 hover:bg-dark-200/50 rounded-full transition-all text-gray-400 hover:text-gray-200 hover:scale-110 relative z-10"
           >
             <X size={18} />
           </button>
@@ -97,7 +97,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 flex items-center gap-2 text-red-300 text-sm">
+            <div className="bg-red-500/15 border border-red-500/25 rounded-lg p-3 flex items-center gap-2 text-red-300 text-sm backdrop-blur-sm">
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
@@ -105,8 +105,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Email Field */}
           <div className="space-y-1.5">
-            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
-              <Mail size={12} className="text-gray-500" /> Email
+            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
+              <Mail size={12} className="text-gray-400" /> Email
             </label>
             <input
               type="email"
@@ -114,14 +114,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
             />
           </div>
 
           {/* Password Field */}
           <div className="space-y-1.5">
-            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
-              <Lock size={12} className="text-gray-500" /> Mot de passe
+            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
+              <Lock size={12} className="text-gray-400" /> Mot de passe
             </label>
             <input
               type="password"
@@ -129,15 +129,15 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'login' ? '••••••••' : 'Au moins 6 caractères'}
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
             />
           </div>
 
           {/* Confirm Password (Signup only) */}
           {mode === 'signup' && (
             <div className="space-y-1.5">
-              <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
-                <Lock size={12} className="text-gray-500" /> Confirmer le mot de passe
+              <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
+                <Lock size={12} className="text-gray-400" /> Confirmer le mot de passe
               </label>
               <input
                 type="password"
@@ -145,7 +145,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
               />
             </div>
           )}
@@ -154,13 +154,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
+            className={`w-full bg-gradient-to-r text-dark-300 font-medium py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
               loading
                 ? 'from-gray-500 to-gray-600 cursor-not-allowed'
                 : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 glow-blue'
             }`}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
             {loading ? (
               <span className="relative z-10 flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-dark-300 border-t-transparent rounded-full animate-spin" />
@@ -179,7 +179,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={switchMode}
-              className="text-xs md:text-sm text-gray-400 hover:text-primary-400 transition-colors"
+              className="text-xs md:text-sm text-gray-400 hover:text-primary-300 transition-colors font-medium"
             >
               {mode === 'login' 
                 ? 'Pas encore de compte ? S\'inscrire' 

@@ -230,73 +230,73 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/25 fixed inset-y-0 z-20 animate-slide-in-left shadow-2xl">
-        <div className="p-6 border-b border-primary-700/15 flex items-center gap-3 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/8 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <span className="inline-flex h-10 w-10 rounded-xl bg-gradient-to-br from-primary-400/90 to-primary-700/90 shadow-lg shadow-primary-500/30 items-center justify-center relative z-10 animate-float overflow-hidden ring-2 ring-primary-500/20">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/20 fixed inset-y-0 z-20 animate-slide-in-left shadow-2xl">
+        <div className="p-6 border-b border-primary-500/10 flex items-center gap-3 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <span className="inline-flex h-11 w-11 rounded-xl bg-gradient-to-br from-primary-400/85 to-primary-600/85 shadow-lg shadow-primary-500/25 items-center justify-center relative z-10 animate-float overflow-hidden ring-1 ring-primary-500/15">
             <img
               src="/logo2.png"
               alt="Logo NeuroTime"
-              className="h-9 w-9 object-contain"
+              className="h-10 w-10 object-contain"
             />
           </span>
           <div className="relative z-10">
             <h1 className="text-xl font-bold tracking-tight leading-tight">
-              <span className="text-[#008CFF] drop-shadow-[0_1px_8px_rgba(0,140,255,0.3)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
-              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_8px_rgba(118,204,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Time</span>
+              <span className="text-[#008CFF] drop-shadow-[0_1px_6px_rgba(0,140,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
+              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_6px_rgba(118,204,255,0.2)]" style={{letterSpacing: "-0.5px"}}>Time</span>
             </h1>
-            <span className="text-[0.7rem] text-primary-400/90 mt-0.5 block font-semibold tracking-wide uppercase">Gestion</span>
+            <span className="text-[0.7rem] text-primary-300/80 mt-0.5 block font-medium tracking-wider uppercase">Gestion</span>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
           <NavButton 
             active={view === 'dashboard'} 
             onClick={() => setView('dashboard')} 
-            icon={<LayoutDashboard size={20} />} 
+            icon={<LayoutDashboard size={19} />} 
             label="Tableau de bord" 
           />
           <NavButton 
             active={view === 'missions'} 
             onClick={() => setView('missions')} 
-            icon={<ListChecks size={20} />} 
+            icon={<ListChecks size={19} />} 
             label="Missions" 
           />
           <NavButton 
             active={view === 'calendar'} 
             onClick={() => setView('calendar')} 
-            icon={<CalendarIcon size={20} />} 
+            icon={<CalendarIcon size={19} />} 
             label="Agenda" 
           />
           <NavButton 
             active={view === 'payments'} 
             onClick={() => setView('payments')} 
-            icon={<Euro size={20} />} 
+            icon={<Euro size={19} />} 
             label="Paiements" 
           />
         </nav>
 
-        <div className="p-4 space-y-3 border-t border-primary-500/15">
+        <div className="p-4 space-y-3 border-t border-primary-500/10">
            <button 
             onClick={() => openNewMissionModal()}
-            className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group shadow-lg shadow-primary-500/30"
+            className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group shadow-lg shadow-primary-500/25"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
             <Plus size={18} className="relative z-10" strokeWidth={2.5} />
             <span className="relative z-10 tracking-wide">Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
-          <div className="pt-2 border-t border-primary-500/15 mt-2">
-            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-primary-500/10">
-              <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
+          <div className="pt-2 border-t border-primary-500/10 mt-2">
+            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-primary-500/8">
+              <div className="p-1.5 rounded-lg bg-primary-500/15 border border-primary-500/20">
                 <User size={12} className="text-primary-300" />
               </div>
-              <span className="truncate text-gray-300 font-medium">{user.email || 'Utilisateur'}</span>
+              <span className="truncate text-gray-200 font-medium">{user.email || 'Utilisateur'}</span>
             </div>
             <button 
               onClick={handleSignOut}
-              className="w-full glass-button hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/40 transition-all text-sm"
+              className="w-full glass-button hover:bg-red-500/15 text-gray-300 hover:text-red-300 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
             >
               <LogOut size={14} />
               <span>Déconnexion</span>
@@ -346,8 +346,8 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - Version améliorée */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/25 z-30 pb-safe animate-slide-up shadow-2xl">
+      {/* Mobile Bottom Navigation - Version premium */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/20 z-30 pb-safe animate-slide-up shadow-2xl">
         <div className="flex justify-around items-center px-3 py-2.5">
           <MobileNavButton 
             active={view === 'dashboard'} 
@@ -366,10 +366,10 @@ const App: React.FC = () => {
           <div className="relative -top-8">
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-500 text-dark-300 p-4 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-300/80 hover:scale-110 relative overflow-hidden group shadow-2xl shadow-primary-500/40"
+              className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-500 text-dark-300 p-4 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-300/80 hover:scale-110 relative overflow-hidden group shadow-2xl shadow-primary-500/35"
               aria-label="Nouvelle mission"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
               <Plus size={24} strokeWidth={2.5} className="relative z-10" />
             </button>
           </div>
@@ -422,25 +422,25 @@ const App: React.FC = () => {
   );
 };
 
-// Sub-components for Nav - Version améliorée
+// Sub-components for Nav - Version premium
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm relative overflow-hidden group font-medium ${
       active 
-        ? 'glass-button text-primary-200 font-bold shadow-lg shadow-primary-500/20 border-primary-500/40' 
-        : 'text-gray-400 hover:glass-button hover:text-primary-200 hover:shadow-md'
+        ? 'glass-button text-primary-200 font-semibold shadow-md shadow-primary-500/15 border-primary-500/30' 
+        : 'text-gray-400 hover:glass-button hover:text-primary-200 hover:shadow-sm'
     }`}
   >
-    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/15 via-primary-400/25 to-primary-500/15 translate-x-[-100%] transition-transform duration-700 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
+    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/12 via-primary-400/20 to-primary-500/12 translate-x-[-100%] transition-transform duration-700 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
     <span className="relative z-10 flex items-center gap-3">
-      <span className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-105'}`}>
+      <span className={`transition-transform duration-300 ${active ? 'scale-105' : 'group-hover:scale-105'}`}>
         {icon}
       </span>
       <span className="tracking-wide">{label}</span>
     </span>
     {active && (
-      <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary-400 shadow-lg shadow-primary-400/50"></span>
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary-400 shadow-md shadow-primary-400/40"></span>
     )}
   </button>
 );
@@ -450,16 +450,16 @@ const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, on
     onClick={onClick}
     className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all min-w-[60px] relative ${
       active 
-        ? 'text-primary-300 bg-primary-500/25 shadow-lg shadow-primary-500/20 border border-primary-500/30' 
-        : 'text-gray-500 active:text-primary-300 active:bg-primary-500/10'
+        ? 'text-primary-300 bg-primary-500/20 shadow-md shadow-primary-500/15 border border-primary-500/25' 
+        : 'text-gray-500 active:text-primary-300 active:bg-primary-500/8'
     }`}
   >
-    <span className={`transition-transform duration-300 ${active ? 'scale-110' : ''}`}>
+    <span className={`transition-transform duration-300 ${active ? 'scale-105' : ''}`}>
       {icon}
     </span>
-    {label && <span className={`text-[10px] mt-1 font-bold leading-tight tracking-wide ${active ? 'text-primary-200' : ''}`}>{label}</span>}
+    {label && <span className={`text-[10px] mt-1 font-semibold leading-tight tracking-wide ${active ? 'text-primary-200' : ''}`}>{label}</span>}
     {active && (
-      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400 shadow-md shadow-primary-400/50"></span>
+      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400 shadow-sm shadow-primary-400/40"></span>
     )}
   </button>
 );
