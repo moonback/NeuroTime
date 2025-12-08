@@ -91,6 +91,7 @@ const PublicMissionsView: React.FC<PublicMissionsViewProps> = ({ onLoginClick })
     const d = (m.details?.dayHours || 0) + (m.details?.nightHours || 0);
     return acc + d;
   }, 0);
+  const averageHourlyRate = totalHours > 0 ? totalRevenue / totalHours : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
@@ -216,6 +217,19 @@ const PublicMissionsView: React.FC<PublicMissionsViewProps> = ({ onLoginClick })
                 </div>
               </div>
             </div>
+            {totalHours > 0 && (
+              <div className="glass-card rounded-2xl p-4 md:p-6 border-primary-500/20">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                    <Euro size={20} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Tarif horaire moyen</p>
+                    <p className="text-2xl md:text-3xl font-black text-gray-100">{averageHourlyRate.toFixed(2)}€/h</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -303,6 +317,31 @@ const PublicMissionsView: React.FC<PublicMissionsViewProps> = ({ onLoginClick })
                           )}
                         </div>
                       )}
+
+                      {/* Tarif horaire */}
+                      {(() => {
+                        const missionHours = (mission.details?.dayHours || 0) + (mission.details?.nightHours || 0);
+                        const hourlyRate = missionHours > 0 && mission.totalEarnings 
+                          ? mission.totalEarnings / missionHours 
+                          : mission.hourlyRate || 0;
+                        
+                        if (hourlyRate > 0) {
+                          return (
+                            <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                              <Euro size={12} className="text-gray-500" />
+                              <span className="font-medium">
+                                Tarif horaire: <span className="text-blue-300 font-bold">{hourlyRate.toFixed(2)}€/h</span>
+                                {mission.rateType && mission.rateType !== 'custom' && (
+                                  <span className="ml-1 text-[10px] text-gray-500">
+                                    ({mission.rateType === 'day' ? 'jour' : mission.rateType === 'night' ? 'nuit' : 'mixte'})
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
 
                     {/* Right side - Revenue */}
