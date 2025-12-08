@@ -6,6 +6,7 @@ const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
+const ImageUploadMission = lazy(() => import('./components/ImageUploadMission'));
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
   const [missions, setMissions] = useState<Mission[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
   
@@ -110,6 +112,10 @@ const App: React.FC = () => {
     }
     setEditingMission(null);
   }, [editingMission]);
+
+  const handleSaveMissions = useCallback((newMissions: Mission[]) => {
+    setMissions(prev => [...prev, ...newMissions]);
+  }, []);
 
   const handleEditMission = (mission: Mission) => {
     if (mission.isPaid) {
@@ -325,6 +331,7 @@ const App: React.FC = () => {
                 onNew={() => openNewMissionModal()}
                 onTogglePaid={handleTogglePaid}
                 onComplete={handleCompleteMission}
+                onUploadImage={() => setIsImageUploadOpen(true)}
               />
             )}
             {view === 'calendar' && (
@@ -398,6 +405,11 @@ const App: React.FC = () => {
           initialData={editingMission}
           defaultDate={selectedDateForNew}
           missions={missions}
+        />
+        <ImageUploadMission
+          isOpen={isImageUploadOpen}
+          onClose={() => setIsImageUploadOpen(false)}
+          onSave={handleSaveMissions}
         />
       </Suspense>
 

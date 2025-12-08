@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Mission } from '../types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle } from 'lucide-react';
+import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
 
 interface MissionsListProps {
@@ -12,9 +12,10 @@ interface MissionsListProps {
   onNew: () => void;
   onTogglePaid: (mission: Mission) => void;
   onComplete: (mission: Mission) => void;
+  onUploadImage: () => void;
 }
 
-const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete }) => {
+const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete, onUploadImage }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('planned');
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -48,13 +49,22 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Mes Missions</h1>
           <p className="text-gray-300 text-sm md:text-base font-medium">Historique complet de vos interventions</p>
         </div>
-        <button 
-          onClick={onNew}
-          className="w-full md:w-auto bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 glow-blue transition-all text-sm md:text-base shadow-md shadow-primary-500/25"
-        >
-          <Plus size={18} strokeWidth={2.5} />
-          <span className="tracking-wide">Nouvelle Mission</span>
-        </button>
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          <button 
+            onClick={onUploadImage}
+            className="w-full md:w-auto bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 hover:from-emerald-400 hover:via-emerald-500 hover:to-emerald-400 text-dark-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base shadow-md shadow-emerald-500/25"
+          >
+            <ImageIcon size={18} strokeWidth={2.5} />
+            <span className="tracking-wide">Importer depuis photo</span>
+          </button>
+          <button 
+            onClick={onNew}
+            className="w-full md:w-auto bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 glow-blue transition-all text-sm md:text-base shadow-md shadow-primary-500/25"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            <span className="tracking-wide">Nouvelle Mission</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters Bar */}
