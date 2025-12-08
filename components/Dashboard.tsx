@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
-import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
+import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
@@ -9,6 +9,7 @@ import DashboardCharts from './DashboardCharts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
 import DashboardActivity from './DashboardActivity';
+import { jsPDF } from 'jspdf';
 
 interface DashboardProps {
   missions: Mission[];
@@ -204,16 +205,36 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     refreshSummary();
   }, [refreshSummary]);
 
+  const escapeCsv = (value: string | number | null | undefined) => {
+    if (value === undefined || value === null) return '""';
+    if (typeof value === 'number') return value.toString();
+    return `"${value.replace(/"/g, '""')}"`;
+  };
+
+  const rateTypeLabel = (rateType: Mission['rateType']) => {
+    switch (rateType) {
+      case 'day':
+        return 'Jour';
+      case 'night':
+        return 'Nuit';
+      case 'mixed':
+        return 'Mixte';
+      case 'custom':
+      default:
+        return 'Personnalisé';
+    }
+  };
+
   const downloadCSV = () => {
     const headers = ['Titre', 'Client', 'Date', 'Début', 'Fin', 'Lieu', 'Tarif Type', 'Taux/h', 'Total (€)', 'Statut'];
     const rows = missions.map(m => [
-      `"${m.title}"`,
-      `"${m.client}"`,
+      escapeCsv(m.title),
+      escapeCsv(m.client),
       format(new Date(m.startTime), 'dd/MM/yyyy'),
       format(new Date(m.startTime), 'HH:mm'),
       format(new Date(m.endTime), 'HH:mm'),
-      `"${m.location}"`,
-      m.rateType === 'night' ? 'Nuit' : 'Jour',
+      escapeCsv(m.location),
+      rateTypeLabel(m.rateType),
       m.hourlyRate,
       m.totalEarnings?.toFixed(2) || 0,
       m.status
@@ -229,6 +250,376 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadCompletedReportMD = () => {
+    if (allCompletedMissions.length === 0) {
+      alert("Aucune mission terminée à exporter.");
+      return;
+    }
+
+    const totalEarnings = allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+    const totalHours = allCompletedMissions.reduce((acc, m) => {
+      const start = new Date(m.startTime).getTime();
+      const end = new Date(m.endTime).getTime();
+      return acc + (end - start) / (1000 * 60 * 60);
+    }, 0);
+    const averageRate = totalHours > 0 ? (totalEarnings / totalHours) : 0;
+
+    // Calculer les statistiques par client
+    const clientStats = new Map<string, { count: number; earnings: number }>();
+    allCompletedMissions.forEach(m => {
+      const existing = clientStats.get(m.client) || { count: 0, earnings: 0 };
+      clientStats.set(m.client, {
+        count: existing.count + 1,
+        earnings: existing.earnings + (m.totalEarnings || 0)
+      });
+    });
+
+    let mdContent = `# 📋 Rapport des Missions Terminées\n\n`;
+    mdContent += `\`\`\`\n`;
+    mdContent += `═══════════════════════════════════════════════════════════════\n`;
+    mdContent += `  NEUROTIME - RAPPORT D'ACTIVITÉ\n`;
+    mdContent += `═══════════════════════════════════════════════════════════════\n`;
+    mdContent += `\`\`\`\n\n`;
+
+    mdContent += `**📅 Date d'export :** ${format(new Date(), 'dd MMMM yyyy à HH:mm', { locale: fr })}\n\n`;
+
+    mdContent += `## 📊 Vue d'ensemble\n\n`;
+    mdContent += `| Métrique | Valeur |\n`;
+    mdContent += `|:---------|:-------:|\n`;
+    mdContent += `| **Nombre de missions** | **${allCompletedMissions.length}** |\n`;
+    mdContent += `| **Total des gains** | **${totalEarnings.toFixed(2)} €** |\n`;
+    mdContent += `| **Total des heures** | **${totalHours.toFixed(2)}h** |\n`;
+    mdContent += `| **Taux horaire moyen** | **${averageRate.toFixed(2)} €/h** |\n`;
+    mdContent += `| **Nombre de clients** | **${clientStats.size}** |\n\n`;
+
+    mdContent += `---\n\n`;
+
+    mdContent += `## 📈 Statistiques par Client\n\n`;
+    const sortedClients = Array.from(clientStats.entries())
+      .sort((a, b) => b[1].earnings - a[1].earnings);
+    
+    sortedClients.forEach(([client, stats]) => {
+      mdContent += `- **${client}** : ${stats.count} mission${stats.count > 1 ? 's' : ''} - ${stats.earnings.toFixed(2)} €\n`;
+    });
+    mdContent += `\n---\n\n`;
+
+    mdContent += `## 📝 Détail des Missions\n\n`;
+    mdContent += `| Date | Créneaux | Mission | Client | Lieu | Type | Taux/h | Total | H. jour | H. nuit |\n`;
+    mdContent += `|:-----|:---------|:--------|:-------|:-----|:-----|:------:|:-----:|:------:|:-------:|\n`;
+
+    allCompletedMissions
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      .forEach((m, index) => {
+        const date = format(new Date(m.startTime), 'dd/MM/yyyy', { locale: fr });
+        const slots = formatTimeSlots(m);
+        const mission = m.title.replace(/\|/g, '\\|').substring(0, 30);
+        const client = m.client.replace(/\|/g, '\\|').substring(0, 20);
+        const location = m.location.replace(/\|/g, '\\|').substring(0, 20);
+        const rateType = rateTypeLabel(m.rateType);
+        const hourlyRate = m.hourlyRate || 0;
+        const total = m.totalEarnings?.toFixed(2) || '0.00';
+        const dayHours = m.details?.dayHours?.toFixed(1) || '-';
+        const nightHours = m.details?.nightHours?.toFixed(1) || '-';
+
+        mdContent += `| ${date} | ${slots} | ${mission}${mission.length >= 30 ? '...' : ''} | ${client}${client.length >= 20 ? '...' : ''} | ${location}${location.length >= 20 ? '...' : ''} | ${rateType} | ${hourlyRate} | **${total}** | ${dayHours} | ${nightHours} |\n`;
+      });
+
+    mdContent += `\n---\n\n`;
+
+    mdContent += `## 💰 Résumé Financier\n\n`;
+    mdContent += `| Description | Montant |\n`;
+    mdContent += `|:------------|:-------:|\n`;
+    mdContent += `| **Total des gains réalisés** | **${totalEarnings.toFixed(2)} €** |\n`;
+    mdContent += `| Nombre total d'heures | ${totalHours.toFixed(2)}h |\n`;
+    mdContent += `| Taux horaire moyen | ${averageRate.toFixed(2)} €/h |\n`;
+    mdContent += `| Nombre de missions | ${allCompletedMissions.length} |\n\n`;
+
+    mdContent += `---\n\n`;
+    mdContent += `*Document généré le ${format(new Date(), 'dd MMMM yyyy à HH:mm', { locale: fr })} par NeuroTime*\n`;
+
+    const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `missions_terminees_${format(new Date(), 'yyyy-MM-dd')}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadCompletedReportPDF = () => {
+    if (allCompletedMissions.length === 0) {
+      alert("Aucune mission terminée à exporter.");
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      const headerHeight = 40;
+      let currentPage = 1;
+
+      // Fonction pour dessiner l'en-tête
+      const drawHeader = (yPos: number) => {
+        // Barre colorée en haut
+        doc.setFillColor(59, 130, 246); // Bleu primary
+        doc.rect(0, 0, pageWidth, headerHeight, 'F');
+        
+        // Titre
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont(undefined, 'bold');
+        doc.text('RAPPORT DES MISSIONS TERMINÉES', pageWidth / 2, 18, { align: 'center' });
+        
+        // Sous-titre
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('NeuroTime - Activité Professionnelle', pageWidth / 2, 28, { align: 'center' });
+        
+        // Date
+        doc.setFontSize(9);
+        doc.text(`Généré le ${format(new Date(), 'dd MMMM yyyy à HH:mm', { locale: fr })}`, pageWidth / 2, 35, { align: 'center' });
+        
+        doc.setTextColor(0, 0, 0);
+        return headerHeight + 5;
+      };
+
+      // Fonction pour dessiner le pied de page
+      const drawFooter = (pageNum: number, totalPages: number) => {
+        const footerY = pageHeight - 10;
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(`Page ${pageNum} / ${totalPages}`, pageWidth / 2, footerY, { align: 'center' });
+        doc.text('NeuroTime - Document confidentiel', pageWidth - margin, footerY, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+      };
+
+      // Calculer les statistiques
+      const totalEarnings = allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+      const totalHours = allCompletedMissions.reduce((acc, m) => {
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        return acc + (end - start) / (1000 * 60 * 60);
+      }, 0);
+      const averageRate = totalHours > 0 ? (totalEarnings / totalHours) : 0;
+
+      // Première page - En-tête et statistiques
+      let yPos = drawHeader(0);
+
+      // Section statistiques avec encadrés
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Vue d\'ensemble', margin, yPos);
+      yPos += 8;
+
+      const statsBoxHeight = 25;
+      const statsBoxWidth = (pageWidth - 2 * margin - 10) / 4;
+      const statsY = yPos;
+
+      // Box 1: Nombre de missions
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Missions', margin + 5, statsY + 7);
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(allCompletedMissions.length.toString(), margin + 5, statsY + 16);
+
+      // Box 2: Total gains
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin + statsBoxWidth + 5, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin + statsBoxWidth + 5, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Total gains', margin + statsBoxWidth + 10, statsY + 7);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${totalEarnings.toFixed(2)} €`, margin + statsBoxWidth + 10, statsY + 16);
+
+      // Box 3: Total heures
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin + (statsBoxWidth + 5) * 2, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin + (statsBoxWidth + 5) * 2, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Total heures', margin + (statsBoxWidth + 5) * 2 + 5, statsY + 7);
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${totalHours.toFixed(1)}h`, margin + (statsBoxWidth + 5) * 2 + 5, statsY + 16);
+
+      // Box 4: Taux moyen
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin + (statsBoxWidth + 5) * 3, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin + (statsBoxWidth + 5) * 3, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Taux moyen', margin + (statsBoxWidth + 5) * 3 + 5, statsY + 7);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${averageRate.toFixed(2)} €/h`, margin + (statsBoxWidth + 5) * 3 + 5, statsY + 16);
+
+      yPos = statsY + statsBoxHeight + 15;
+
+      // Section détail des missions
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Détail des Missions', margin, yPos);
+      yPos += 8;
+
+      // Tableau avec bordures
+      const colWidths = [22, 28, 40, 35, 30, 25];
+      const headers = ['Date', 'Créneaux', 'Mission', 'Client', 'Lieu', 'Total (€)'];
+      const startX = margin;
+      const tableTopY = yPos;
+
+      // En-têtes du tableau avec fond coloré
+      doc.setFillColor(59, 130, 246);
+      doc.rect(startX, tableTopY, pageWidth - 2 * margin, 8, 'F');
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      let xPos = startX + 2;
+      headers.forEach((header, i) => {
+        doc.text(header, xPos, tableTopY + 6);
+        xPos += colWidths[i];
+      });
+
+      yPos = tableTopY + 10;
+      doc.setTextColor(0, 0, 0);
+
+      // Données du tableau
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      const sortedMissions = [...allCompletedMissions].sort(
+        (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      );
+
+      sortedMissions.forEach((m, index) => {
+        // Vérifier si on a besoin d'une nouvelle page
+        if (yPos > pageHeight - 35) {
+          drawFooter(currentPage, 0); // On ne connaît pas encore le total
+          doc.addPage();
+          currentPage++;
+          yPos = drawHeader(0) + 5;
+          
+          // Redessiner les en-têtes du tableau
+          doc.setFillColor(59, 130, 246);
+          doc.rect(startX, yPos, pageWidth - 2 * margin, 8, 'F');
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(255, 255, 255);
+          xPos = startX + 2;
+          headers.forEach((header, i) => {
+            doc.text(header, xPos, yPos + 6);
+            xPos += colWidths[i];
+          });
+          yPos += 10;
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'normal');
+        }
+
+        // Fond alterné pour les lignes
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(startX, yPos - 4, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        const date = format(new Date(m.startTime), 'dd/MM/yyyy', { locale: fr });
+        const slots = formatTimeSlots(m);
+        const mission = doc.splitTextToSize(m.title, colWidths[2] - 4);
+        const client = doc.splitTextToSize(m.client, colWidths[3] - 4);
+        const location = doc.splitTextToSize(m.location, colWidths[4] - 4);
+        const total = m.totalEarnings?.toFixed(2) || '0.00';
+
+        const maxLines = Math.max(mission.length, client.length, location.length, 1);
+        const cellHeight = maxLines * 5;
+
+        // Bordures verticales
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.1);
+        xPos = startX;
+        doc.line(xPos, yPos - 4, xPos, yPos + cellHeight - 4);
+        headers.forEach((_, i) => {
+          xPos += colWidths[i];
+          doc.line(xPos, yPos - 4, xPos, yPos + cellHeight - 4);
+        });
+
+        // Texte des cellules
+        xPos = startX + 2;
+        doc.text(date, xPos, yPos);
+        xPos += colWidths[0];
+        doc.text(slots, xPos, yPos);
+        xPos += colWidths[1];
+        doc.text(mission, xPos, yPos);
+        xPos += colWidths[2];
+        doc.text(client, xPos, yPos);
+        xPos += colWidths[3];
+        doc.text(location, xPos, yPos);
+        xPos += colWidths[4];
+        doc.setFont(undefined, 'bold');
+        doc.text(total, xPos, yPos);
+        doc.setFont(undefined, 'normal');
+
+        // Ligne horizontale
+        doc.setDrawColor(200, 200, 200);
+        doc.line(startX, yPos + cellHeight - 4, pageWidth - margin, yPos + cellHeight - 4);
+
+        yPos += cellHeight;
+      });
+
+      // Ligne de total
+      yPos += 5;
+      if (yPos > pageHeight - 30) {
+        drawFooter(currentPage, 0);
+        doc.addPage();
+        currentPage++;
+        yPos = drawHeader(0) + 5;
+      }
+      
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin, yPos - 6, pageWidth - 2 * margin, 10, 'F');
+      doc.text(`TOTAL GÉNÉRAL : ${totalEarnings.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
+
+      // Dessiner le pied de page sur toutes les pages
+      const totalPages = doc.internal.pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        drawFooter(i, totalPages);
+      }
+
+      // Sauvegarder
+      doc.save(`missions_terminees_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+    }
   };
 
   const backupData = () => {
@@ -274,16 +665,34 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
             Mise à jour temps réel sur vos missions planifiées et réalisées
           </div>
         </div>
-        <div className="flex gap-2.5">
-            <button 
-              onClick={downloadCSV}
-              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
-              title="Exporter pour Excel"
-            >
-              <Download size={16} strokeWidth={2.5} />
-              <span className="hidden md:inline">Exporter CSV</span>
-              <span className="md:hidden">CSV</span>
-            </button>
+        <div className="flex gap-2.5 flex-wrap">
+          <button 
+            onClick={downloadCSV}
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            title="Exporter pour Excel"
+          >
+            <Download size={16} strokeWidth={2.5} />
+            <span className="hidden md:inline">Exporter CSV</span>
+            <span className="md:hidden">CSV</span>
+          </button>
+          <button 
+            onClick={downloadCompletedReportMD}
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            title="Exporter les missions terminées en Markdown"
+          >
+            <FileText size={16} strokeWidth={2.5} />
+            <span className="hidden md:inline">Export MD</span>
+            <span className="md:hidden">MD</span>
+          </button>
+          <button 
+            onClick={downloadCompletedReportPDF}
+            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
+            title="Exporter les missions terminées en PDF (pour paiement)"
+          >
+            <File size={16} strokeWidth={2.5} />
+            <span className="hidden md:inline">Export PDF</span>
+            <span className="md:hidden">PDF</span>
+          </button>
         </div>
       </header>
 
