@@ -30,7 +30,7 @@ flowchart TD
   - `geminiService.ts` : appels AI (amélioration description, résumé).
 - **UI clés** :
   - Missions : `MissionForm`, `MissionsList`, `CalendarView` (filtre, heatmap CA).
-  - Dashboard : `Dashboard` (+ Stats, Activity, Goals, Alerts, Charts), export CSV/JSON, backup/restore.
+  - Dashboard : `Dashboard` (+ Stats, Activity, Goals, Charts), export CSV/JSON, backup/restore.
   - PWA : `PWAInstallPrompt`, `SplashScreen`, `LoadingSpinner`.
 - **Utilitaires** :
   - `calculations.ts` : calcul jour/nuit minute-près (20€/h, 25€/h, créneaux multiples).

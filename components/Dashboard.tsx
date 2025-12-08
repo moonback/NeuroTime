@@ -6,7 +6,6 @@ import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, isSameMonth }
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
-import DashboardAlerts from './DashboardAlerts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
 import DashboardActivity from './DashboardActivity';
@@ -320,9 +319,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
       {/* Graphiques */}
       <DashboardCharts missions={missions} />
-
-      {/* Alertes et rappels */}
-      <DashboardAlerts missions={missions} onValidate={onValidate} onEdit={onEdit} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
