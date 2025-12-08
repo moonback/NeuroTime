@@ -37,7 +37,7 @@ export interface Mission {
   };
 }
 
-export type ViewState = 'dashboard' | 'calendar' | 'missions';
+export type ViewState = 'dashboard' | 'calendar' | 'missions' | 'payments';
 
 export interface DayStats {
   date: string;

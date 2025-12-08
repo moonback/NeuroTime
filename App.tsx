@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
+const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -111,6 +112,10 @@ const App: React.FC = () => {
   }, [editingMission]);
 
   const handleEditMission = (mission: Mission) => {
+    if (mission.isPaid) {
+      alert('Cette mission a été payée et ne peut plus être modifiée.');
+      return;
+    }
     setEditingMission(mission);
     setSelectedDateForNew(undefined);
     setIsModalOpen(true);
@@ -118,6 +123,10 @@ const App: React.FC = () => {
 
   // Special handler to convert a planned mission to completed (validate hours)
   const handleValidateMission = (mission: Mission) => {
+    if (mission.isPaid) {
+      alert('Cette mission a été payée et ne peut plus être modifiée.');
+      return;
+    }
     const missionToValidate = { ...mission, status: 'completed' as const };
     setEditingMission(missionToValidate);
     setSelectedDateForNew(undefined);
@@ -134,10 +143,15 @@ const App: React.FC = () => {
   }, []);
 
   const handleDeleteMission = useCallback((id: string) => {
+    const mission = missions.find(m => m.id === id);
+    if (mission?.isPaid) {
+      alert('Cette mission a été payée et ne peut plus être supprimée.');
+      return;
+    }
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette mission ?")) {
       setMissions(prev => prev.filter(m => m.id !== id));
     }
-  }, []);
+  }, [missions]);
 
   const handleTogglePaid = useCallback((mission: Mission) => {
     setMissions(prev => prev.map(m => 
@@ -254,6 +268,12 @@ const App: React.FC = () => {
             icon={<CalendarIcon size={20} />} 
             label="Agenda" 
           />
+          <NavButton 
+            active={view === 'payments'} 
+            onClick={() => setView('payments')} 
+            icon={<Euro size={20} />} 
+            label="Paiements" 
+          />
         </nav>
 
         <div className="p-4 space-y-3 border-t border-primary-500/15">
@@ -316,6 +336,12 @@ const App: React.FC = () => {
                 onNewMission={openNewMissionModal}
               />
             )}
+            {view === 'payments' && (
+              <PaymentsView 
+                missions={missions} 
+                onTogglePaid={handleTogglePaid}
+              />
+            )}
           </Suspense>
         </div>
       </main>
@@ -353,6 +379,13 @@ const App: React.FC = () => {
             onClick={() => setView('calendar')} 
             icon={<CalendarIcon size={22} />} 
             label="Agenda"
+          />
+          
+          <MobileNavButton 
+            active={view === 'payments'} 
+            onClick={() => setView('payments')} 
+            icon={<Euro size={22} />} 
+            label="Paiements"
           />
         </div>
       </nav>

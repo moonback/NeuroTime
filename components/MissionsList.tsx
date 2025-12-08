@@ -230,7 +230,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     </td>
                     <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        {mission.status === 'planned' && (
+                        {mission.status === 'planned' && !mission.isPaid && (
                           <button 
                             onClick={() => onComplete(mission)}
                             className="text-emerald-300 hover:text-emerald-200 bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-500/30 hover:border-emerald-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
@@ -239,20 +239,28 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                             <CheckCircle size={16} strokeWidth={2} />
                           </button>
                         )}
-                        <button 
-                          onClick={() => onEdit(mission)}
-                          className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
-                          title="Modifier"
-                        >
-                          <Edit size={16} strokeWidth={2} />
-                        </button>
-                        <button 
-                          onClick={() => onDelete(mission.id)}
-                          className="text-red-300 hover:text-red-200 bg-red-500/25 hover:bg-red-500/35 border border-red-500/30 hover:border-red-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={16} strokeWidth={2} />
-                        </button>
+                        {!mission.isPaid ? (
+                          <>
+                            <button 
+                              onClick={() => onEdit(mission)}
+                              className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                              title="Modifier"
+                            >
+                              <Edit size={16} strokeWidth={2} />
+                            </button>
+                            <button 
+                              onClick={() => onDelete(mission.id)}
+                              className="text-red-300 hover:text-red-200 bg-red-500/25 hover:bg-red-500/35 border border-red-500/30 hover:border-red-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                              title="Supprimer"
+                            >
+                              <Trash2 size={16} strokeWidth={2} />
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-500 italic px-2" title="Mission payée - Modification et suppression désactivées">
+                            Verrouillée
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
