@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, memo } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
 import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
-import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, isSameMonth } from 'date-fns';
+import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
@@ -23,6 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const [isActivityExpanded, setIsActivityExpanded] = useState(false);
   const [isUpcomingExpanded, setIsUpcomingExpanded] = useState(false);
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
+  const now = new Date();
   
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
   // Missions terminées : toutes celles avec status 'completed'
@@ -92,6 +93,43 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       .slice(0, 5),
     [allCompletedMissions]
   );
+
+  // Vue d'ensemble
+  const todayMissions = useMemo(
+    () => missions.filter(m => isToday(new Date(m.startTime))),
+    [missions]
+  );
+
+  const todayHours = useMemo(
+    () =>
+      todayMissions.reduce((acc, m) => {
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        return acc + (end - start) / (1000 * 60 * 60);
+      }, 0),
+    [todayMissions]
+  );
+
+  const thisWeekMissions = useMemo(() => {
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    return missions.filter(m => {
+      const start = new Date(m.startTime);
+      return start >= weekStart && start <= weekEnd;
+    });
+  }, [missions, now]);
+
+  const thisWeekHours = useMemo(
+    () =>
+      thisWeekMissions.reduce((acc, m) => {
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        return acc + (end - start) / (1000 * 60 * 60);
+      }, 0),
+    [thisWeekMissions]
+  );
+
+  const nextMission = useMemo(() => upcomingMissions[0] ?? null, [upcomingMissions]);
 
   // KPIs avancés
   // Taux horaire moyen
@@ -215,6 +253,10 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">Tableau de bord</h1>
           <p className="text-gray-400 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary-500/10 border border-primary-500/30 px-3 py-1 text-xs text-primary-100">
+            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+            Mise à jour temps réel sur vos missions planifiées et réalisées
+          </div>
         </div>
         <div className="flex gap-2">
             <button 
@@ -228,6 +270,69 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
             </button>
         </div>
       </header>
+
+      {/* Vue d'ensemble rapide */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 animate-slide-in-up">
+        <div className="glass-card rounded-2xl p-4 md:p-5 border border-primary-500/20 bg-gradient-to-br from-primary-600/20 via-primary-500/10 to-primary-400/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary-500/20 border border-primary-500/40">
+                <Clock className="w-4 h-4 text-primary-200" />
+              </div>
+              <p className="text-sm font-semibold text-primary-100">Aujourd'hui</p>
+            </div>
+            <span className="text-xs text-gray-300">{todayMissions.length} mission(s)</span>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-gray-100">{todayHours.toFixed(1)}h</p>
+          <p className="text-xs text-gray-400">Temps prévu ou réalisé sur la journée</p>
+        </div>
+
+        <div className="glass-card rounded-2xl p-4 md:p-5 border border-emerald-500/20 bg-gradient-to-br from-emerald-600/15 via-emerald-500/10 to-emerald-400/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40">
+                <TrendingUp className="w-4 h-4 text-emerald-200" />
+              </div>
+              <p className="text-sm font-semibold text-emerald-100">Cette semaine</p>
+            </div>
+            <span className="text-xs text-gray-300">{thisWeekMissions.length} mission(s)</span>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-gray-100">{thisWeekHours.toFixed(1)}h</p>
+          <p className="text-xs text-gray-400">Charge totale entre lundi et dimanche</p>
+        </div>
+
+        <div className="glass-card rounded-2xl p-4 md:p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/15 via-orange-500/10 to-orange-400/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-orange-500/20 border border-orange-500/40">
+                <Calendar className="w-4 h-4 text-orange-200" />
+              </div>
+              <p className="text-sm font-semibold text-orange-100">Prochaine mission</p>
+            </div>
+            {nextMission ? (
+              <span className="text-xs text-orange-100 bg-orange-500/20 border border-orange-500/40 px-2 py-1 rounded-full">
+                {format(new Date(nextMission.startTime), 'dd MMM', { locale: fr })}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">—</span>
+            )}
+          </div>
+          {nextMission ? (
+            <div className="mt-3 space-y-1">
+              <p className="text-base md:text-lg font-bold text-gray-100 line-clamp-1">{nextMission.title}</p>
+              <p className="text-sm text-gray-300 flex items-center gap-2">
+                <Clock size={14} className="text-gray-500" />
+                {format(new Date(nextMission.startTime), 'HH:mm')} • {nextMission.location}
+              </p>
+              <p className="text-xs text-gray-400">
+                {nextMission.rateType === 'night' ? 'Mission de nuit' : 'Mission de jour'} · {nextMission.totalEarnings?.toFixed(0) ?? 0}€
+              </p>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-gray-400">Aucune mission planifiée. Ajoutez-en une pour rester prêt.</p>
+          )}
+        </div>
+      </div>
 
       {/* AI Summary Card */}
       <div className="glass-card bg-gradient-to-br from-primary-600/20 via-primary-500/30 to-primary-400/20 rounded-2xl p-5 md:p-6 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine">
