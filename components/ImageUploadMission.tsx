@@ -203,7 +203,7 @@ const ImageUploadMission: React.FC<ImageUploadMissionProps> = ({ isOpen, onClose
               <button
                 onClick={handleAnalyze}
                 disabled={!selectedFile}
-                className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 glow-blue transition-all shadow-md shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ImageIcon size={18} strokeWidth={2.5} />
                 <span>Analyser l'image avec Gemini</span>
@@ -327,7 +327,7 @@ const ImageUploadMission: React.FC<ImageUploadMissionProps> = ({ isOpen, onClose
               <button
                 onClick={handleAddMissions}
                 disabled={selectedMissions.size === 0}
-                className="px-5 py-2.5 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold rounded-xl glow-blue transition-all shadow-md shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 Ajouter {selectedMissions.size > 0 && `(${selectedMissions.size})`}
               </button>

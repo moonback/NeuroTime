@@ -292,7 +292,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
             selectedMissions.map(mission => (
               <div 
                 key={mission.id} 
-                className="group relative glass-light rounded-lg p-2.5 md:p-3 border-primary-500/20 hover:border-primary-500/50 hover:glow-blue transition-all duration-200"
+                className="group relative glass-light rounded-lg p-2.5 md:p-3 border-primary-500/20 hover:border-primary-500/30 hover:shadow-lg transition-all duration-200"
               >
                 <div className="flex justify-between items-start mb-2">
                    <div className="flex items-start gap-2 overflow-hidden">

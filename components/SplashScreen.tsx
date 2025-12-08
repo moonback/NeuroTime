@@ -138,40 +138,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             <stop offset="0%" stopColor="#00D4FF" stopOpacity="0.7" />
             <stop offset="100%" stopColor="#0066FF" stopOpacity="0.7" />
           </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-            <feMerge> 
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-          <filter id="strongGlow">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-            <feMerge> 
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
         
-        {/* Central pulse circle */}
-        <circle
-          cx="50%"
-          cy="50%"
-          r="0"
-          fill="none"
-          stroke="url(#accentGradient)"
-          strokeWidth="3"
-          opacity="0.6"
-          filter="url(#strongGlow)"
-        >
-          <animate attributeName="r" from="0" to="300" dur="3s" repeatCount="indefinite" />
-          <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
-        </circle>
-
         {/* Circuit lines radiating from center */}
         {circuitElements.map((circuit, i) => (
-          <g key={i} filter="url(#glow)">
+          <g key={i}>
             <line
               x1="50%"
               y1="50%"
@@ -209,18 +180,16 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           fill="none"
           stroke="url(#accentGradient)"
           strokeWidth="2"
-          opacity="0.6"
+          opacity="0.4"
           className="circuit-path"
-          filter="url(#glow)"
         />
         <path
           d="M 25% 75% Q 35% 60%, 50% 50% T 75% 75%"
           fill="none"
           stroke="url(#accentGradient)"
           strokeWidth="2"
-          opacity="0.6"
+          opacity="0.4"
           className="circuit-path"
-          filter="url(#glow)"
         />
         <path
           d="M 20% 40% Q 30% 50%, 50% 50% T 80% 40%"
@@ -242,34 +211,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
 
       {/* Main Content Container */}
       <div className="relative z-10 flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 px-4 sm:px-6 md:px-8 max-w-4xl">
-        {/* Logo with enhanced effects */}
+        {/* Logo */}
         <div className="relative flex-shrink-0">
-          {/* Multi-layer glow effect */}
-          <div 
-            className="absolute inset-0 blur-3xl"
-            style={{
-              background: 'radial-gradient(circle, rgba(0,140,255,0.7) 0%, rgba(0,212,255,0.4) 40%, transparent 70%)',
-              width: '180%',
-              height: '180%',
-              top: '-40%',
-              left: '-40%',
-              animation: 'pulseGlow 2.5s ease-in-out infinite'
-            }}
-          />
-          
-          <div 
-            className="absolute inset-0 blur-2xl"
-            style={{
-              background: 'radial-gradient(circle, rgba(118,204,255,0.5) 0%, transparent 60%)',
-              width: '150%',
-              height: '150%',
-              top: '-25%',
-              left: '-25%',
-              animation: 'pulseGlow 2s ease-in-out infinite reverse'
-            }}
-          />
-          
-          {/* Logo container with scale animation */}
           <div 
             className="relative z-10"
             style={{
@@ -277,13 +220,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             }}
           >
             <div
-              className="h-28 w-28 sm:h-32 sm:w-32 md:h-40 md:w-40 bg-gradient-to-br from-[#008CFF] to-[#00D4FF] rounded-full flex items-center justify-center"
-              style={{
-                filter: 'drop-shadow(0 0 30px rgba(0,140,255,0.9)) drop-shadow(0 0 60px rgba(0,140,255,0.5))',
-                animation: 'float 3s ease-in-out infinite',
-                willChange: 'transform',
-                boxShadow: '0 0 80px rgba(0,140,255,0.4), inset 0 0 40px rgba(255,255,255,0.2)'
-              }}
+              className="h-28 w-28 sm:h-32 sm:w-32 md:h-40 md:w-40 bg-primary-500 rounded-full flex items-center justify-center shadow-lg"
             >
               <span className="text-5xl sm:text-6xl md:text-7xl font-bold text-white">N</span>
             </div>
@@ -300,13 +237,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             }}
           >
             <span 
-              className="inline-block"
+              className="inline-block text-primary-500"
               style={{
-                background: 'linear-gradient(135deg, #008CFF 0%, #76CCFF 50%, #00D4FF 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 20px rgba(0,140,255,0.7))',
                 letterSpacing: '-0.03em',
                 fontWeight: 800
               }}
@@ -429,25 +361,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           }
         }
         
-        @keyframes float {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg); 
-          }
-          50% { 
-            transform: translateY(-10px) rotate(2deg); 
-          }
-        }
-        
-        @keyframes pulseGlow {
-          0%, 100% { 
-            opacity: 0.5; 
-            transform: scale(1.4);
-          }
-          50% { 
-            opacity: 0.9; 
-            transform: scale(1.7);
-          }
-        }
 
         @keyframes breathe {
           0%, 100% {
@@ -513,8 +426,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         }
         
         .circuit-dot {
-          animation: pulseGlow 2.5s ease-in-out infinite;
-          will-change: opacity, transform;
+          animation: fadeIn 1s ease-out;
         }
         
         /* Optimisation pour les appareils à faible performance */
@@ -528,18 +440,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           
           [style*="animation"] {
             animation: none !important;
-          }
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-          @keyframes float {
-            0%, 100% { 
-              transform: translateY(0px); 
-            }
-            50% { 
-              transform: translateY(-6px); 
-            }
           }
         }
       `}</style>

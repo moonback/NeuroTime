@@ -395,7 +395,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
         
         {/* Header */}
         <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light'}`}>
@@ -854,14 +854,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-dark-300 font-black py-3 md:py-3.5 px-5 rounded-xl shadow-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm md:text-base relative overflow-hidden group glow-blue ${
+              className={`flex-[2] text-white font-semibold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all hover:shadow-xl flex items-center justify-center gap-2.5 text-sm md:text-base ${
                 isConverting 
-                ? 'from-green-500 via-green-600 to-green-500 hover:from-green-400 hover:via-green-500 hover:to-green-400 shadow-green-500/40' 
-                : 'from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 shadow-primary-500/40'
+                ? 'bg-green-500 hover:bg-green-600' 
+                : 'bg-primary-500 hover:bg-primary-600'
               }`}
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-              <span className="relative z-10 flex items-center gap-2.5 tracking-wide">
+              <span className="flex items-center gap-2.5 tracking-wide">
                 {isConverting ? <CheckCircle size={18} strokeWidth={2.5} /> : <Calendar size={18} strokeWidth={2.5} />}
                 {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
               </span>

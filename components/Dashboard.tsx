@@ -760,21 +760,20 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* AI Summary Card */}
-      <div className="glass-card bg-gradient-to-br from-primary-600/25 via-primary-500/30 to-primary-400/20 rounded-2xl p-6 md:p-8 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine mb-6 border-primary-500/30">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+      <div className="glass-card bg-primary-500/10 rounded-2xl p-6 md:p-8 text-gray-100 relative overflow-hidden animate-slide-in-up mb-6 border-primary-500/20">
         <div className="relative z-10">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
-              <span className="bg-primary-500/35 p-2 rounded-xl backdrop-blur-sm border border-primary-400/50 animate-pulse-glow shadow-lg shadow-primary-500/30">
-                 <SparklesIcon className="w-5 h-5 text-primary-200" />
+              <span className="bg-primary-500/20 p-2 rounded-xl border border-primary-500/30 shadow-md">
+                 <SparklesIcon className="w-5 h-5 text-primary-400" />
               </span>
-              <h3 className="font-bold text-lg md:text-xl tracking-wide text-primary-200">Assistant Intelligent</h3>
+              <h3 className="font-bold text-lg md:text-xl tracking-wide text-primary-400">Assistant Intelligent</h3>
             </div>
             <button
               type="button"
               onClick={refreshSummary}
               disabled={isSummaryLoading || missions.length === 0}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg glass-button text-xs md:text-sm font-semibold text-primary-100 border border-primary-400/40 hover:border-primary-300/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg glass-button text-xs md:text-sm font-semibold text-primary-300 border border-primary-500/30 hover:border-primary-400/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Rafraîchir l'analyse IA"
             >
               <RefreshCcw className={`w-4 h-4 ${isSummaryLoading ? 'animate-spin' : ''}`} />
@@ -783,10 +782,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           </div>
           <p className="text-gray-100 leading-relaxed text-sm md:text-base font-medium max-w-2xl">{summary}</p>
         </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/15 blur-3xl group-hover:opacity-40 group-hover:scale-110 transition-all duration-700"></div>
-        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/25 blur-2xl animate-float"></div>
       </div>
 
       {/* Statistics Grid */}
@@ -938,7 +933,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         ) : (
           <div className="grid gap-3">
             {upcomingMissions.map((mission, index) => (
-              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-primary-500/50 hover:glow-blue transition-all duration-300 animate-slide-in-up relative overflow-hidden" style={{ animationDelay: `${index * 50}ms` }}>
+              <div key={mission.id} className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl glass-light hover:border-primary-500/30 hover:shadow-lg transition-all duration-200 animate-slide-in-up" style={{ animationDelay: `${index * 50}ms` }}>
                 <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 
                 {/* Date Badge */}
@@ -1149,7 +1144,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = memo(({ icon, label, value, subtext, color, textColor, trend }: any) => (
-  <div className={`p-5 md:p-6 rounded-2xl glass-card transition-all hover:glow-blue ${color} group relative overflow-hidden animate-slide-in-up shadow-lg`}>
+  <div className={`p-5 md:p-6 rounded-2xl glass-card transition-all hover:shadow-lg ${color} group relative animate-slide-in-up shadow-md`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     <div className="relative z-10">
       <div className="flex items-start justify-between mb-4">

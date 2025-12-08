@@ -11,16 +11,16 @@ export default {
       },
       colors: {
         primary: {
-          50: '#e0f2ff',
-          100: '#b3e0ff',
-          200: '#80ccff',
-          300: '#4db8ff',
-          400: '#26a8ff',
-          500: '#00d4ff', // Bleu électrique principal
-          600: '#00b8e6',
-          700: '#0099cc',
-          800: '#007ab3',
-          900: '#005c99',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6', // Bleu moderne et sobre
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         },
         dark: {
           50: '#1e2332',
@@ -45,8 +45,8 @@ export default {
         xs: '2px',
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(0, 212, 255, 0.3)',
-        'glow-lg': '0 0 40px rgba(0, 212, 255, 0.4)',
+        'soft': '0 4px 12px rgba(0, 0, 0, 0.15)',
+        'soft-lg': '0 8px 24px rgba(0, 0, 0, 0.2)',
       },
       animation: {
         'fade-in-slow': 'fade-in 0.6s ease-out',

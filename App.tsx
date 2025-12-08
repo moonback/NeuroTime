@@ -236,22 +236,21 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/20 fixed inset-y-0 z-20 animate-slide-in-left shadow-2xl">
-        <div className="p-6 border-b border-primary-500/10 flex items-center gap-3 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          <span className="inline-flex h-11 w-11 rounded-xl bg-gradient-to-br from-primary-400/85 to-primary-600/85 shadow-lg shadow-primary-500/25 items-center justify-center relative z-10 animate-float overflow-hidden ring-1 ring-primary-500/15">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 animate-slide-in-left shadow-lg">
+        <div className="p-6 border-b border-gray-700/30 flex items-center gap-3">
+          <span className="inline-flex h-11 w-11 rounded-xl bg-primary-500 items-center justify-center shadow-md">
             <img
               src="/logo2.png"
               alt="Logo NeuroTime"
               className="h-10 w-10 object-contain"
             />
           </span>
-          <div className="relative z-10">
+          <div>
             <h1 className="text-xl font-bold tracking-tight leading-tight">
-              <span className="text-[#008CFF] drop-shadow-[0_1px_6px_rgba(0,140,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
-              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_6px_rgba(118,204,255,0.2)]" style={{letterSpacing: "-0.5px"}}>Time</span>
+              <span className="text-primary-500" style={{letterSpacing: "-0.5px"}}>Neuro</span>
+              <span className="text-primary-400 ml-0.5" style={{letterSpacing: "-0.5px"}}>Time</span>
             </h1>
-            <span className="text-[0.7rem] text-primary-300/80 mt-0.5 block font-medium tracking-wider uppercase">Gestion</span>
+            <span className="text-[0.7rem] text-gray-400 mt-0.5 block font-medium tracking-wider uppercase">Gestion</span>
           </div>
         </div>
 
@@ -282,27 +281,26 @@ const App: React.FC = () => {
           />
         </nav>
 
-        <div className="p-4 space-y-3 border-t border-primary-500/10">
+        <div className="p-4 space-y-3 border-t border-gray-700/30">
            <button 
             onClick={() => openNewMissionModal()}
-            className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group shadow-lg shadow-primary-500/25"
+            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-md hover:shadow-lg"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-            <Plus size={18} className="relative z-10" strokeWidth={2.5} />
-            <span className="relative z-10 tracking-wide">Nouvelle mission</span>
+            <Plus size={18} strokeWidth={2.5} />
+            <span className="tracking-wide">Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
-          <div className="pt-2 border-t border-primary-500/10 mt-2">
-            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-primary-500/8">
-              <div className="p-1.5 rounded-lg bg-primary-500/15 border border-primary-500/20">
-                <User size={12} className="text-primary-300" />
+          <div className="pt-2 border-t border-gray-700/30 mt-2">
+            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-gray-700/30">
+              <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
+                <User size={12} className="text-primary-400" />
               </div>
               <span className="truncate text-gray-200 font-medium">{user.email || 'Utilisateur'}</span>
             </div>
             <button 
               onClick={handleSignOut}
-              className="w-full glass-button hover:bg-red-500/15 text-gray-300 hover:text-red-300 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
+              className="w-full glass-button hover:bg-red-500/10 text-gray-300 hover:text-red-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
             >
               <LogOut size={14} />
               <span>Déconnexion</span>
@@ -353,8 +351,8 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - Version premium */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/20 z-30 pb-safe animate-slide-up shadow-2xl">
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg">
         <div className="flex justify-around items-center px-3 py-2.5">
           <MobileNavButton 
             active={view === 'dashboard'} 
@@ -373,11 +371,10 @@ const App: React.FC = () => {
           <div className="relative -top-8">
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-500 text-dark-300 p-4 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-300/80 hover:scale-110 relative overflow-hidden group shadow-2xl shadow-primary-500/35"
+              className="bg-primary-500 hover:bg-primary-600 text-white p-4 rounded-full transform active:scale-90 transition-all ring-4 ring-dark-300/80 hover:scale-110 shadow-lg"
               aria-label="Nouvelle mission"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-              <Plus size={24} strokeWidth={2.5} className="relative z-10" />
+              <Plus size={24} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -425,7 +422,7 @@ const App: React.FC = () => {
       
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400 animate-slide-in-up animate-glass-shine">
+        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400 animate-slide-in-up">
           <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
           <span>Sauvegarde...</span>
         </div>
@@ -434,25 +431,24 @@ const App: React.FC = () => {
   );
 };
 
-// Sub-components for Nav - Version premium
+// Sub-components for Nav
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm relative overflow-hidden group font-medium ${
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
       active 
-        ? 'glass-button text-primary-200 font-semibold shadow-md shadow-primary-500/15 border-primary-500/30' 
-        : 'text-gray-400 hover:glass-button hover:text-primary-200 hover:shadow-sm'
+        ? 'glass-button text-primary-400 font-semibold shadow-md border-primary-500/30 bg-primary-500/10' 
+        : 'text-gray-400 hover:glass-button hover:text-primary-300 hover:shadow-sm'
     }`}
   >
-    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/12 via-primary-400/20 to-primary-500/12 translate-x-[-100%] transition-transform duration-700 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
-    <span className="relative z-10 flex items-center gap-3">
-      <span className={`transition-transform duration-300 ${active ? 'scale-105' : 'group-hover:scale-105'}`}>
+    <span className="flex items-center gap-3">
+      <span className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
         {icon}
       </span>
       <span className="tracking-wide">{label}</span>
     </span>
     {active && (
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary-400 shadow-md shadow-primary-400/40"></span>
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary-500"></span>
     )}
   </button>
 );
@@ -462,16 +458,16 @@ const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, on
     onClick={onClick}
     className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all min-w-[60px] relative ${
       active 
-        ? 'text-primary-300 bg-primary-500/20 shadow-md shadow-primary-500/15 border border-primary-500/25' 
-        : 'text-gray-500 active:text-primary-300 active:bg-primary-500/8'
+        ? 'text-primary-400 bg-primary-500/15 shadow-md border border-primary-500/30' 
+        : 'text-gray-500 active:text-primary-400 active:bg-primary-500/10'
     }`}
   >
-    <span className={`transition-transform duration-300 ${active ? 'scale-105' : ''}`}>
+    <span className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
       {icon}
     </span>
-    {label && <span className={`text-[10px] mt-1 font-semibold leading-tight tracking-wide ${active ? 'text-primary-200' : ''}`}>{label}</span>}
+    {label && <span className={`text-[10px] mt-1 font-semibold leading-tight tracking-wide ${active ? 'text-primary-300' : ''}`}>{label}</span>}
     {active && (
-      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400 shadow-sm shadow-primary-400/40"></span>
+      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-500"></span>
     )}
   </button>
 );

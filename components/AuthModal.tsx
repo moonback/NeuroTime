@@ -154,13 +154,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-gradient-to-r text-dark-300 font-medium py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
+            className={`w-full text-white font-medium py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg ${
               loading
-                ? 'from-gray-500 to-gray-600 cursor-not-allowed'
-                : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 glow-blue'
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-primary-500 hover:bg-primary-600'
             }`}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
             {loading ? (
               <span className="relative z-10 flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-dark-300 border-t-transparent rounded-full animate-spin" />

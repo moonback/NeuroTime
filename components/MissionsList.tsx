@@ -59,7 +59,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           </button>
           <button 
             onClick={onNew}
-            className="w-full md:w-auto bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 glow-blue transition-all text-sm md:text-base shadow-md shadow-primary-500/25"
+            className="w-full md:w-auto bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base shadow-md hover:shadow-lg"
           >
             <Plus size={18} strokeWidth={2.5} />
             <span className="tracking-wide">Nouvelle Mission</span>
@@ -88,8 +88,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                 onClick={() => setStatusFilter(s)}
                 className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${
                   statusFilter === s 
-                    ? 'bg-primary-500 text-dark-300 shadow-md glow-blue' 
-                    : 'glass-button text-gray-400 hover:text-primary-200 hover:shadow-sm'
+                    ? 'bg-primary-500 text-white shadow-md' 
+                    : 'glass-button text-gray-400 hover:text-primary-300 hover:shadow-sm'
                 }`}
               >
                 {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
