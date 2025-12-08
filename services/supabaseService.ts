@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Mission } from '../types';
 import { getSupabase } from './authService';
+import { retry } from '../utils/retry';
 
 // Initialisation du client Supabase (utilise le même client que l'auth)
 const getSupabaseClient = () => {
@@ -59,6 +60,7 @@ const dbToMission = (dbRow: any): Mission => ({
   logistics: dbRow.logistics,
   timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
   isPaid: dbRow.is_paid || false, // Récupérer le statut de paiement (par défaut false)
+  updatedAt: dbRow.updated_at || undefined, // Récupérer la date de mise à jour
 });
 
 // Obtenir l'ID de l'utilisateur connecté
@@ -85,53 +87,58 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
   }
 
   try {
-    // Récupérer les IDs existants pour cet utilisateur
-    const { data: existingData } = await supabase
-      .from('missions')
-      .select('id')
-      .eq('user_id', userId);
-    
-    const existingIds = new Set((existingData || []).map(row => row.id));
-    const missionIds = new Set(missions.map(m => m.id));
-
-    // Supprimer les missions qui n'existent plus dans la nouvelle liste
-    const idsToDelete = Array.from(existingIds).filter(id => !missionIds.has(id));
-    if (idsToDelete.length > 0) {
-      const { error: deleteError } = await supabase
+    await retry(async () => {
+      // Récupérer les IDs existants pour cet utilisateur
+      const { data: existingData, error: selectError } = await supabase
         .from('missions')
-        .delete()
-        .in('id', idsToDelete)
+        .select('id')
         .eq('user_id', userId);
-
-      if (deleteError) {
-        console.error('Erreur lors de la suppression des missions:', deleteError);
-      }
-    }
-
-    // Utiliser upsert pour insérer ou mettre à jour les missions
-    if (missions.length > 0) {
-      const missionsDb = missions.map(m => missionToDb(m, userId));
       
-      // Filtrer les colonnes undefined pour éviter les erreurs si les colonnes n'existent pas encore
-      const missionsDbFiltered = missionsDb.map(mission => {
-        const filtered: any = {};
-        Object.keys(mission).forEach(key => {
-          if (mission[key] !== undefined) {
-            filtered[key] = mission[key];
-          }
+      if (selectError) {
+        throw selectError;
+      }
+      
+      const existingIds = new Set((existingData || []).map(row => row.id));
+      const missionIds = new Set(missions.map(m => m.id));
+
+      // Supprimer les missions qui n'existent plus dans la nouvelle liste
+      const idsToDelete = Array.from(existingIds).filter(id => !missionIds.has(id));
+      if (idsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('missions')
+          .delete()
+          .in('id', idsToDelete)
+          .eq('user_id', userId);
+
+        if (deleteError) {
+          throw deleteError;
+        }
+      }
+
+      // Utiliser upsert pour insérer ou mettre à jour les missions
+      if (missions.length > 0) {
+        const missionsDb = missions.map(m => missionToDb(m, userId));
+        
+        // Filtrer les colonnes undefined pour éviter les erreurs si les colonnes n'existent pas encore
+        const missionsDbFiltered = missionsDb.map(mission => {
+          const filtered: any = {};
+          Object.keys(mission).forEach(key => {
+            if (mission[key] !== undefined) {
+              filtered[key] = mission[key];
+            }
+          });
+          return filtered;
         });
-        return filtered;
-      });
-      
-      const { error: upsertError } = await supabase
-        .from('missions')
-        .upsert(missionsDbFiltered, { onConflict: 'id' });
+        
+        const { error: upsertError } = await supabase
+          .from('missions')
+          .upsert(missionsDbFiltered, { onConflict: 'id' });
 
-      if (upsertError) {
-        console.error('Erreur lors de la sauvegarde des missions:', upsertError);
-        throw upsertError;
+        if (upsertError) {
+          throw upsertError;
+        }
       }
-    }
+    });
   } catch (error) {
     console.error('Erreur lors de la sauvegarde dans Supabase:', error);
     throw error;
@@ -153,16 +160,19 @@ export const loadMissionsFromSupabase = async (): Promise<Mission[]> => {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('missions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('start_time', { ascending: false });
-
-    if (error) {
-      console.error('Erreur lors du chargement des missions:', error);
-      return [];
-    }
+    const { data, error } = await retry(async () => {
+      const result = await supabase
+        .from('missions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('start_time', { ascending: false });
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
+      return result;
+    });
 
     return (data || []).map(dbToMission);
   } catch (error) {
@@ -186,15 +196,16 @@ export const addMissionToSupabase = async (mission: Mission): Promise<void> => {
   }
 
   try {
-    const missionDb = missionToDb(mission, userId);
-    const { error } = await supabase
-      .from('missions')
-      .insert([missionDb]);
+    await retry(async () => {
+      const missionDb = missionToDb(mission, userId);
+      const { error } = await supabase
+        .from('missions')
+        .insert([missionDb]);
 
-    if (error) {
-      console.error('Erreur lors de l\'ajout de la mission:', error);
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
+    });
   } catch (error) {
     console.error('Erreur lors de l\'ajout dans Supabase:', error);
     throw error;
@@ -216,17 +227,18 @@ export const updateMissionInSupabase = async (mission: Mission): Promise<void> =
   }
 
   try {
-    const missionDb = missionToDb(mission, userId);
-    const { error } = await supabase
-      .from('missions')
-      .update(missionDb)
-      .eq('id', mission.id)
-      .eq('user_id', userId);
+    await retry(async () => {
+      const missionDb = missionToDb(mission, userId);
+      const { error } = await supabase
+        .from('missions')
+        .update(missionDb)
+        .eq('id', mission.id)
+        .eq('user_id', userId);
 
-    if (error) {
-      console.error('Erreur lors de la mise à jour de la mission:', error);
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
+    });
   } catch (error) {
     console.error('Erreur lors de la mise à jour dans Supabase:', error);
     throw error;
@@ -248,16 +260,17 @@ export const deleteMissionFromSupabase = async (missionId: string): Promise<void
   }
 
   try {
-    const { error } = await supabase
-      .from('missions')
-      .delete()
-      .eq('id', missionId)
-      .eq('user_id', userId);
+    await retry(async () => {
+      const { error } = await supabase
+        .from('missions')
+        .delete()
+        .eq('id', missionId)
+        .eq('user_id', userId);
 
-    if (error) {
-      console.error('Erreur lors de la suppression de la mission:', error);
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
+    });
   } catch (error) {
     console.error('Erreur lors de la suppression dans Supabase:', error);
     throw error;

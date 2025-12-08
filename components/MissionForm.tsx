@@ -6,6 +6,7 @@ import { calculateEarnings, calculateEarningsMultiple, RATE_DAY, RATE_NIGHT } fr
 import { TimeSlot } from '../types';
 import { Tooltip } from './Tooltip';
 import { getAllClients, addClient, Client, syncClientsWithMissions } from '../services/clientService';
+import { findDuplicateMissions, formatConflictMessage } from '../utils/missionValidation';
 
 interface MissionFormProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [status, setStatus] = useState<'planned' | 'completed' | 'cancelled'>('planned');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [duplicateWarning, setDuplicateWarning] = useState<string>('');
   
   // Client management
   const [clients, setClients] = useState<Client[]>([]);
@@ -210,6 +212,64 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       }
     }
   }, [timeSlots, date, calculationMode]);
+
+  // Détection de doublons (date/heure)
+  useEffect(() => {
+    if (!date || timeSlots.length === 0 || !title.trim()) {
+      setDuplicateWarning('');
+      return;
+    }
+
+    // Vérifier que tous les créneaux ont des heures valides
+    const hasValidSlots = timeSlots.every(slot => 
+      slot.startTime && slot.endTime && 
+      slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
+    );
+
+    if (!hasValidSlots) {
+      setDuplicateWarning('');
+      return;
+    }
+
+    // Construire une mission temporaire pour la vérification
+    const firstSlot = timeSlots[0];
+    const lastSlot = timeSlots[timeSlots.length - 1];
+    const startIso = new Date(`${date}T${firstSlot.startTime}`).toISOString();
+    let endObj = new Date(`${date}T${lastSlot.endTime}`);
+    const startObj = new Date(`${date}T${firstSlot.startTime}`);
+    if (endObj <= startObj) {
+      endObj.setDate(endObj.getDate() + 1);
+    }
+    const endIso = endObj.toISOString();
+
+    const tempMission: Mission = {
+      id: initialData?.id || '',
+      title,
+      client,
+      location,
+      description,
+      startTime: startIso,
+      endTime: endIso,
+      timeSlots: timeSlots.length > 1 ? timeSlots : undefined,
+      status,
+      rateType: 'day',
+      hourlyRate: 0,
+      totalEarnings: 0,
+    };
+
+    // Chercher les doublons
+    const conflicts = findDuplicateMissions(
+      tempMission,
+      missions,
+      initialData?.id
+    );
+
+    if (conflicts.length > 0) {
+      setDuplicateWarning(formatConflictMessage(conflicts));
+    } else {
+      setDuplicateWarning('');
+    }
+  }, [date, timeSlots, title, client, location, description, status, missions, initialData?.id]);
 
   const formatDateForInput = (d: Date) => d.toISOString().split('T')[0];
   const formatTimeForInput = (d: Date) => d.toTimeString().slice(0, 5);
@@ -709,6 +769,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     <p className="text-xs text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.timeSlots}
                     </p>
+                  )}
+                  
+                  {/* Avertissement de doublon */}
+                  {duplicateWarning && (
+                    <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-3 flex items-start gap-2">
+                      <AlertCircle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-yellow-300 flex-1">{duplicateWarning}</p>
+                    </div>
                   )}
                 </div>
               </div>

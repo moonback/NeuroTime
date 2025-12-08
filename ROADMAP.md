@@ -91,9 +91,9 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - [x] Gestion des fuseaux horaires ✅
 - [x] Validation des formulaires améliorée ✅
 - [x] Gestion des erreurs réseau ✅
-- [ ] **Validation métier renforcée** : Détection de doublons mission (date/heure)
-- [ ] **Retries automatiques** : Réessayer les requêtes Supabase en cas d'échec
-- [ ] **Gestion des conflits** : Résolution automatique lors de la synchronisation
+- [x] **Validation métier renforcée** : Détection de doublons mission (date/heure)
+- [x] **Retries automatiques** : Réessayer les requêtes Supabase en cas d'échec
+- [x] **Gestion des conflits** : Résolution automatique lors de la synchronisation
 
 ### 🧪 Tests et qualité
 

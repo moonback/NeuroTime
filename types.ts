@@ -35,6 +35,9 @@ export interface Mission {
     deliveryTime?: string; // ISO String
     pickupTime?: string; // ISO String
   };
+  
+  // Timestamps (optionnels pour compatibilité avec anciennes missions)
+  updatedAt?: string; // ISO String - Date de dernière modification
 }
 
 export type ViewState = 'dashboard' | 'calendar' | 'missions' | 'payments';
