@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro, Bot } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
@@ -10,9 +10,12 @@ import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
+import ChatAssistant from './components/ChatAssistant';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
+import { getAllClients, Client } from './services/clientService';
+import { loadGoalsFromSupabase, Goal } from './services/goalsService';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
@@ -33,6 +36,12 @@ const App: React.FC = () => {
   
   // Splash screen - se masque une fois l'auth vérifiée
   const [showSplash, setShowSplash] = useState(true);
+  
+  // Chat Assistant
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   // Vérifier l'authentification au démarrage
   useEffect(() => {
@@ -72,6 +81,21 @@ const App: React.FC = () => {
           const data = await loadMissions();
           setMissions(data);
           setIsLoaded(true);
+          
+          // Charger les clients et objectifs pour le chat
+          try {
+            const loadedClients = await getAllClients(data);
+            setClients(loadedClients);
+          } catch (error) {
+            console.error('Erreur lors du chargement des clients:', error);
+          }
+          
+          try {
+            const loadedGoals = await loadGoalsFromSupabase();
+            setGoals(loadedGoals);
+          } catch (error) {
+            console.error('Erreur lors du chargement des objectifs:', error);
+          }
         } catch (error) {
           console.error('Erreur lors du chargement:', error);
         } finally {
@@ -81,6 +105,21 @@ const App: React.FC = () => {
       loadData();
     }
   }, [user, isLoaded]);
+  
+  // Recharger clients et goals quand les missions changent
+  useEffect(() => {
+    if (isLoaded && missions.length > 0) {
+      const reloadContext = async () => {
+        try {
+          const loadedClients = await getAllClients(missions);
+          setClients(loadedClients);
+        } catch (error) {
+          console.error('Erreur lors du rechargement des clients:', error);
+        }
+      };
+      reloadContext();
+    }
+  }, [missions, isLoaded]);
 
   // Save data whenever it changes, BUT only if initial load is done
   useEffect(() => {
@@ -418,6 +457,32 @@ const App: React.FC = () => {
           <span>Sauvegarde...</span>
         </div>
       )}
+      
+      {/* Chat Assistant Button (floating) */}
+      {!isChatOpen && (
+        <button
+          onClick={() => {
+            setIsChatOpen(true);
+            setIsChatMinimized(false);
+          }}
+          className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 bg-gradient-to-br from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-white p-4 rounded-full glow-blue-strong transform active:scale-90 transition-all shadow-2xl shadow-primary-500/35 hover:scale-110 relative overflow-hidden group"
+          aria-label="Ouvrir l'assistant IA"
+        >
+          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+          <Bot size={24} strokeWidth={2.5} className="relative z-10" />
+        </button>
+      )}
+      
+      {/* Chat Assistant */}
+      <ChatAssistant
+        missions={missions}
+        clients={clients}
+        goals={goals}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        isMinimized={isChatMinimized}
+        onToggleMinimize={() => setIsChatMinimized(!isChatMinimized)}
+      />
     </div>
   );
 };
