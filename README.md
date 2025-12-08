@@ -1,6 +1,6 @@
 # 🧠 NeuroTime
 
-Application web pour freelances de l’événementiel : planifiez vos missions, calculez automatiquement vos gains jour/nuit, émettez devis/factures, suivez vos paiements et objectifs, le tout avec authentification Supabase, PWA hors-ligne et assistance IA Gemini.
+Application web pour freelances de l’événementiel : planifiez vos missions, calculez automatiquement vos gains jour/nuit, suivez vos objectifs, le tout avec authentification Supabase, PWA hors-ligne et assistance IA Gemini.
 
 ---
 
@@ -19,9 +19,9 @@ Application web pour freelances de l’événementiel : planifiez vos missions, 
 ---
 
 ## 🎯 Présentation
-NeuroTime aide les freelances (techniciens, régisseurs, hôtes) à centraliser leurs missions, suivre leurs heures, facturer et analyser leur activité. L’app combine Supabase (auth + base Postgres), stockage local résilient et une PWA installable, avec un résumé métier généré par IA.
+NeuroTime aide les freelances (techniciens, régisseurs, hôtes) à centraliser leurs missions, suivre leurs heures et analyser leur activité. L’app combine Supabase (auth + base Postgres), stockage local résilient et une PWA installable, avec un résumé métier généré par IA.
 
-**Pitch (3 lignes)** : Organisez vos missions, facturez en quelques clics et suivez vos revenus réels/prévisionnels. Les tarifs jour/nuit sont calculés automatiquement, les clients sont synchronisés et vos données restent disponibles grâce au mode PWA + fallback localStorage. Une synthèse IA motive et oriente vos actions.
+**Pitch (3 lignes)** : Organisez vos missions et suivez vos revenus réels/prévisionnels. Les tarifs jour/nuit sont calculés automatiquement, les clients sont synchronisés et vos données restent disponibles grâce au mode PWA + fallback localStorage. Une synthèse IA motive et oriente vos actions.
 
 ---
 
@@ -29,7 +29,7 @@ NeuroTime aide les freelances (techniciens, régisseurs, hôtes) à centraliser 
 | Couche | Technologies |
 | --- | --- |
 | UI | React 19, TypeScript, Vite, Tailwind CSS 4, Lucide React, Recharts |
-| Métier | date-fns (dates), calculs horaires jour/nuit, générateur PDF (jspdf) |
+| Métier | date-fns (dates), calculs horaires jour/nuit |
 | Données | Supabase (PostgreSQL, Auth, RLS activé), stockage local fallback |
 | AI | Google Gemini (gemini-2.5-flash) pour résumé et amélioration de descriptions |
 | PWA | vite-plugin-pwa, manifest, service worker cache-first/network-first |
@@ -38,8 +38,7 @@ NeuroTime aide les freelances (techniciens, régisseurs, hôtes) à centraliser 
 
 ## ✨ Fonctionnalités principales (MVP)
 - Missions : création/édition/suppression, statuts (planned/completed/cancelled), multi-créneaux horaires, logistique optionnelle, calcul auto jour/nuit (20€/h jour, 25€/h nuit) ou montant manuel.
-- Vues : tableau de bord (KPIs, exports CSV/JSON, résumé IA), liste, calendrier mensuel, Kanban, finance.
-- Finance : devis, factures, paiements, génération PDF, numéros auto, rapports financiers (mois/année), graphiques.
+- Vues : tableau de bord (KPIs, exports CSV/JSON, résumé IA), liste, calendrier mensuel.
 - Clients : carnet clients synchronisé depuis les missions, dédoublonnage, stockage Supabase + fallback local.
 - Objectifs : objectifs mensuels/annuels (CA, missions, heures) synchronisés Supabase.
 - Authentification : Supabase email/password, session persistante, RLS par utilisateur.
@@ -70,7 +69,6 @@ Dans l’éditeur SQL Supabase, exécuter dans l’ordre selon vos besoins :
 - `supabase_setup.sql` (table missions + RLS + index + trigger)  
 - `supabase_migration_time_slots.sql` (multi-créneaux & logistique si base existante)  
 - `supabase_migration_clients.sql` (table clients)  
-- `supabase_migration_financial.sql` (tables invoices, quotes, payments)  
 - `supabase_setup_goals.sql` (table goals)
 
 4) Variables d’environnement (`.env.local`)
@@ -96,8 +94,8 @@ PWA : le service worker est généré au build et actif aussi en dev via vite-pl
 ```
 NeuroTime/
 ├── App.tsx                    # Shell principal, navigation, lazy loading
-├── components/                # UI métier (Dashboard, Calendar, Finance, Kanban…)
-├── services/                  # Intégrations (auth, supabase, finance, clients, AI, PDF)
+├── components/                # UI métier (Dashboard, Calendar…)
+├── services/                  # Intégrations (auth, supabase, clients, AI)
 ├── utils/                     # Calculs horaires, helpers de créneaux
 ├── types.ts                   # Modèles de données partagés
 ├── public/                    # Assets + manifest PWA
@@ -124,8 +122,8 @@ Conseils : ne jamais commiter `.env.local`; utiliser des clés « anon », pas `
 - Garder les conversions camelCase ↔ snake_case cohérentes avec Supabase (voir `supabaseService.ts`).
 - Respecter le fallback offline : écrire côté services (Supabase + localStorage) plutôt que directement dans les composants.
 - Rester minimal sur les dépendances (favoriser date-fns, Recharts, Supabase JS, jspdf, lucide).
-- Commits clairs (`type(scope): message`, ex. `feat(finance): add PDF number generation`).
-- Tests manuels : créer/éditer une mission, basculer de online à offline, créer une facture + paiement, vérifier l’auth.
+- Commits clairs (`type(scope): message`, ex. `feat(auth): improve session handling`).
+- Tests manuels : créer/éditer une mission, basculer de online à offline, vérifier l’auth.
 
 ---
 

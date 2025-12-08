@@ -34,44 +34,44 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   const totalFilteredEarnings = filteredMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
 
   return (
-    <div className="space-y-4 md:space-y-6 pb-24 md:pb-8 animate-fade-in">
+    <div className="space-y-5 md:space-y-6 pb-24 md:pb-8 animate-fade-in">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-between items-start md:items-center">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-5 justify-between items-start md:items-center mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">Mes Missions</h1>
-          <p className="text-gray-400 mt-1 text-sm md:text-base">Historique complet de vos interventions</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-100 tracking-tight mb-2">Mes Missions</h1>
+          <p className="text-gray-300 text-sm md:text-base font-medium">Historique complet de vos interventions</p>
         </div>
         <button 
           onClick={onNew}
-          className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-medium py-2 px-4 md:py-2.5 md:px-5 rounded-lg md:rounded-xl flex items-center gap-2 glow-blue transition-all text-sm md:text-base"
+          className="bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-bold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center gap-2.5 glow-blue transition-all text-sm md:text-base shadow-lg shadow-primary-500/30"
         >
-          <Plus size={18} />
-          <span>Nouvelle Mission</span>
+          <Plus size={18} strokeWidth={2.5} />
+          <span className="tracking-wide">Nouvelle Mission</span>
         </button>
       </div>
 
       {/* Filters Bar */}
-      <div className="glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col md:flex-row gap-3 md:gap-4 items-center justify-between">
+      <div className="glass-card rounded-2xl p-4 md:p-5 flex flex-col md:flex-row gap-4 md:gap-5 items-center justify-between shadow-lg">
         <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} strokeWidth={2} />
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder="Rechercher une mission..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+            className="w-full pl-11 pr-4 py-3 glass-light border-primary-500/25 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/60 outline-none transition-all text-sm text-gray-100 placeholder-gray-400 font-medium"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
           {(['all', 'planned', 'completed', 'cancelled'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all tracking-wide ${
                 statusFilter === s 
-                  ? 'bg-primary-500 text-dark-300 shadow-sm glow-blue' 
-                  : 'glass-button text-gray-400 hover:text-primary-300'
+                  ? 'bg-primary-500 text-dark-300 shadow-lg glow-blue' 
+                  : 'glass-button text-gray-400 hover:text-primary-200 hover:shadow-md'
               }`}
             >
               {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -81,92 +81,94 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Stats Summary for Selection */}
-      <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 glass-light p-2.5 md:p-3 rounded-lg">
-        <Filter size={12} />
-        <span><b className="text-gray-200">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
-        <span className="w-1 h-1 bg-gray-600 rounded-full mx-1"></span>
-        <span className="flex items-center gap-1">
-          Total : <b className="text-gray-100">{totalFilteredEarnings.toFixed(0)} €</b>
+      <div className="flex items-center gap-3 text-xs md:text-sm text-gray-300 glass-light p-3 md:p-4 rounded-xl border border-primary-500/15">
+        <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
+          <Filter size={14} className="text-primary-300" strokeWidth={2.5} />
+        </div>
+        <span className="font-semibold"><b className="text-gray-100 font-black">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
+        <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
+        <span className="flex items-center gap-1.5 font-semibold">
+          Total : <b className="text-primary-300 font-black">{totalFilteredEarnings.toFixed(0)} €</b>
         </span>
       </div>
 
       {/* List / Table */}
-      <div className="glass-card rounded-xl md:rounded-2xl overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden shadow-lg">
         {filteredMissions.length === 0 ? (
-          <div className="p-8 md:p-12 text-center text-gray-400">
-            <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-dark-100 rounded-full flex items-center justify-center mb-3 md:mb-4 border border-dark-200">
-              <Search size={24} className="text-gray-500" />
+          <div className="p-10 md:p-14 text-center text-gray-300">
+            <div className="mx-auto w-16 h-16 md:w-20 md:h-20 bg-dark-100/80 rounded-2xl flex items-center justify-center mb-4 md:mb-5 border border-primary-500/20 shadow-lg">
+              <Search size={28} className="text-gray-400" strokeWidth={2} />
             </div>
-            <p className="text-base md:text-lg font-medium text-gray-200">Aucune mission trouvée</p>
-            <p className="text-xs md:text-sm mt-1 text-gray-500">Modifiez vos filtres ou créez une nouvelle mission</p>
+            <p className="text-lg md:text-xl font-bold text-gray-200 mb-2">Aucune mission trouvée</p>
+            <p className="text-xs md:text-sm text-gray-400 font-medium">Modifiez vos filtres ou créez une nouvelle mission</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[700px] md:min-w-[800px]">
-              <thead className="bg-dark-100 border-b border-dark-200">
+              <thead className="bg-dark-100/60 border-b border-primary-500/20 backdrop-blur-sm">
                 <tr>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Date & Heure</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Mission / Client</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Lieu</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Montant</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Statut</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Date & Heure</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Mission / Client</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Lieu</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Montant</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Statut</th>
+                  <th className="px-5 md:px-6 py-4 md:py-5 text-right text-xs font-bold text-gray-300 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-dark-200">
+              <tbody className="divide-y divide-primary-500/10">
                 {filteredMissions.map((mission) => (
-                  <tr key={mission.id} className="group hover:bg-dark-100/50 transition-colors">
-                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                  <tr key={mission.id} className="group hover:bg-dark-100/40 transition-all duration-300">
+                    <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="font-bold text-gray-100 text-sm md:text-base">{format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
-                        <span className="text-[10px] md:text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                          <Clock size={10} />
+                        <span className="font-black text-gray-100 text-sm md:text-base tracking-tight">{format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
+                        <span className="text-xs text-gray-400 flex items-center gap-1.5 mt-1 font-medium">
+                          <Clock size={12} className="text-gray-500" strokeWidth={2} />
                           {formatTimeSlots(mission)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4">
+                    <td className="px-5 md:px-6 py-4 md:py-5">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-gray-100 text-sm md:text-base">{mission.title}</span>
-                        <span className="text-[10px] md:text-xs text-primary-400 font-medium flex items-center gap-1 mt-0.5">
-                          <Briefcase size={10} /> {mission.client}
+                        <span className="font-bold text-gray-100 text-sm md:text-base tracking-tight">{mission.title}</span>
+                        <span className="text-xs text-primary-300 font-semibold flex items-center gap-1.5 mt-1">
+                          <Briefcase size={12} className="text-primary-400" strokeWidth={2} /> {mission.client}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-300">
-                      <div className="flex items-center gap-1.5">
-                         <MapPin size={12} className="text-gray-500" />
-                         <span className="truncate max-w-[120px] md:max-w-[150px]">{mission.location}</span>
+                    <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap text-sm text-gray-300">
+                      <div className="flex items-center gap-2">
+                         <MapPin size={14} className="text-gray-400" strokeWidth={2} />
+                         <span className="truncate max-w-[120px] md:max-w-[150px] font-medium">{mission.location}</span>
                       </div>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1 font-bold text-gray-100 bg-dark-100 border border-dark-200 px-2 md:px-3 py-0.5 md:py-1 rounded-md w-fit shadow-sm text-xs md:text-sm">
-                        {mission.totalEarnings?.toFixed(0)} <Euro size={10} />
+                    <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap">
+                      <div className="flex items-center gap-1 font-black text-gray-100 bg-primary-500/20 border border-primary-500/40 px-3 py-1.5 rounded-lg w-fit shadow-md text-sm">
+                        {mission.totalEarnings?.toFixed(0)} <Euro size={12} strokeWidth={2.5} />
                       </div>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium border
-                        ${mission.status === 'completed' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 
-                          mission.status === 'planned' ? 'bg-primary-500/20 text-primary-300 border-primary-500/30' : 
-                          'bg-red-500/20 text-red-300 border-red-500/30'}`}>
+                    <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm
+                        ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' : 
+                          mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' : 
+                          'bg-red-500/25 text-red-200 border-red-500/40'}`}>
                         {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
                       </span>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-xs md:text-sm font-medium">
-                      <div className="flex items-center justify-end gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button 
                           onClick={() => onEdit(mission)}
-                          className="text-primary-400 hover:text-primary-300 bg-primary-500/20 hover:bg-primary-500/30 p-1.5 md:p-2 rounded-md transition-colors"
+                          className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
                           title="Modifier"
                         >
-                          <Edit size={14} />
+                          <Edit size={16} strokeWidth={2} />
                         </button>
                         <button 
                           onClick={() => onDelete(mission.id)}
-                          className="text-red-400 hover:text-red-300 bg-red-500/20 hover:bg-red-500/30 p-1.5 md:p-2 rounded-md transition-colors"
+                          className="text-red-300 hover:text-red-200 bg-red-500/25 hover:bg-red-500/35 border border-red-500/30 hover:border-red-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
                           title="Supprimer"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} strokeWidth={2} />
                         </button>
                       </div>
                     </td>
