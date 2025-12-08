@@ -438,3 +438,45 @@ export const syncClientsWithMissionsInSupabase = async (missions: { client: stri
   }
 };
 
+// Récupérer les missions terminées publiques (pour les visiteurs non connectés)
+export const loadPublicCompletedMissions = async (
+  startDate?: string,
+  endDate?: string
+): Promise<Mission[]> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    console.error('Impossible de se connecter à Supabase');
+    return [];
+  }
+
+  try {
+    // Utiliser le client Supabase sans authentification pour récupérer les missions publiques
+    let query = supabase
+      .from('missions')
+      .select('*')
+      .eq('status', 'completed');
+
+    // Filtrer par date si fourni
+    if (startDate) {
+      query = query.gte('start_time', startDate);
+    }
+    if (endDate) {
+      query = query.lte('start_time', endDate);
+    }
+
+    const { data, error } = await query
+      .order('start_time', { ascending: false })
+      .limit(200); // Augmenter la limite pour permettre plus de missions
+
+    if (error) {
+      console.error('Erreur lors du chargement des missions publiques:', error);
+      return [];
+    }
+
+    return (data || []).map(dbToMission);
+  } catch (error) {
+    console.error('Erreur lors du chargement des missions publiques:', error);
+    return [];
+  }
+};
+
