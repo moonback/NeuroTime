@@ -201,10 +201,10 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/30 fixed inset-y-0 z-20 animate-slide-in-left">
-        <div className="p-6 border-b border-primary-700/20 flex items-center gap-3 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-          <span className="inline-flex h-9 w-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-700 shadow-lg items-center justify-center relative z-10 animate-float overflow-hidden">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-primary-500/25 fixed inset-y-0 z-20 animate-slide-in-left shadow-2xl">
+        <div className="p-6 border-b border-primary-700/15 flex items-center gap-3 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/8 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <span className="inline-flex h-10 w-10 rounded-xl bg-gradient-to-br from-primary-400/90 to-primary-700/90 shadow-lg shadow-primary-500/30 items-center justify-center relative z-10 animate-float overflow-hidden ring-2 ring-primary-500/20">
             <img
               src="/logo2.png"
               alt="Logo NeuroTime"
@@ -212,15 +212,15 @@ const App: React.FC = () => {
             />
           </span>
           <div className="relative z-10">
-            <h1 className="text-xl font-semibold tracking-tight leading-tight">
-              <span className="text-[#008CFF] drop-shadow-[0_1px_5px_rgba(0,140,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
-              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_5px_rgba(118,204,255,0.2)]" style={{letterSpacing: "-0.5px"}}>Time</span>
+            <h1 className="text-xl font-bold tracking-tight leading-tight">
+              <span className="text-[#008CFF] drop-shadow-[0_1px_8px_rgba(0,140,255,0.3)]" style={{letterSpacing: "-0.5px"}}>Neuro</span>
+              <span className="text-[#76CCFF] ml-0.5 drop-shadow-[0_1px_8px_rgba(118,204,255,0.25)]" style={{letterSpacing: "-0.5px"}}>Time</span>
             </h1>
-            <span className="text-[0.65rem] text-primary-400 mt-0.5 block font-medium opacity-80">Gestion</span>
+            <span className="text-[0.7rem] text-primary-400/90 mt-0.5 block font-semibold tracking-wide uppercase">Gestion</span>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <NavButton 
             active={view === 'dashboard'} 
             onClick={() => setView('dashboard')} 
@@ -241,25 +241,27 @@ const App: React.FC = () => {
           />
         </nav>
 
-        <div className="p-4 space-y-2 border-t border-primary-500/20">
+        <div className="p-4 space-y-3 border-t border-primary-500/15">
            <button 
             onClick={() => openNewMissionModal()}
-            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-dark-300 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group"
+            className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 text-dark-300 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 glow-blue transition-all text-sm relative overflow-hidden group shadow-lg shadow-primary-500/30"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-            <Plus size={18} className="relative z-10" />
-            <span className="relative z-10">Nouvelle mission</span>
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+            <Plus size={18} className="relative z-10" strokeWidth={2.5} />
+            <span className="relative z-10 tracking-wide">Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
-          <div className="pt-2 border-t border-primary-500/20 mt-2">
-            <div className="flex items-center gap-2 px-2 py-2 mb-2 text-xs text-gray-400">
-              <User size={14} />
-              <span className="truncate">{user.email || 'Utilisateur'}</span>
+          <div className="pt-2 border-t border-primary-500/15 mt-2">
+            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-primary-500/10">
+              <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
+                <User size={12} className="text-primary-300" />
+              </div>
+              <span className="truncate text-gray-300 font-medium">{user.email || 'Utilisateur'}</span>
             </div>
             <button 
               onClick={handleSignOut}
-              className="w-full glass-button hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
+              className="w-full glass-button hover:bg-red-500/20 text-gray-300 hover:text-red-300 font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/40 transition-all text-sm"
             >
               <LogOut size={14} />
               <span>Déconnexion</span>
@@ -301,9 +303,9 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/30 z-30 pb-safe animate-slide-up">
-        <div className="flex justify-around items-center px-2 py-2">
+      {/* Mobile Bottom Navigation - Version améliorée */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-primary-500/25 z-30 pb-safe animate-slide-up shadow-2xl">
+        <div className="flex justify-around items-center px-3 py-2.5">
           <MobileNavButton 
             active={view === 'dashboard'} 
             onClick={() => setView('dashboard')} 
@@ -318,13 +320,13 @@ const App: React.FC = () => {
             label="Missions"
           />
 
-          <div className="relative -top-7">
+          <div className="relative -top-8">
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-gradient-to-br from-primary-500 to-primary-600 text-dark-300 p-3.5 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-50 hover:scale-110 relative overflow-hidden group"
+              className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-500 text-dark-300 p-4 rounded-full glow-blue-strong transform active:scale-90 transition-all ring-4 ring-dark-300/80 hover:scale-110 relative overflow-hidden group shadow-2xl shadow-primary-500/40"
               aria-label="Nouvelle mission"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
               <Plus size={24} strokeWidth={2.5} className="relative z-10" />
             </button>
           </div>
@@ -370,35 +372,45 @@ const App: React.FC = () => {
   );
 };
 
-// Sub-components for Nav
+// Sub-components for Nav - Version améliorée
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm relative overflow-hidden group ${
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm relative overflow-hidden group font-medium ${
       active 
-        ? 'glass-button text-primary-300 font-semibold glow-blue' 
-        : 'text-gray-400 hover:glass-button hover:text-primary-300'
+        ? 'glass-button text-primary-200 font-bold shadow-lg shadow-primary-500/20 border-primary-500/40' 
+        : 'text-gray-400 hover:glass-button hover:text-primary-200 hover:shadow-md'
     }`}
   >
-    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/10 via-primary-400/20 to-primary-500/10 translate-x-[-100%] transition-transform duration-500 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
+    <span className={`absolute inset-0 bg-gradient-to-r from-primary-500/15 via-primary-400/25 to-primary-500/15 translate-x-[-100%] transition-transform duration-700 ${active ? 'translate-x-0' : 'group-hover:translate-x-[100%]'}`}></span>
     <span className="relative z-10 flex items-center gap-3">
-      {icon}
-      <span>{label}</span>
+      <span className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-105'}`}>
+        {icon}
+      </span>
+      <span className="tracking-wide">{label}</span>
     </span>
+    {active && (
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary-400 shadow-lg shadow-primary-400/50"></span>
+    )}
   </button>
 );
 
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all min-w-[60px] ${
+    className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all min-w-[60px] relative ${
       active 
-        ? 'text-primary-400 bg-primary-500/20' 
-        : 'text-gray-500 active:text-primary-400'
+        ? 'text-primary-300 bg-primary-500/25 shadow-lg shadow-primary-500/20 border border-primary-500/30' 
+        : 'text-gray-500 active:text-primary-300 active:bg-primary-500/10'
     }`}
   >
-    {icon}
-    {label && <span className="text-[10px] mt-1 font-semibold leading-tight">{label}</span>}
+    <span className={`transition-transform duration-300 ${active ? 'scale-110' : ''}`}>
+      {icon}
+    </span>
+    {label && <span className={`text-[10px] mt-1 font-bold leading-tight tracking-wide ${active ? 'text-primary-200' : ''}`}>{label}</span>}
+    {active && (
+      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400 shadow-md shadow-primary-400/50"></span>
+    )}
   </button>
 );
 

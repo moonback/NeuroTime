@@ -249,22 +249,22 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
   return (
     <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in-up">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in-up mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight">Tableau de bord</h1>
-          <p className="text-gray-400 mt-1 text-sm md:text-base">Vue d'ensemble de votre activité</p>
-          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary-500/10 border border-primary-500/30 px-3 py-1 text-xs text-primary-100">
-            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-100 tracking-tight mb-2">Tableau de bord</h1>
+          <p className="text-gray-300 text-sm md:text-base font-medium">Vue d'ensemble de votre activité</p>
+          <div className="mt-3 inline-flex items-center gap-2.5 rounded-full bg-primary-500/15 border border-primary-500/40 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-lg shadow-primary-500/10">
+            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-md shadow-green-400/50" />
             Mise à jour temps réel sur vos missions planifiées et réalisées
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5">
             <button 
               onClick={downloadCSV}
-              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-4 py-2 rounded-lg font-medium transition-all text-sm"
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-lg"
               title="Exporter pour Excel"
             >
-              <Download size={16} />
+              <Download size={16} strokeWidth={2.5} />
               <span className="hidden md:inline">Exporter CSV</span>
               <span className="md:hidden">CSV</span>
             </button>
@@ -272,45 +272,45 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </header>
 
       {/* Vue d'ensemble rapide */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 animate-slide-in-up">
-        <div className="glass-card rounded-2xl p-4 md:p-5 border border-primary-500/20 bg-gradient-to-br from-primary-600/20 via-primary-500/10 to-primary-400/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary-500/20 border border-primary-500/40">
-                <Clock className="w-4 h-4 text-primary-200" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 animate-slide-in-up mb-6">
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-primary-500/25 bg-gradient-to-br from-primary-600/25 via-primary-500/15 to-primary-400/10 hover:from-primary-600/30 hover:via-primary-500/20 hover:to-primary-400/15 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary-500/25 border border-primary-500/50 shadow-lg shadow-primary-500/20">
+                <Clock className="w-5 h-5 text-primary-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-semibold text-primary-100">Aujourd'hui</p>
+              <p className="text-sm font-bold text-primary-100 tracking-wide">Aujourd'hui</p>
             </div>
-            <span className="text-xs text-gray-300">{todayMissions.length} mission(s)</span>
+            <span className="text-xs font-semibold text-gray-200 bg-primary-500/20 border border-primary-500/40 px-2.5 py-1 rounded-full">{todayMissions.length} mission(s)</span>
           </div>
-          <p className="mt-3 text-2xl font-bold text-gray-100">{todayHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-400">Temps prévu ou réalisé sur la journée</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{todayHours.toFixed(1)}h</p>
+          <p className="text-xs text-gray-300 font-medium">Temps prévu ou réalisé sur la journée</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 md:p-5 border border-emerald-500/20 bg-gradient-to-br from-emerald-600/15 via-emerald-500/10 to-emerald-400/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40">
-                <TrendingUp className="w-4 h-4 text-emerald-200" />
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-emerald-500/25 bg-gradient-to-br from-emerald-600/20 via-emerald-500/15 to-emerald-400/10 hover:from-emerald-600/25 hover:via-emerald-500/20 hover:to-emerald-400/15 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/25 border border-emerald-500/50 shadow-lg shadow-emerald-500/20">
+                <TrendingUp className="w-5 h-5 text-emerald-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-semibold text-emerald-100">Cette semaine</p>
+              <p className="text-sm font-bold text-emerald-100 tracking-wide">Cette semaine</p>
             </div>
-            <span className="text-xs text-gray-300">{thisWeekMissions.length} mission(s)</span>
+            <span className="text-xs font-semibold text-gray-200 bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-1 rounded-full">{thisWeekMissions.length} mission(s)</span>
           </div>
-          <p className="mt-3 text-2xl font-bold text-gray-100">{thisWeekHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-400">Charge totale entre lundi et dimanche</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{thisWeekHours.toFixed(1)}h</p>
+          <p className="text-xs text-gray-300 font-medium">Charge totale entre lundi et dimanche</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 md:p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/15 via-orange-500/10 to-orange-400/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-orange-500/20 border border-orange-500/40">
-                <Calendar className="w-4 h-4 text-orange-200" />
+        <div className="glass-card rounded-2xl p-5 md:p-6 border border-orange-500/25 bg-gradient-to-br from-orange-600/20 via-orange-500/15 to-orange-400/10 hover:from-orange-600/25 hover:via-orange-500/20 hover:to-orange-400/15 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-orange-500/25 border border-orange-500/50 shadow-lg shadow-orange-500/20">
+                <Calendar className="w-5 h-5 text-orange-200" strokeWidth={2.5} />
               </div>
-              <p className="text-sm font-semibold text-orange-100">Prochaine mission</p>
+              <p className="text-sm font-bold text-orange-100 tracking-wide">Prochaine mission</p>
             </div>
             {nextMission ? (
-              <span className="text-xs text-orange-100 bg-orange-500/20 border border-orange-500/40 px-2 py-1 rounded-full">
+              <span className="text-xs font-semibold text-orange-100 bg-orange-500/25 border border-orange-500/50 px-2.5 py-1 rounded-full shadow-md">
                 {format(new Date(nextMission.startTime), 'dd MMM', { locale: fr })}
               </span>
             ) : (
@@ -318,38 +318,38 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
             )}
           </div>
           {nextMission ? (
-            <div className="mt-3 space-y-1">
-              <p className="text-base md:text-lg font-bold text-gray-100 line-clamp-1">{nextMission.title}</p>
-              <p className="text-sm text-gray-300 flex items-center gap-2">
-                <Clock size={14} className="text-gray-500" />
+            <div className="mt-3 space-y-2">
+              <p className="text-lg md:text-xl font-bold text-gray-100 line-clamp-1 tracking-tight">{nextMission.title}</p>
+              <p className="text-sm text-gray-300 flex items-center gap-2 font-medium">
+                <Clock size={14} className="text-gray-400" strokeWidth={2} />
                 {format(new Date(nextMission.startTime), 'HH:mm')} • {nextMission.location}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 font-medium">
                 {nextMission.rateType === 'night' ? 'Mission de nuit' : 'Mission de jour'} · {nextMission.totalEarnings?.toFixed(0) ?? 0}€
               </p>
             </div>
           ) : (
-            <p className="mt-3 text-sm text-gray-400">Aucune mission planifiée. Ajoutez-en une pour rester prêt.</p>
+            <p className="mt-3 text-sm text-gray-400 font-medium">Aucune mission planifiée. Ajoutez-en une pour rester prêt.</p>
           )}
         </div>
       </div>
 
       {/* AI Summary Card */}
-      <div className="glass-card bg-gradient-to-br from-primary-600/20 via-primary-500/30 to-primary-400/20 rounded-2xl p-5 md:p-6 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+      <div className="glass-card bg-gradient-to-br from-primary-600/25 via-primary-500/30 to-primary-400/20 rounded-2xl p-6 md:p-8 text-gray-100 relative overflow-hidden group animate-slide-in-up animate-glass-shine mb-6 border-primary-500/30">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="bg-primary-500/30 p-1.5 rounded-lg backdrop-blur-sm border border-primary-400/40 animate-pulse-glow">
-               <SparklesIcon className="w-4 h-4 text-primary-300" />
+          <div className="flex items-center gap-3 mb-4">
+            <span className="bg-primary-500/35 p-2 rounded-xl backdrop-blur-sm border border-primary-400/50 animate-pulse-glow shadow-lg shadow-primary-500/30">
+               <SparklesIcon className="w-5 h-5 text-primary-200" />
             </span>
-            <h3 className="font-semibold text-base md:text-lg tracking-wide text-primary-300">Assistant Intelligent</h3>
+            <h3 className="font-bold text-lg md:text-xl tracking-wide text-primary-200">Assistant Intelligent</h3>
           </div>
-          <p className="text-gray-200 leading-relaxed text-sm md:text-base font-normal max-w-2xl">{summary}</p>
+          <p className="text-gray-100 leading-relaxed text-sm md:text-base font-medium max-w-2xl">{summary}</p>
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/10 blur-3xl group-hover:opacity-30 group-hover:scale-110 transition-all duration-700"></div>
-        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/20 blur-2xl animate-float"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary-400/15 blur-3xl group-hover:opacity-40 group-hover:scale-110 transition-all duration-700"></div>
+        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 rounded-full bg-primary-500/25 blur-2xl animate-float"></div>
       </div>
 
       {/* Statistics Grid */}
@@ -712,24 +712,24 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 };
 
 const StatCard = memo(({ icon, label, value, subtext, color, textColor, trend }: any) => (
-  <div className={`p-4 md:p-5 rounded-xl glass-card transition-all hover:glow-blue ${color} group relative overflow-hidden animate-slide-in-up`}>
-    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+  <div className={`p-5 md:p-6 rounded-2xl glass-card transition-all hover:glow-blue ${color} group relative overflow-hidden animate-slide-in-up shadow-lg`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     <div className="relative z-10">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`p-2.5 rounded-xl bg-dark-50 shadow-sm border border-dark-100 ${textColor} group-hover:scale-110 transition-transform duration-300`}>
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-3 rounded-xl bg-dark-50/80 shadow-lg border border-dark-100/50 ${textColor} group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 text-xs font-semibold ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            {trend.isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+          <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-lg ${trend.isPositive ? 'text-green-300 bg-green-500/20 border border-green-500/30' : 'text-red-300 bg-red-500/20 border border-red-500/30'}`}>
+            {trend.isPositive ? <TrendingUp size={14} strokeWidth={2.5} /> : <TrendingDown size={14} strokeWidth={2.5} />}
             {trend.value}%
           </div>
         )}
       </div>
       <div>
-        <p className="text-2xl md:text-3xl font-bold text-gray-100 tracking-tight group-hover:scale-105 transition-transform duration-300">{value}</p>
-        <p className={`text-xs md:text-sm font-semibold mt-1 ${textColor}`}>{label}</p>
-        <p className="text-[10px] md:text-xs text-gray-400 mt-1.5">{subtext}</p>
+        <p className="text-3xl md:text-4xl font-black text-gray-100 tracking-tight group-hover:scale-105 transition-transform duration-300 mb-1">{value}</p>
+        <p className={`text-xs md:text-sm font-bold mt-1 ${textColor} tracking-wide`}>{label}</p>
+        <p className="text-[10px] md:text-xs text-gray-300 mt-2 font-medium">{subtext}</p>
       </div>
     </div>
   </div>

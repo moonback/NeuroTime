@@ -394,35 +394,35 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 md:p-4 transition-all animate-fade-in">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-4 md:p-6 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/20 border-green-500/30 glass-light' : 'border-primary-500/20 glass-light'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+        <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
-            <h2 className={`text-lg md:text-xl font-bold ${isConverting ? 'text-green-300' : 'text-gray-100'}`}>
+            <h2 className={`text-xl md:text-2xl font-black tracking-tight ${isConverting ? 'text-green-200' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
-            <p className={`text-[10px] md:text-xs mt-0.5 ${isConverting ? 'text-green-400' : 'text-gray-400'}`}>
+            <p className={`text-xs md:text-sm mt-1.5 font-medium ${isConverting ? 'text-green-300' : 'text-gray-300'}`}>
               {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-dark-200 rounded-full transition-all text-gray-400 hover:scale-110 relative z-10">
-            <X size={18} />
+          <button onClick={onClose} className="p-2 md:p-2.5 hover:bg-dark-200/50 rounded-xl transition-all text-gray-400 hover:text-gray-100 hover:scale-110 hover:rotate-90 relative z-10 glass-button border border-transparent hover:border-primary-500/30">
+            <X size={18} strokeWidth={2.5} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar">
-          <div className="p-4 md:p-6 space-y-6 md:space-y-8">
+          <div className="p-5 md:p-7 space-y-6 md:space-y-8">
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-primary-500/20 border border-primary-500/30 rounded-lg p-2.5 md:p-3 flex items-center gap-2.5 glass-light hover:border-primary-500/50 transition-all animate-slide-in-up">
-                 <Copy size={14} className="text-primary-400" />
+               <div className="bg-primary-500/25 border border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
+                 <Copy size={16} className="text-primary-300" strokeWidth={2.5} />
                  <select 
                    onChange={handleCopyFromMission}
-                   className="bg-transparent text-xs md:text-sm text-primary-300 font-medium w-full focus:outline-none cursor-pointer"
+                   className="bg-transparent text-xs md:text-sm text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
                    defaultValue=""
                  >
                    <option value="" disabled>Copier depuis une mission précédente...</option>
@@ -434,17 +434,17 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             )}
 
             {/* Section 1: Informations Générales */}
-            <section className="space-y-3 md:space-y-4">
-              <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <Briefcase size={12} /> Détails de la mission
+            <section className="space-y-4 md:space-y-5">
+              <h3 className="text-xs md:text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2.5 mb-1">
+                <Briefcase size={14} className="text-primary-400" strokeWidth={2.5} /> Détails de la mission
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                <div className="space-y-2">
+                  <label className="text-xs md:text-sm font-bold text-gray-200 flex items-center gap-1.5 tracking-wide">
                     Titre de la mission
                     <Tooltip content="Nom descriptif de votre mission (ex: Régie Son, Accueil VIP)">
-                      <AlertCircle size={12} className="text-gray-500 cursor-help" />
+                      <AlertCircle size={12} className="text-gray-400 cursor-help hover:text-primary-400 transition-colors" />
                     </Tooltip>
                   </label>
                   <input
@@ -456,8 +456,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
                     }}
                     placeholder="Ex: Régie Son - Concert"
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                      errors.title ? 'border-red-500/50' : ''
+                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-light border-primary-500/25 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/60 outline-none transition-all text-sm text-gray-100 placeholder-gray-400 font-medium ${
+                      errors.title ? 'border-red-500/60 focus:ring-red-500/50' : ''
                     }`}
                   />
                   {errors.title && (
@@ -843,26 +843,26 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 md:p-6 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 md:p-7 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl glass-button text-gray-200 font-semibold hover:shadow-sm transition-all text-sm md:text-base relative z-10"
+              className="flex-1 py-3 md:py-3.5 px-5 rounded-xl glass-button text-gray-200 font-bold hover:shadow-lg transition-all text-sm md:text-base relative z-10 tracking-wide"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className={`flex-[2] bg-gradient-to-r text-dark-300 font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm md:text-base relative overflow-hidden group ${
+              className={`flex-[2] bg-gradient-to-r text-dark-300 font-black py-3 md:py-3.5 px-5 rounded-xl shadow-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm md:text-base relative overflow-hidden group glow-blue ${
                 isConverting 
-                ? 'from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 shadow-green-500/30' 
-                : 'from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 shadow-primary-500/30'
+                ? 'from-green-500 via-green-600 to-green-500 hover:from-green-400 hover:via-green-500 hover:to-green-400 shadow-green-500/40' 
+                : 'from-primary-500 via-primary-600 to-primary-500 hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 shadow-primary-500/40'
               }`}
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-              <span className="relative z-10 flex items-center gap-2">
-                {isConverting ? <CheckCircle size={16} /> : <Calendar size={16} />}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+              <span className="relative z-10 flex items-center gap-2.5 tracking-wide">
+                {isConverting ? <CheckCircle size={18} strokeWidth={2.5} /> : <Calendar size={18} strokeWidth={2.5} />}
                 {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
               </span>
             </button>
