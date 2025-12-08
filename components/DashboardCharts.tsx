@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { Mission } from '../types';
-import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths, isThisMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
-import { TrendingUp, Users, Moon, Sun } from 'lucide-react';
+import { TrendingUp, Moon, Sun } from 'lucide-react';
 
 interface DashboardChartsProps {
   missions: Mission[];
@@ -101,30 +101,6 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions }) => {
     ].filter(item => item.hours > 0);
   }, [missions]);
 
-  // Top 5 clients par revenus
-  const topClients = useMemo(() => {
-    const completedMissions = missions.filter(m => m.status === 'completed');
-    
-    const clientMap = new Map<string, { revenue: number; count: number }>();
-    
-    completedMissions.forEach(mission => {
-      const existing = clientMap.get(mission.client) || { revenue: 0, count: 0 };
-      clientMap.set(mission.client, {
-        revenue: existing.revenue + (mission.totalEarnings || 0),
-        count: existing.count + 1,
-      });
-    });
-    
-    return Array.from(clientMap.entries())
-      .map(([client, data]) => ({
-        client,
-        revenue: Math.round(data.revenue * 100) / 100,
-        count: data.count,
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-  }, [missions]);
-
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -195,114 +171,58 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions }) => {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Répartition jour/nuit */}
-        <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-500/30">
-              <Moon className="w-5 h-5 text-purple-400" />
-            </div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-100">Répartition jour/nuit</h3>
+      {/* Répartition jour/nuit */}
+      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+        <div className="flex items-center gap-2.5 mb-6">
+          <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-500/30">
+            <Moon className="w-5 h-5 text-purple-400" />
           </div>
-          {dayNightDistribution.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={dayNightDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percentage }) => `${name}: ${percentage}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {dayNightDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="mt-4 space-y-2">
-                {dayNightDistribution.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                      />
-                      <span className="text-gray-300">{item.name}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400">{item.hours}h</span>
-                      <span className="text-primary-300 font-semibold">{item.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-[250px] text-gray-400">
-              <p>Aucune donnée disponible</p>
-            </div>
-          )}
+          <h3 className="text-lg md:text-xl font-bold text-gray-100">Répartition jour/nuit</h3>
         </div>
-
-        {/* Top clients */}
-        <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="bg-emerald-500/20 p-2 rounded-lg border border-emerald-500/30">
-              <Users className="w-5 h-5 text-emerald-400" />
+        {dayNightDistribution.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={dayNightDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percentage }) => `${name}: ${percentage}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {dayNightDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<PieTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 space-y-2">
+              {dayNightDistribution.map((item, index) => (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="text-gray-300">{item.name}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-400">{item.hours}h</span>
+                    <span className="text-primary-300 font-semibold">{item.percentage}%</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-100">Top 5 clients</h3>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-[250px] text-gray-400">
+            <p>Aucune donnée disponible</p>
           </div>
-          {topClients.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={topClients} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.2} />
-                  <XAxis type="number" stroke="#9ca3af" style={{ fontSize: '12px' }} />
-                  <YAxis 
-                    dataKey="client" 
-                    type="category" 
-                    width={100} 
-                    stroke="#9ca3af" 
-                    style={{ fontSize: '12px' }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #10b981',
-                      borderRadius: '8px',
-                    }}
-                    formatter={(value: number) => [`${value.toFixed(2)} €`, 'Revenus']}
-                  />
-                  <Bar dataKey="revenue" fill="#10b981" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="mt-4 space-y-2">
-                {topClients.map((client, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400">#{index + 1}</span>
-                      <span className="text-gray-300 truncate max-w-[150px]">{client.client}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400 text-xs">{client.count} mission{client.count > 1 ? 's' : ''}</span>
-                      <span className="text-emerald-400 font-semibold">{client.revenue.toFixed(0)}€</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-[250px] text-gray-400">
-              <p>Aucune donnée disponible</p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
