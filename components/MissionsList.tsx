@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Mission } from '../types';
 import { format } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
 
