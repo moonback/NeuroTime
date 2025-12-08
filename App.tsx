@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, Menu, ListChecks, LogOut, User, DollarSign, Columns } from 'lucide-react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User } from 'lucide-react';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
-const FinanceView = lazy(() => import('./components/FinanceView'));
-const KanbanView = lazy(() => import('./components/KanbanView'));
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -132,12 +130,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleStatusChange = useCallback((missionId: string, newStatus: 'planned' | 'completed' | 'cancelled') => {
-    setMissions(prev => prev.map(m => 
-      m.id === missionId ? { ...m, status: newStatus } : m
-    ));
-  }, []);
-
   const handleImportData = useCallback((importedMissions: Mission[]) => {
     if (window.confirm(`Attention, l'importation va remplacer vos ${missions.length} missions actuelles par ${importedMissions.length} missions importées. Continuer ?`)) {
       setMissions(importedMissions);
@@ -247,18 +239,6 @@ const App: React.FC = () => {
             icon={<CalendarIcon size={20} />} 
             label="Agenda" 
           />
-          <NavButton 
-            active={view === 'finance'} 
-            onClick={() => setView('finance')} 
-            icon={<DollarSign size={20} />} 
-            label="Finance" 
-          />
-          <NavButton 
-            active={view === 'kanban'} 
-            onClick={() => setView('kanban')} 
-            icon={<Columns size={20} />} 
-            label="Kanban" 
-          />
         </nav>
 
         <div className="p-4 space-y-2 border-t border-primary-500/20">
@@ -317,17 +297,6 @@ const App: React.FC = () => {
                 onNewMission={openNewMissionModal}
               />
             )}
-            {view === 'finance' && (
-              <FinanceView missions={missions} />
-            )}
-            {view === 'kanban' && (
-              <KanbanView 
-                missions={missions} 
-                onEdit={handleEditMission} 
-                onDelete={handleDeleteMission}
-                onStatusChange={handleStatusChange}
-              />
-            )}
           </Suspense>
         </div>
       </main>
@@ -365,18 +334,6 @@ const App: React.FC = () => {
             onClick={() => setView('calendar')} 
             icon={<CalendarIcon size={22} />} 
             label="Agenda"
-          />
-          <MobileNavButton 
-            active={view === 'finance'} 
-            onClick={() => setView('finance')} 
-            icon={<DollarSign size={22} />} 
-            label="Finance"
-          />
-          <MobileNavButton 
-            active={view === 'kanban'} 
-            onClick={() => setView('kanban')} 
-            icon={<Columns size={22} />} 
-            label="Kanban"
           />
         </div>
       </nav>

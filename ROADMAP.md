@@ -3,12 +3,12 @@
 ### État actuel (MVP livré)
 - Auth Supabase (email/password), RLS actif.
 - Missions avec créneaux multiples, calcul auto jour/nuit, Kanban, Agenda, Dashboard (exports CSV/JSON, résumé IA).
-- Clients synchronisés, finance (devis/factures/paiements, PDF, rapports), objectifs (CA/missions/heures).
+- Clients synchronisés, objectifs (CA/missions/heures).
 - PWA (manifest, service worker, cache, prompt d’installation), fallback localStorage.
 
 ### V1 (priorité courte)
-- Tests E2E (Playwright/Cypress) sur parcours clés : auth, création mission, facture + paiement, offline/online.
-- Validation métier renforcée : doublons mission sur date/heure, contrôles sur montants factures/paiements (paiement <= total).
+- Tests E2E (Playwright/Cypress) sur parcours clés : auth, création mission, offline/online.
+- Validation métier renforcée : doublons mission sur date/heure.
 - Gestion des erreurs utilisateur : toasts unifiés, retries Supabase, indicateurs d’état réseau.
 - Observabilité : brancher Sentry (ou équivalent) en mode opt-in.
 - Accessibilité : focus states, roles ARIA sur modals/nav, contrastes.
@@ -21,7 +21,7 @@
 
 ### V2+
 - Notifications (push web, emails via Supabase functions) pour rappels de mission/paiement.
-- Partage sécurisé de devis/factures (liens publics signés avec statut).
+- Partage sécurisé de rapports (liens publics signés avec statut).
 - Insights avancés : prévisions CA, répartition par type de mission/client, objectifs dynamiques.
 - Application mobile packagée (PWA installable ou wrapper Capacitor).
 # 🗺️ Roadmap NeuroTime
@@ -101,11 +101,8 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 
 ### Nouvelles fonctionnalités
 
-#### 💰 Gestion financière
-- [x] **Facturation** : Génération automatique de factures PDF ✅
-- [x] **Devis** : Création et suivi des devis ✅
-- [x] **Paiements** : Suivi des paiements reçus/en attente ✅
-- [x] **Rapports** : Rapports mensuels/annuels détaillés ✅
+#### 💰 Gestion des revenus
+- [x] **Suivi CA** : Calculs auto jour/nuit ✅
 - [x] **Graphiques** : Visualisation des revenus (Chart.js/Recharts) ✅
 
 #### 📊 Analytics avancés

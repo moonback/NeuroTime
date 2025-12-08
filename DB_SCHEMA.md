@@ -37,65 +37,6 @@ Index : `idx_missions_user_id`, `idx_missions_start_time`, `idx_missions_status`
 | created_at / updated_at | TIMESTAMPTZ |  |
 Index : `idx_clients_user_id`, `idx_clients_name`, unique `idx_clients_user_name_unique` sur `(user_id, lower(name))`.
 
-#### `invoices`
-| Colonne | Type | Contraintes / Notes |
-| --- | --- | --- |
-| id | UUID PK |  |
-| user_id | UUID FK |  |
-| invoice_number | TEXT | UNIQUE(user_id, invoice_number) |
-| mission_id | UUID FK -> missions | `ON DELETE SET NULL` |
-| client | TEXT | NOT NULL |
-| client_address | TEXT | nullable |
-| client_email | TEXT | nullable |
-| issue_date | DATE | NOT NULL |
-| due_date | DATE | NOT NULL |
-| items | JSONB | [{description, quantity, unitPrice, total}] |
-| subtotal | NUMERIC(10,2) | NOT NULL |
-| tax | NUMERIC(10,2) | défaut 0 |
-| tax_rate | NUMERIC(5,2) | défaut 0 |
-| total | NUMERIC(10,2) | NOT NULL |
-| status | TEXT | `draft|sent|paid|overdue|cancelled` |
-| notes | TEXT | nullable |
-| created_at / updated_at | TIMESTAMPTZ |  |
-Index : `idx_invoices_user_id`, `idx_invoices_mission_id`, `idx_invoices_status`, `idx_invoices_issue_date`.
-
-#### `quotes`
-| Colonne | Type | Contraintes / Notes |
-| --- | --- | --- |
-| id | UUID PK |  |
-| user_id | UUID FK |  |
-| quote_number | TEXT | UNIQUE(user_id, quote_number) |
-| mission_id | UUID FK -> missions | `ON DELETE SET NULL` |
-| client | TEXT | NOT NULL |
-| client_address | TEXT | nullable |
-| client_email | TEXT | nullable |
-| issue_date | DATE | NOT NULL |
-| valid_until | DATE | NOT NULL |
-| items | JSONB | [{description, quantity, unitPrice, total}] |
-| subtotal | NUMERIC(10,2) | NOT NULL |
-| tax | NUMERIC(10,2) | défaut 0 |
-| tax_rate | NUMERIC(5,2) | défaut 0 |
-| total | NUMERIC(10,2) | NOT NULL |
-| status | TEXT | `draft|sent|accepted|rejected|expired` |
-| notes | TEXT | nullable |
-| created_at / updated_at | TIMESTAMPTZ |  |
-Index : `idx_quotes_user_id`, `idx_quotes_mission_id`, `idx_quotes_status`, `idx_quotes_issue_date`.
-
-#### `payments`
-| Colonne | Type | Contraintes / Notes |
-| --- | --- | --- |
-| id | UUID PK |  |
-| user_id | UUID FK |  |
-| invoice_id | UUID FK -> invoices | `ON DELETE CASCADE` |
-| amount | NUMERIC(10,2) | NOT NULL |
-| payment_date | DATE | NOT NULL |
-| method | TEXT | `cash|bank_transfer|check|card|other` |
-| reference | TEXT | nullable |
-| status | TEXT | `pending|completed|failed|refunded` |
-| notes | TEXT | nullable |
-| created_at / updated_at | TIMESTAMPTZ |  |
-Index : `idx_payments_user_id`, `idx_payments_invoice_id`, `idx_payments_status`, `idx_payments_payment_date`.
-
 #### `goals`
 | Colonne | Type | Contraintes / Notes |
 | --- | --- | --- |
@@ -110,7 +51,7 @@ Index : `idx_goals_user_id`, `idx_goals_user_type_period`.
 
 ### Sécurité (RLS)
 - Politiques homogènes : SELECT/INSERT/UPDATE/DELETE autorisés uniquement si `auth.uid() = user_id`.
-- Triggers `update_updated_at_column()` appliqués aux tables missions, invoices, quotes, payments, clients, goals.
+- Triggers `update_updated_at_column()` appliqués aux tables missions, clients, goals.
 
 ### Points d’attention
 - Toujours utiliser la clé `anon` côté front (les politiques RLS protègent par utilisateur).

@@ -27,7 +27,7 @@ export const enhanceDescription = async (
       
       Note brute de l'utilisateur : "${rawText}"
       
-      Tâche : Réécris cette note en une description de mission professionnelle, concise et claire (environ 2-3 phrases) pour un rapport d'activité ou une facture. Corrige les fautes, utilise un ton formel et met en valeur les actions réalisées.
+      Tâche : Réécris cette note en une description de mission professionnelle, concise et claire (environ 2-3 phrases) pour un rapport d'activité. Corrige les fautes, utilise un ton formel et met en valeur les actions réalisées.
       Retourne uniquement le texte amélioré.
     `;
 

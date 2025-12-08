@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
           manifest: {
             name: 'NeuroTime - Gestion Personnelle',
             short_name: 'NeuroTime',
-            description: 'Application de gestion personnelle pour freelances - Suivi de missions, facturation et statistiques',
+            description: 'Application de gestion personnelle pour freelances - Suivi de missions et statistiques',
             theme_color: '#008CFF',
             background_color: '#0f172a',
             display: 'standalone',

@@ -26,22 +26,6 @@ L’application n’a pas de backend custom : toutes les opérations passent par
   - `syncClientsWithMissionsInSupabase(missions[])` → INSERT batch des clients manquants.
 - Fallback : localStorage (`clientService`) avec dédoublonnage.
 
-### Finance
-#### Factures (`invoices` table)
-- Colonnes : `id`, `user_id`, `invoice_number` (unique par user), `mission_id`, `client`, `client_address`, `client_email`, `issue_date`, `due_date`, `items` (JSONB), `subtotal`, `tax`, `tax_rate`, `total`, `status`, `notes`, `created_at`, `updated_at`.
-- Opérations : `loadInvoices()`, `saveInvoice(invoice)` (upsert), `deleteInvoice(id)`, génération PDF via `pdfService`.
-
-#### Devis (`quotes` table)
-- Colonnes similaires : `quote_number`, `valid_until`, `status in (draft|sent|accepted|rejected|expired)`.
-- Opérations : `loadQuotes()`, `saveQuote(quote)`, `deleteQuote(id)`, PDF.
-
-#### Paiements (`payments` table)
-- Colonnes : `id`, `user_id`, `invoice_id`, `amount`, `payment_date`, `method`, `reference`, `status`, `notes`, `created_at`, `updated_at`.
-- Opérations : `loadPayments()`, `loadPaymentsByInvoice(invoiceId)`, `savePayment(payment)`, `deletePayment(id)`.
-
-#### Rapports financiers
-- `generateFinancialReport(period: 'month' | 'year', date)` → agrège invoices (total, CA), payments (payés), missions complétées (revenus estimés), breakdown par client et par mois (période annuelle).
-
 ### Objectifs (`goals` table)
 - Colonnes : `id`, `user_id`, `type` (`revenue|missions|hours`), `target`, `period` (`month|year`), `created_at`, `updated_at`, unique `(user_id, type, period)`.
 - Opérations : `loadGoalsFromSupabase()`, `saveGoalToSupabase(goal)` (upsert + gestion contrainte unique), `saveGoalsToSupabase(goals[])`, `deleteGoalFromSupabase(id)`.
