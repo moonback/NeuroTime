@@ -854,7 +854,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             </button>
             <button
               type="submit"
-              className={`flex-[2] text-white font-semibold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all hover:shadow-xl flex items-center justify-center gap-2.5 text-sm md:text-base ${
+              className={`flex-[2] text-white font-semibold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all hover:shadow-xl flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${
                 isConverting 
                 ? 'bg-green-500 hover:bg-green-600' 
                 : 'bg-primary-500 hover:bg-primary-600'
