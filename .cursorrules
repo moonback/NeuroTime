@@ -1,0 +1,59 @@
+# Contexte projet
+- NeuroTime : app web pour freelances événementiels. Gestion missions, vues dashboard/agenda/kanban, finance (devis/factures/paiements), objectifs, IA Gemini, PWA, stockage Supabase + fallback localStorage.
+- Pas de backend custom : tout passe par Supabase (Postgres + Auth) et services front. RLS actif sur toutes les tables (filtre user_id).
+
+# Stack & dépendances
+- React 19 + TypeScript, Vite, Tailwind CSS 4, Lucide React, Recharts, date-fns.
+- Supabase JS v2 (auth + tables), jspdf pour PDF, @google/genai pour Gemini, vite-plugin-pwa.
+- Favoriser : date-fns pour dates, Supabase JS pour data, Recharts pour graphes, Lucide pour icônes.
+- Éviter : nouvelles surcouches state global (Redux, MobX), libs UI lourdes, accès direct DOM non nécessaire.
+
+# Style & conventions
+- Composants fonctionnels, hooks React (`useState`, `useEffect`, `useMemo`, `useCallback`).
+- Typage strict TypeScript, modèles dans `types.ts`.
+- Nommage : camelCase pour JS/TS, PascalCase pour composants, snake_case en base Supabase (mapper côté services).
+- Organisation : logique métier dans `services/`; UI dans `components/`; utilitaires dans `utils/`; scripts SQL dans la racine (supabase_*.sql).
+- Styles : Tailwind utilitaire existant; réutiliser classes “glass-*”, “glow-*”, et tokens de couleur dark.
+
+# Patterns d’architecture
+- Frontend : Vite + lazy loading des vues lourdes (Dashboard, Calendar, Finance, Kanban) dans `App.tsx`.
+- Services :
+  - `authService.ts` (client Supabase singleton, signUp/signIn/signOut, écoute session).
+  - `supabaseService.ts` (CRUD missions + clients, mapping camel↔snake, sync complète avec suppression des orphelins).
+  - `storageService.ts` (fallback : écrire localStorage d’abord, tenter Supabase ensuite).
+  - `financialService.ts` (invoices/quotes/payments + rapports), `goalsService.ts`, `clientService.ts`.
+  - `geminiService.ts` (résumé, amélioration description), `pdfService.ts` (jspdf).
+- PWA : vite-plugin-pwa configuré dans `vite.config.ts`, manifest dans `public/`, `PWAInstallPrompt` intégré dans `App.tsx`.
+- Base de données : scripts SQL (`supabase_setup.sql`, `supabase_migration_*`, `supabase_setup_goals.sql`, `supabase_migration_financial.sql`, `supabase_migration_clients.sql`) avec RLS activé.
+
+# Bonnes pratiques
+- Toujours passer par les services pour accéder aux données (respect RLS et mappings).
+- Garder le fallback offline : écrire d’abord localStorage, puis Supabase (ne pas casser ce flux).
+- Manipuler les dates/heures avec date-fns; gérer les créneaux multi-slot via `timeSlots` + `calculations.ts`.
+- Erreurs : messages user-friendly en UI; logs techniques en console; ne pas bloquer l’app si Supabase échoue (grâce au fallback).
+- Sécurité : n’exposer que la clé `anon`; ne jamais commiter `.env.local`; pas de `service_role` côté front.
+- Type safety : typer les réponses Supabase, préférer `as const` sur statuts, vérifier les champs optionnels (timeSlots, logistics).
+- Tests attendus (manuels a minima) : auth, CRUD mission (multi-créneaux), finance (devis/facture/paiement), export CSV/JSON, PWA install, offline→online sync.
+
+# Tâches courantes
+- Nouvelle fonctionnalité UI : créer un composant dans `components/`, extraire la logique dans un service/utilitaire si nécessaire, typer les props, lazy-load si lourd.
+- Nouvel endpoint Supabase : ajouter dans le service correspondant (mapping camel↔snake, RLS), gérer erreurs réseau (console.warn) et fallback si pertinent.
+- Nouvelle table : écrire un script SQL cohérent (RLS + index + trigger updated_at), mettre à jour `DB_SCHEMA.md` et le service concerné.
+- Ajouter un rapport/graphique : utiliser `financialService` ou `supabaseService`, formater avec date-fns, graphes via Recharts existant.
+- Ajouter une action AI : utiliser `geminiService` et s’assurer que `process.env.API_KEY` est défini (vient de `GEMINI_API_KEY`).
+
+# À éviter
+- Appels Supabase directement dans les composants (dupliquerait la logique RLS/mapping).
+- Ajouter des dépendances lourdes sans besoin; préférer les libs déjà présentes.
+- Casser le mode offline en ne stockant que côté réseau.
+- Utiliser des clés Supabase privées dans le front.
+
+# Documentation & commentaires
+- Mettre à jour README/DB_SCHEMA/API_DOCS lors de changements structurels (DB, flux, features).
+- Ajouter des commentaires seulement si la logique n’est pas évidente; sinon privilégier des noms clairs.
+
+# Check-list PR interne
+- Pas de secrets dans les diff; `.env.local` ignoré.
+- Fonctionne en dev (`npm run dev`) et build (`npm run build`).
+- Parcours manuel minimal exécuté (auth, mission, finance, export, PWA prompt/offline).
+
