@@ -77,7 +77,7 @@ export const generateSummary = async (missions: Mission[]): Promise<string> => {
     return response.text?.trim() || "Impossible de générer le résumé.";
   } catch (error) {
     console.error("Error generating summary:", error);
-    return "Analysez vos données pour voir votre progression.";
+    return "Impossible de générer l'analyse pour le moment. Veuillez réessayer.";
   }
 };
 

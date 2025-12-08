@@ -201,9 +201,14 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     }
   }, [missions]);
 
+  // Initialiser le message par défaut
   useEffect(() => {
-    refreshSummary();
-  }, [refreshSummary]);
+    if (missions.length === 0) {
+      setSummary("Aucune mission enregistrée. Commencez par noter vos heures !");
+    } else {
+      setSummary("Cliquez sur 'Rafraîchir' pour obtenir une analyse de vos données.");
+    }
+  }, [missions.length]);
 
   const escapeCsv = (value: string | number | null | undefined) => {
     if (value === undefined || value === null) return '""';
