@@ -130,6 +130,12 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const handleTogglePaid = useCallback((mission: Mission) => {
+    setMissions(prev => prev.map(m => 
+      m.id === mission.id ? { ...m, isPaid: !m.isPaid } : m
+    ));
+  }, []);
+
   const handleImportData = useCallback((importedMissions: Mission[]) => {
     if (window.confirm(`Attention, l'importation va remplacer vos ${missions.length} missions actuelles par ${importedMissions.length} missions importées. Continuer ?`)) {
       setMissions(importedMissions);
@@ -288,6 +294,7 @@ const App: React.FC = () => {
                 onEdit={handleEditMission} 
                 onDelete={handleDeleteMission} 
                 onNew={() => openNewMissionModal()}
+                onTogglePaid={handleTogglePaid}
               />
             )}
             {view === 'calendar' && (

@@ -21,6 +21,9 @@ export interface Mission {
   hourlyRate: number; // Taux de base (indicatif si mixte)
   totalEarnings: number;
   
+  // Suivi du paiement
+  isPaid?: boolean; // Indique si la mission a été payée
+  
   // Détail du calcul automatique
   details?: {
     dayHours: number;

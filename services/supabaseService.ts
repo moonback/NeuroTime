@@ -25,6 +25,11 @@ const missionToDb = (mission: Mission, userId?: string) => {
     details: mission.details,
   };
   
+  // Ajouter is_paid (par défaut false si non défini)
+  if (mission.isPaid !== undefined) {
+    dbRow.is_paid = mission.isPaid;
+  }
+  
   // Ajouter logistics seulement s'il existe (pour compatibilité avec anciennes bases)
   if (mission.logistics !== undefined) {
     dbRow.logistics = mission.logistics;
@@ -53,6 +58,7 @@ const dbToMission = (dbRow: any): Mission => ({
   details: dbRow.details,
   logistics: dbRow.logistics,
   timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
+  isPaid: dbRow.is_paid || false, // Récupérer le statut de paiement (par défaut false)
 });
 
 // Obtenir l'ID de l'utilisateur connecté
