@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Mission } from '../types';
 import { format } from 'date-fns';
 import fr from 'date-fns/locale/fr';
-import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle } from 'lucide-react';
+import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
 
 interface MissionsListProps {
@@ -11,9 +11,10 @@ interface MissionsListProps {
   onDelete: (id: string) => void;
   onNew: () => void;
   onTogglePaid: (mission: Mission) => void;
+  onComplete: (mission: Mission) => void;
 }
 
-const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid }) => {
+const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('all');
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -229,6 +230,15 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     </td>
                     <td className="px-5 md:px-6 py-4 md:py-5 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {mission.status === 'planned' && (
+                          <button 
+                            onClick={() => onComplete(mission)}
+                            className="text-emerald-300 hover:text-emerald-200 bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-500/30 hover:border-emerald-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                            title="Marquer comme terminée"
+                          >
+                            <CheckCircle size={16} strokeWidth={2} />
+                          </button>
+                        )}
                         <button 
                           onClick={() => onEdit(mission)}
                           className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"

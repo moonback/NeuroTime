@@ -124,6 +124,15 @@ const App: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  // Handler to directly mark a mission as completed (without opening form)
+  const handleCompleteMission = useCallback((mission: Mission) => {
+    if (window.confirm(`Marquer la mission "${mission.title}" comme terminée ?`)) {
+      setMissions(prev => prev.map(m => 
+        m.id === mission.id ? { ...m, status: 'completed' as const } : m
+      ));
+    }
+  }, []);
+
   const handleDeleteMission = useCallback((id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette mission ?")) {
       setMissions(prev => prev.filter(m => m.id !== id));
@@ -295,6 +304,7 @@ const App: React.FC = () => {
                 onDelete={handleDeleteMission} 
                 onNew={() => openNewMissionModal()}
                 onTogglePaid={handleTogglePaid}
+                onComplete={handleCompleteMission}
               />
             )}
             {view === 'calendar' && (
