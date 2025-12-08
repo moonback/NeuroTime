@@ -6,19 +6,20 @@ interface SplashScreenProps {
   ready?: boolean;
 }
 
-const CIRCUIT_LINES = 16;
-const DOTS_PER_LINE = 6;
-const FADE_OUT_DURATION = 300;
-const CIRCUIT_ANGLE_STEP = 22.5;
-const CIRCUIT_LENGTH = 35;
+const CIRCUIT_LINES = 20;
+const DOTS_PER_LINE = 8;
+const FADE_OUT_DURATION = 400;
+const CIRCUIT_ANGLE_STEP = 18;
+const CIRCUIT_LENGTH = 38;
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ 
   onFinish, 
-  minDisplayTime = 1500, 
+  minDisplayTime = 1800, 
   ready = true 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [progress, setProgress] = useState(0);
   const startTimeRef = useRef(Date.now());
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,12 +35,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
   useEffect(() => {
     if (!ready) return;
 
+    // Simuler une progression
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 100);
+
     const checkFinish = () => {
       const elapsed = Date.now() - startTimeRef.current;
       const remaining = Math.max(0, minDisplayTime - elapsed);
 
       timeoutRef.current = setTimeout(() => {
-        handleFinish();
+        setProgress(100);
+        setTimeout(handleFinish, 200);
       }, remaining);
     };
 
@@ -49,10 +62,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       window.addEventListener('load', checkFinish);
       return () => {
         window.removeEventListener('load', checkFinish);
+        clearInterval(progressInterval);
       };
     }
 
     return () => {
+      clearInterval(progressInterval);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -62,7 +77,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
     };
   }, [ready, minDisplayTime, handleFinish]);
 
-  // Mémoriser les calculs SVG pour éviter les recalculs
   const circuitElements = useMemo(() => {
     return Array.from({ length: CIRCUIT_LINES }, (_, i) => {
       const angle = (i * CIRCUIT_ANGLE_STEP) * Math.PI / 180;
@@ -76,7 +90,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         return { x: dotX, y: dotY };
       });
 
-      return { angle, x2, y2, dots };
+      return { angle, x2, y2, dots, delay: i * 0.1 };
     });
   }, []);
 
@@ -86,20 +100,29 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-[#0a0a0f] flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[9999] bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] flex items-center justify-center overflow-hidden"
       role="status"
       aria-label="Chargement de l'application NeuroTime"
       style={{
-        animation: isVisible && !isFadingOut ? 'fadeIn 0.3s ease-in' : 'fadeOut 0.3s ease-out forwards',
+        animation: isVisible && !isFadingOut ? 'fadeIn 0.4s ease-out' : 'fadeOut 0.4s ease-in forwards',
         willChange: isFadingOut ? 'opacity' : 'auto'
       }}
     >
+      {/* Animated Background Gradient */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(0,140,255,0.08) 0%, transparent 60%)',
+          animation: 'breathe 4s ease-in-out infinite'
+        }}
+      />
+
       {/* Circuit Board / Neural Network Background */}
       <svg 
         className="absolute inset-0 w-full h-full"
         style={{ 
-          opacity: 0.4, 
-          filter: 'blur(0.5px)',
+          opacity: 0.5, 
+          filter: 'blur(0.3px)',
           willChange: 'opacity'
         }}
         preserveAspectRatio="xMidYMid slice"
@@ -107,12 +130,23 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       >
         <defs>
           <linearGradient id="circuitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#008CFF" stopOpacity="0.5" />
-            <stop offset="50%" stopColor="#76CCFF" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#008CFF" stopOpacity="0.4" />
+            <stop offset="0%" stopColor="#008CFF" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="#76CCFF" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#008CFF" stopOpacity="0.5" />
+          </linearGradient>
+          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00D4FF" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#0066FF" stopOpacity="0.7" />
           </linearGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <filter id="strongGlow">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
             <feMerge> 
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -120,7 +154,22 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           </filter>
         </defs>
         
-        {/* Circuit lines radiating from center with neural network pattern */}
+        {/* Central pulse circle */}
+        <circle
+          cx="50%"
+          cy="50%"
+          r="0"
+          fill="none"
+          stroke="url(#accentGradient)"
+          strokeWidth="3"
+          opacity="0.6"
+          filter="url(#strongGlow)"
+        >
+          <animate attributeName="r" from="0" to="300" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
+        </circle>
+
+        {/* Circuit lines radiating from center */}
         {circuitElements.map((circuit, i) => (
           <g key={i} filter="url(#glow)">
             <line
@@ -129,115 +178,137 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
               x2={`${circuit.x2}%`}
               y2={`${circuit.y2}%`}
               stroke="url(#circuitGradient)"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               className="circuit-line"
-              opacity="0.7"
+              opacity="0"
+              style={{
+                animationDelay: `${circuit.delay}s`
+              }}
             />
-            {/* Dots along the line */}
             {circuit.dots.map((dot, j) => (
               <circle
                 key={j}
                 cx={`${dot.x}%`}
                 cy={`${dot.y}%`}
-                r="2.5"
+                r="3"
                 fill="#008CFF"
-                opacity="0.7"
+                opacity="0"
                 className="circuit-dot"
+                style={{
+                  animationDelay: `${circuit.delay + j * 0.05}s`
+                }}
               />
             ))}
           </g>
         ))}
         
-        {/* Curved connecting paths for neural network effect */}
+        {/* Enhanced curved connecting paths */}
         <path
           d="M 25% 25% Q 35% 40%, 50% 50% T 75% 25%"
           fill="none"
-          stroke="url(#circuitGradient)"
-          strokeWidth="1.5"
-          opacity="0.5"
-          className="circuit-line"
+          stroke="url(#accentGradient)"
+          strokeWidth="2"
+          opacity="0.6"
+          className="circuit-path"
           filter="url(#glow)"
         />
         <path
           d="M 25% 75% Q 35% 60%, 50% 50% T 75% 75%"
           fill="none"
-          stroke="url(#circuitGradient)"
-          strokeWidth="1.5"
-          opacity="0.5"
-          className="circuit-line"
+          stroke="url(#accentGradient)"
+          strokeWidth="2"
+          opacity="0.6"
+          className="circuit-path"
           filter="url(#glow)"
         />
         <path
           d="M 20% 40% Q 30% 50%, 50% 50% T 80% 40%"
           fill="none"
           stroke="url(#circuitGradient)"
-          strokeWidth="1"
-          opacity="0.4"
-          className="circuit-line"
+          strokeWidth="1.5"
+          opacity="0.5"
+          className="circuit-path"
         />
         <path
           d="M 20% 60% Q 30% 50%, 50% 50% T 80% 60%"
           fill="none"
           stroke="url(#circuitGradient)"
-          strokeWidth="1"
-          opacity="0.4"
-          className="circuit-line"
+          strokeWidth="1.5"
+          opacity="0.5"
+          className="circuit-path"
         />
       </svg>
 
-      {/* Main Content Container - Horizontal Layout */}
-      <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-10 px-4 sm:px-6 md:px-8 max-w-4xl">
-        {/* Logo - Left side */}
+      {/* Main Content Container */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 px-4 sm:px-6 md:px-8 max-w-4xl">
+        {/* Logo with enhanced effects */}
         <div className="relative flex-shrink-0">
-          {/* Glow effect behind logo */}
+          {/* Multi-layer glow effect */}
           <div 
             className="absolute inset-0 blur-3xl"
             style={{
-              background: 'radial-gradient(circle, rgba(0,140,255,0.6) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(0,140,255,0.7) 0%, rgba(0,212,255,0.4) 40%, transparent 70%)',
+              width: '180%',
+              height: '180%',
+              top: '-40%',
+              left: '-40%',
+              animation: 'pulseGlow 2.5s ease-in-out infinite'
+            }}
+          />
+          
+          <div 
+            className="absolute inset-0 blur-2xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(118,204,255,0.5) 0%, transparent 60%)',
               width: '150%',
               height: '150%',
               top: '-25%',
               left: '-25%',
-              animation: 'pulseGlow 2s ease-in-out infinite'
+              animation: 'pulseGlow 2s ease-in-out infinite reverse'
             }}
           />
           
-          {/* Logo container */}
-          <div className="relative z-10">
-            <img
-              src="/logo2.png"
-              alt="NeuroTime Logo"
-              className="h-24 w-24 sm:h-28 sm:w-28 md:h-36 md:w-36 object-contain"
+          {/* Logo container with scale animation */}
+          <div 
+            className="relative z-10"
+            style={{
+              animation: 'scaleIn 0.6s ease-out'
+            }}
+          >
+            <div
+              className="h-28 w-28 sm:h-32 sm:w-32 md:h-40 md:w-40 bg-gradient-to-br from-[#008CFF] to-[#00D4FF] rounded-full flex items-center justify-center"
               style={{
-                filter: 'drop-shadow(0 0 25px rgba(0,140,255,0.9)) drop-shadow(0 0 50px rgba(0,140,255,0.5))',
+                filter: 'drop-shadow(0 0 30px rgba(0,140,255,0.9)) drop-shadow(0 0 60px rgba(0,140,255,0.5))',
                 animation: 'float 3s ease-in-out infinite',
-                willChange: 'transform'
+                willChange: 'transform',
+                boxShadow: '0 0 80px rgba(0,140,255,0.4), inset 0 0 40px rgba(255,255,255,0.2)'
               }}
-              loading="eager"
-              onError={(e) => {
-                // Fallback si l'image ne charge pas
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-              }}
-            />
+            >
+              <span className="text-5xl sm:text-6xl md:text-7xl font-bold text-white">N</span>
+            </div>
           </div>
         </div>
 
-        {/* Text Content - Right side */}
-        <div className="flex flex-col justify-center items-center sm:items-start text-center sm:text-left">
+        {/* Text Content with stagger animation */}
+        <div className="flex flex-col justify-center items-center text-center">
           {/* App Name */}
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-none">
+          <h1 
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-none mb-3"
+            style={{
+              animation: 'slideUp 0.6s ease-out 0.2s backwards'
+            }}
+          >
             <span 
               className="inline-block"
               style={{
-                background: 'linear-gradient(to right, #008CFF 0%, #76CCFF 100%)',
+                background: 'linear-gradient(135deg, #008CFF 0%, #76CCFF 50%, #00D4FF 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 15px rgba(0,140,255,0.6))',
-                letterSpacing: '-0.02em',
-                fontWeight: 700
+                filter: 'drop-shadow(0 0 20px rgba(0,140,255,0.7))',
+                letterSpacing: '-0.03em',
+                fontWeight: 800
               }}
             >
               NeuroTime
@@ -245,31 +316,64 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           </h1>
           
           {/* Tagline */}
-          <p className="text-white/70 text-xs sm:text-sm md:text-base lg:text-lg font-medium mt-2 sm:mt-3 leading-relaxed">
+          <p 
+            className="text-white/80 text-sm sm:text-base md:text-lg lg:text-xl font-medium leading-relaxed"
+            style={{
+              animation: 'slideUp 0.6s ease-out 0.4s backwards',
+              textShadow: '0 2px 10px rgba(0,140,255,0.3)'
+            }}
+          >
             Gérez votre temps, maximisez vos gains.
           </p>
+
+          {/* Subtle accent line */}
+          <div 
+            className="mt-4 h-1 bg-gradient-to-r from-transparent via-[#008CFF] to-transparent rounded-full"
+            style={{
+              width: '200px',
+              animation: 'expandWidth 0.8s ease-out 0.6s backwards',
+              boxShadow: '0 0 20px rgba(0,140,255,0.6)'
+            }}
+          />
         </div>
       </div>
 
-      {/* Loading Indicator - Bottom */}
-      <div className="absolute bottom-6 sm:bottom-8 md:bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2">
-        <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium" aria-live="polite">
-          Chargement en cours
-          <span className="loading-dots" aria-hidden="true">...</span>
-        </p>
-        <div className="flex gap-2 mt-1" role="progressbar" aria-label="Chargement">
-          {[0, 0.2, 0.4].map((delay, index) => (
-            <div 
-              key={index}
-              className="w-2 sm:w-2.5 h-2 sm:h-2.5 bg-[#008CFF] rounded-full"
-              style={{
-                animation: 'dotPulse 1.4s ease-in-out infinite',
-                animationDelay: `${delay}s`,
-                boxShadow: '0 0 10px rgba(0,140,255,0.9), 0 0 20px rgba(0,140,255,0.5)',
-                willChange: 'opacity, transform'
-              }}
-            />
-          ))}
+      {/* Enhanced Loading Indicator */}
+      <div 
+        className="absolute bottom-8 sm:bottom-10 md:bottom-14 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3"
+        style={{
+          animation: 'slideUp 0.6s ease-out 0.8s backwards'
+        }}
+      >
+        {/* Progress bar */}
+        <div className="w-48 sm:w-56 md:w-64 h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+          <div 
+            className="h-full bg-gradient-to-r from-[#008CFF] via-[#76CCFF] to-[#00D4FF] rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: `${Math.min(progress, 100)}%`,
+              boxShadow: '0 0 20px rgba(0,140,255,0.8)'
+            }}
+          />
+        </div>
+
+        {/* Loading text and dots */}
+        <div className="flex items-center gap-2">
+          <p className="text-white/70 text-xs sm:text-sm md:text-base font-medium" aria-live="polite">
+            Chargement
+          </p>
+          <div className="flex gap-1.5" role="progressbar" aria-label="Chargement">
+            {[0, 0.15, 0.3].map((delay, index) => (
+              <div 
+                key={index}
+                className="w-1.5 h-1.5 bg-[#008CFF] rounded-full"
+                style={{
+                  animation: 'dotBounce 1.2s ease-in-out infinite',
+                  animationDelay: `${delay}s`,
+                  boxShadow: '0 0 12px rgba(0,140,255,0.9)'
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -291,35 +395,79 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             opacity: 0; 
           }
         }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes expandWidth {
+          from {
+            width: 0;
+            opacity: 0;
+          }
+          to {
+            width: 200px;
+            opacity: 1;
+          }
+        }
         
         @keyframes float {
           0%, 100% { 
-            transform: translateY(0px); 
+            transform: translateY(0px) rotate(0deg); 
           }
           50% { 
-            transform: translateY(-8px); 
+            transform: translateY(-10px) rotate(2deg); 
           }
         }
         
         @keyframes pulseGlow {
           0%, 100% { 
             opacity: 0.5; 
-            transform: scale(1.5);
+            transform: scale(1.4);
           }
           50% { 
-            opacity: 0.8; 
-            transform: scale(1.6);
+            opacity: 0.9; 
+            transform: scale(1.7);
+          }
+        }
+
+        @keyframes breathe {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.7;
+            transform: scale(1.1);
           }
         }
         
-        @keyframes dotPulse {
+        @keyframes dotBounce {
           0%, 100% { 
-            opacity: 0.3; 
-            transform: scale(0.8);
+            opacity: 0.4; 
+            transform: translateY(0) scale(0.9);
           }
           50% { 
             opacity: 1; 
-            transform: scale(1.2);
+            transform: translateY(-8px) scale(1.2);
           }
         }
         
@@ -328,8 +476,25 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             stroke-dasharray: 0 1000;
             opacity: 0;
           }
+          20% {
+            opacity: 0.8;
+          }
+          80% {
+            opacity: 0.8;
+          }
+          100% {
+            stroke-dasharray: 1000 0;
+            opacity: 0;
+          }
+        }
+
+        @keyframes circuitPathFlow {
+          0% {
+            stroke-dasharray: 0 1000;
+            opacity: 0;
+          }
           50% {
-            opacity: 1;
+            opacity: 0.7;
           }
           100% {
             stroke-dasharray: 1000 0;
@@ -338,42 +503,43 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         }
         
         .circuit-line {
-          animation: circuitFlow 4s ease-in-out infinite;
+          animation: circuitFlow 5s ease-in-out infinite;
+          will-change: stroke-dasharray, opacity;
+        }
+
+        .circuit-path {
+          animation: circuitPathFlow 6s ease-in-out infinite;
           will-change: stroke-dasharray, opacity;
         }
         
         .circuit-dot {
-          animation: pulseGlow 2s ease-in-out infinite;
+          animation: pulseGlow 2.5s ease-in-out infinite;
           will-change: opacity, transform;
-        }
-        
-        @keyframes loadingDots {
-          0%, 20% {
-            content: '.';
-          }
-          40% {
-            content: '..';
-          }
-          60%, 100% {
-            content: '...';
-          }
-        }
-        
-        .loading-dots::after {
-          content: '...';
-          animation: loadingDots 1.5s steps(4, end) infinite;
         }
         
         /* Optimisation pour les appareils à faible performance */
         @media (prefers-reduced-motion: reduce) {
           .circuit-line,
           .circuit-dot,
-          .loading-dots::after {
-            animation: none;
+          .circuit-path {
+            animation: none !important;
+            opacity: 0.6 !important;
           }
           
           [style*="animation"] {
             animation: none !important;
+          }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+          @keyframes float {
+            0%, 100% { 
+              transform: translateY(0px); 
+            }
+            50% { 
+              transform: translateY(-6px); 
+            }
           }
         }
       `}</style>
