@@ -8,7 +8,6 @@ import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
-import DashboardActivity from './DashboardActivity';
 import { jsPDF } from 'jspdf';
 
 interface DashboardProps {
@@ -22,7 +21,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const [summary, setSummary] = useState<string>('Analyse de vos activités en cours...');
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isActivityExpanded, setIsActivityExpanded] = useState(false);
   const [isUpcomingExpanded, setIsUpcomingExpanded] = useState(false);
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
   const now = new Date();
@@ -866,36 +864,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardStats missions={missions} />
         <DashboardGoals missions={missions} />
-      </div>
-
-      {/* Activité récente */}
-      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
-        <button
-          onClick={() => setIsActivityExpanded(!isActivityExpanded)}
-          className="w-full flex items-center justify-between mb-6 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
-              <Clock className="w-5 h-5 text-indigo-400" />
-            </div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-100">Activité récente</h3>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs md:text-sm text-gray-400">
-              {isActivityExpanded ? 'Réduire' : 'Déplier'}
-            </span>
-            {isActivityExpanded ? (
-              <ChevronUp className="w-5 h-5 text-gray-400" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-400" />
-            )}
-          </div>
-        </button>
-        {isActivityExpanded && (
-          <div className="animate-slide-in-up">
-            <DashboardActivity missions={missions} onEdit={onEdit} />
-          </div>
-        )}
       </div>
 
       {/* Upcoming / Planned Missions List */}
