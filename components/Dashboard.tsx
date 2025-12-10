@@ -3,11 +3,12 @@ import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
 import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
+import DashboardForecast from './DashboardForecast';
 import { jsPDF } from 'jspdf';
 
 interface DashboardProps {
@@ -859,6 +860,9 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
       {/* Graphiques */}
       <DashboardCharts missions={missions} />
+
+      {/* Prévisions de revenus */}
+      <DashboardForecast missions={missions} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
