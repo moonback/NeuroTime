@@ -282,12 +282,24 @@ const App: React.FC = () => {
         </nav>
 
         <div className="p-4 space-y-3 border-t border-gray-700/30">
-           <button 
-            onClick={() => openNewMissionModal()}
-            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-md hover:shadow-lg"
+           <button
+            onClick={openNewMissionModal}
+            className="
+              w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500
+              hover:from-primary-600 hover:to-primary-700 hover:shadow-xl
+              hover:scale-[1.03] transition-transform
+              text-white font-semibold py-3 px-4 rounded-xl
+              flex items-center justify-center gap-2
+              transition-all text-sm shadow-md
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/70
+              active:scale-[0.97] ring-inset"
+            aria-label="Créer une nouvelle mission"
+            type="button"
           >
-            <Plus size={18} strokeWidth={2.5} />
-            <span className="tracking-wide">Nouvelle mission</span>
+            <span className="flex items-center justify-center h-6 w-6 rounded-full bg-white/10 shadow-inner group-hover:bg-primary-600/20 transition-colors">
+              <Plus size={18} strokeWidth={2.3} className="text-primary-50 drop-shadow" />
+            </span>
+            <span className="tracking-wide font-medium">Nouvelle mission</span>
           </button>
           
           {/* User Info & Logout */}
