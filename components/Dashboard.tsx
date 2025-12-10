@@ -8,7 +8,6 @@ import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
-import DashboardForecast from './DashboardForecast';
 import { jsPDF } from 'jspdf';
 
 interface DashboardProps {
@@ -860,9 +859,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
       {/* Graphiques */}
       <DashboardCharts missions={missions} />
-
-      {/* Prévisions de revenus */}
-      <DashboardForecast missions={missions} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
