@@ -236,23 +236,21 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-300 text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
+    <div className="min-h-screen neo-aurora text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
+      <div className="aurora-layer">
+        <div className="aurora-blob primary" style={{ top: '-120px', left: '-60px' }} />
+        <div className="aurora-blob pink" style={{ top: '-80px', right: '-100px' }} />
+        <div className="aurora-blob teal small" style={{ bottom: '-120px', left: '20%' }} />
+      </div>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 animate-slide-in-left shadow-lg">
-        <div className="p-6 border-b border-gray-700/30 flex items-center gap-3">
-          <span className="inline-flex h-11 w-11 rounded-xl bg-primary-500 items-center justify-center shadow-md">
+      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 animate-slide-in-left shadow-lg backdrop-blur-xl">
+        <div className="p-6 border-b border-gray-700/30">
+          <div className="w-full  rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
             <img
-              src="/logo2.png"
-              alt="Logo NeuroTime"
-              className="h-10 w-10 object-contain"
+              src="/logo.png"
+              alt="Logo"
+              className="w-full h-20 object-contain"
             />
-          </span>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight leading-tight">
-              <span className="text-primary-500" style={{letterSpacing: "-0.5px"}}>Neuro</span>
-              <span className="text-primary-400 ml-0.5" style={{letterSpacing: "-0.5px"}}>Time</span>
-            </h1>
-            <span className="text-[0.7rem] text-gray-400 mt-0.5 block font-medium tracking-wider uppercase">Gestion</span>
           </div>
         </div>
 
@@ -312,8 +310,8 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300 overflow-y-auto">
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in">
+      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative">
+        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
               <Dashboard 
@@ -354,7 +352,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg backdrop-blur-xl">
         <div className="flex justify-around items-center px-3 py-2.5">
           <MobileNavButton 
             active={view === 'dashboard'} 
@@ -437,7 +435,7 @@ const App: React.FC = () => {
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium relative overflow-hidden ${
       active 
         ? 'glass-button text-primary-400 font-semibold shadow-md border-primary-500/30 bg-primary-500/10' 
         : 'text-gray-400 hover:glass-button hover:text-primary-300 hover:shadow-sm'

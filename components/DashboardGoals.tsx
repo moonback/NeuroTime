@@ -238,10 +238,10 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions }) => {
         {goalsWithProgress.map((goal) => (
           <div
             key={goal.id}
-            className={`p-4 rounded-xl border transition-all ${
+            className={`p-4 rounded-xl border transition-all glass-light backdrop-blur-sm ${
               goal.isCompleted
-                ? 'bg-green-500/10 border-green-500/30'
-                : 'bg-dark-50 border-dark-200'
+                ? 'border-green-400/40 bg-green-500/10 shadow-soft'
+                : 'border-gray-700/40'
             }`}
           >
             <div className="flex items-center justify-between mb-3">

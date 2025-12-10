@@ -219,34 +219,17 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
               animation: 'scaleIn 0.6s ease-out'
             }}
           >
-            <div
-              className="h-28 w-28 sm:h-32 sm:w-32 md:h-40 md:w-40 bg-primary-500 rounded-full flex items-center justify-center shadow-lg"
-            >
-              <span className="text-5xl sm:text-6xl md:text-7xl font-bold text-white">N</span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="h-28 sm:h-32 md:h-40 w-auto object-contain"
+              draggable={false}
+            />
           </div>
         </div>
 
         {/* Text Content with stagger animation */}
         <div className="flex flex-col justify-center items-center text-center">
-          {/* App Name */}
-          <h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-none mb-3"
-            style={{
-              animation: 'slideUp 0.6s ease-out 0.2s backwards'
-            }}
-          >
-            <span 
-              className="inline-block text-primary-500"
-              style={{
-                letterSpacing: '-0.03em',
-                fontWeight: 800
-              }}
-            >
-              NeuroTime
-            </span>
-          </h1>
-          
           {/* Tagline */}
           <p 
             className="text-white/80 text-sm sm:text-base md:text-lg lg:text-xl font-medium leading-relaxed"

@@ -103,7 +103,7 @@ const DashboardActivity: React.FC<DashboardActivityProps> = ({ missions, onEdit 
         {recentActivity.map((activity, index) => (
           <div
             key={activity.id}
-            className="group relative p-4 bg-dark-50 rounded-xl border border-dark-200 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 cursor-pointer overflow-hidden animate-slide-in-up"
+            className="group relative p-4 glass-light rounded-xl border border-primary-500/10 hover:border-primary-500/40 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 cursor-pointer overflow-hidden animate-slide-in-up backdrop-blur-md"
             onClick={() => onEdit(activity.mission)}
             style={{ animationDelay: `${index * 50}ms` }}
           >

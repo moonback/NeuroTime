@@ -106,7 +106,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions }) => {
         </div>
         
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-dark-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 glass-light rounded-lg border border-gray-700/30 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-primary-400" />
               <div>
@@ -119,7 +119,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-dark-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 glass-light rounded-lg border border-gray-700/30 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <Target className="w-5 h-5 text-green-400" />
               <div>
@@ -133,7 +133,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions }) => {
           </div>
 
           {peakDays.length > 0 && (
-            <div className="p-3 bg-dark-50 rounded-lg">
+            <div className="p-3 glass-light rounded-lg border border-gray-700/30 backdrop-blur-sm">
               <p className="text-sm font-semibold text-gray-200 mb-3">Jours les plus actifs</p>
               <div className="space-y-2">
                 {peakDays.map((day, index) => (
@@ -177,7 +177,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions }) => {
                     <span className="text-sm font-semibold text-blue-300">{week.hours}h</span>
                   </div>
                 </div>
-                <div className="h-2 bg-dark-50 rounded-full overflow-hidden">
+                <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                   <div
                     className="h-full bg-gradient-to-r from-blue-500 to-primary-500 rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
