@@ -19,6 +19,7 @@ import subMonths from 'date-fns/subMonths';
 import fr from 'date-fns/locale/fr';
 import { ChevronLeft, ChevronRight, MapPin, Trash2, Edit, Calendar, CheckCircle, Plus, Briefcase, Clock, Euro, Search, X, Grid3x3, CalendarDays, List, DollarSign } from 'lucide-react';
 import { formatTimeSlots, getMissionTimeSlots } from '../utils/timeSlots';
+import { useSwipeNavigation } from '../utils/useSwipeNavigation';
 
 interface CalendarViewProps {
   missions: Mission[];
@@ -178,6 +179,24 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
     setSelectedDate(now);
   };
 
+  const swipeHandlers = useSwipeNavigation({
+    enabled: isMobile,
+    onSwipeLeft: () => {
+      if (viewMode === 'month') {
+        nextMonth();
+      } else if (viewMode === 'week') {
+        nextWeek();
+      }
+    },
+    onSwipeRight: () => {
+      if (viewMode === 'month') {
+        prevMonth();
+      } else if (viewMode === 'week') {
+        prevWeek();
+      }
+    },
+  });
+
   // Get missions for the currently selected single date
   const selectedDateKey = format(selectedDate, 'yyyy-MM-dd');
   const allMissionsForDate = missionsByDate.get(selectedDateKey) || [];
@@ -190,7 +209,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
   const dailyTotal = selectedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6 h-full pb-24 md:pb-0 animate-fade-in">
+    <div
+      className="flex flex-col gap-4 md:gap-6 h-full pb-24 md:pb-0 animate-fade-in"
+      onTouchStart={swipeHandlers.handleTouchStart}
+      onTouchMove={swipeHandlers.handleTouchMove}
+      onTouchEnd={swipeHandlers.handleTouchEnd}
+    >
       {/* Header with View Mode Toggle, Navigation & Stats */}
       <div className="glass-card rounded-2xl p-4 md:p-5 flex flex-col gap-4">
         {/* View Mode Toggle */}

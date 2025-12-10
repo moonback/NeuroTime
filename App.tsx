@@ -15,6 +15,9 @@ import PublicMissionsView from './components/PublicMissionsView';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
+import { useSwipeNavigation } from './utils/useSwipeNavigation';
+
+const viewOrder: ViewState[] = ['dashboard', 'missions', 'calendar', 'payments'];
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
@@ -23,6 +26,7 @@ const App: React.FC = () => {
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Authentification
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -64,6 +68,13 @@ const App: React.FC = () => {
     return () => {
       unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    const updateIsMobile = () => setIsMobile(window.innerWidth < 768);
+    updateIsMobile();
+    window.addEventListener('resize', updateIsMobile);
+    return () => window.removeEventListener('resize', updateIsMobile);
   }, []);
 
   // Load data on mount (seulement si connecté)
@@ -195,6 +206,24 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const goToNextView = useCallback(() => {
+    const currentIndex = viewOrder.indexOf(view);
+    const nextView = viewOrder[(currentIndex + 1) % viewOrder.length];
+    setView(nextView);
+  }, [view]);
+
+  const goToPrevView = useCallback(() => {
+    const currentIndex = viewOrder.indexOf(view);
+    const prevView = viewOrder[(currentIndex - 1 + viewOrder.length) % viewOrder.length];
+    setView(prevView);
+  }, [view]);
+
+  const swipeHandlers = useSwipeNavigation({
+    enabled: isMobile && !isModalOpen && !isImageUploadOpen && !(isAuthModalOpen && !user),
+    onSwipeLeft: goToNextView,
+    onSwipeRight: goToPrevView,
+  });
+
   const openNewMissionModal = (dateStr?: string) => {
     setEditingMission(null);
     setSelectedDateForNew(dateStr);
@@ -312,7 +341,12 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300 overflow-y-auto">
+      <main
+        className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-dark-300 overflow-y-auto"
+        onTouchStart={swipeHandlers.handleTouchStart}
+        onTouchMove={swipeHandlers.handleTouchMove}
+        onTouchEnd={swipeHandlers.handleTouchEnd}
+      >
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in">
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
