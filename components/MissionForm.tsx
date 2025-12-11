@@ -458,7 +458,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
         
         {/* Header */}
-        <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light'}`}>
+        <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light bg-gradient-to-r from-primary-500/10 via-transparent to-transparent'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
             <h2 className={`text-xl md:text-2xl font-black tracking-tight ${isConverting ? 'text-green-200' : 'text-gray-100'}`}>
@@ -516,8 +516,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
                     }}
                     placeholder="Ex: Régie Son - Concert"
-                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-light border-primary-500/25 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/60 outline-none transition-all text-sm text-gray-100 placeholder-gray-400 font-medium ${
-                      errors.title ? 'border-red-500/60 focus:ring-red-500/50' : ''
+                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 font-medium ${
+                      errors.title ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''
                     }`}
                   />
                   {errors.title && (
@@ -539,8 +539,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       <select
                         value={client}
                         onChange={handleClientChange}
-                        className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 ${
-                          errors.client ? 'border-red-500/50' : 'border-dark-200'
+                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 ${
+                          errors.client ? 'border-red-500/50' : ''
                         }`}
                       >
                         <option value="">Sélectionner un client...</option>
@@ -575,8 +575,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           }}
                           placeholder="Nom du nouveau client"
                           autoFocus
-                          className={`flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                            errors.newClient ? 'border-red-500/50' : 'border-dark-200'
+                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                            errors.newClient ? 'border-red-500/50' : ''
                           }`}
                         />
                         <button
@@ -635,8 +635,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     if (errors.location) setErrors(prev => ({ ...prev, location: '' }));
                   }}
                   placeholder="Ex: Paris La Défense Arena"
-                  className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                    errors.location ? 'border-red-500/50' : 'border-dark-200'
+                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                    errors.location ? 'border-red-500/50' : ''
                   }`}
                 />
                 {errors.location && (
@@ -647,7 +647,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
             </section>
 
-            <hr className="border-gray-100" />
+            <hr className="glass-separator" />
 
             {/* Section 2: Date & Horaires */}
             <section className="space-y-3 md:space-y-4">
@@ -686,8 +686,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       setDate(e.target.value);
                       if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
                     }}
-                    className={`w-full px-3 md:px-4 py-2 md:py-2.5 bg-dark-100 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-gray-100 ${
-                      errors.date ? 'border-red-500/50' : 'border-dark-200'
+                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-100 ${
+                      errors.date ? 'border-red-500/50' : ''
                     }`}
                   />
                   {errors.date && (
@@ -734,7 +734,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.startTime}
                             onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
-                            className={`w-full px-3 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-sm text-gray-100 ${
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
                               errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
                             }`}
                           />
@@ -751,7 +751,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.endTime}
                             onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
-                            className={`w-full px-3 py-2 glass-light border-primary-500/20 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-sm text-gray-100 ${
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
                               errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
                             }`}
                           />
@@ -846,7 +846,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           step="1"
                           value={manualTotal}
                           onChange={(e) => setManualTotal(parseFloat(e.target.value))}
-                          className="w-full pl-4 pr-10 py-3 glass-light border-primary-500/20 rounded-xl text-right font-bold text-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none text-gray-100"
+                          className="w-full pl-4 pr-10 py-3 glass-input rounded-xl text-right font-bold text-xl outline-none text-gray-100"
                         />
                         <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                        </div>
@@ -856,7 +856,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
             </section>
 
-            <hr className="border-gray-100" />
+            <hr className="glass-separator" />
 
             {/* Section 3: IA & Notes */}
             <section className="space-y-4">
@@ -881,7 +881,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Notes rapides : monté les spots, câblage régie, fin 2h du mat..."
                   rows={3}
-                  className="w-full px-4 py-3 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500/50 outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
+                  className="w-full px-4 py-3 glass-input rounded-xl outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
                 />
               </div>
             </section>
@@ -922,10 +922,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             </button>
             <button
               type="submit"
-              className={`flex-[2] text-white font-semibold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all hover:shadow-xl flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${
+              className={`flex-[2] text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${
                 isConverting 
-                ? 'bg-green-500 hover:bg-green-600' 
-                : 'bg-primary-500 hover:bg-primary-600'
+                ? 'bg-green-500 hover:bg-green-600 glow-green' 
+                : 'bg-primary-500 hover:bg-primary-600 glow-primary'
               }`}
             >
               <span className="flex items-center gap-2.5 tracking-wide">
