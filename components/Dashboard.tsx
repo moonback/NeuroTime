@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from 'react';
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
-import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File } from 'lucide-react';
-import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
+import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, addMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
@@ -23,6 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUpcomingExpanded, setIsUpcomingExpanded] = useState(false);
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const now = new Date();
   
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
@@ -32,21 +33,34 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     [missions]
   );
   
-  // Missions du mois en cours (pour les statistiques mensuelles)
-  // Pour les missions terminées : on vérifie si elles se sont terminées ce mois-ci
-  // Pour les missions planifiées : on vérifie si elles commencent ce mois-ci
+  // Missions du mois sélectionné (pour les statistiques mensuelles)
+  // Pour les missions terminées : on vérifie si elles se sont terminées dans le mois sélectionné
+  // Pour les missions planifiées : on vérifie si elles commencent dans le mois sélectionné
+  const selectedMonthStart = useMemo(() => startOfMonth(selectedMonth), [selectedMonth]);
+  const selectedMonthEnd = useMemo(() => endOfMonth(selectedMonth), [selectedMonth]);
+  
+  const selectedMonthCompletedMissions = useMemo(() => 
+    allCompletedMissions.filter(m => {
+      const missionDate = new Date(m.endTime);
+      return missionDate >= selectedMonthStart && missionDate <= selectedMonthEnd;
+    }),
+    [allCompletedMissions, selectedMonthStart, selectedMonthEnd]
+  );
+  
+  const selectedMonthPlannedMissions = useMemo(() => 
+    missions.filter(m => {
+      const missionDate = new Date(m.startTime);
+      return m.status === 'planned' && missionDate >= selectedMonthStart && missionDate <= selectedMonthEnd;
+    }),
+    [missions, selectedMonthStart, selectedMonthEnd]
+  );
+  
+  // Pour compatibilité avec le reste du code
   const thisMonthCompletedMissions = useMemo(() => 
     allCompletedMissions.filter(m => 
       isThisMonth(new Date(m.endTime))
     ),
     [allCompletedMissions]
-  );
-  
-  const thisMonthPlannedMissions = useMemo(() => 
-    missions.filter(m => 
-      m.status === 'planned' && isThisMonth(new Date(m.startTime))
-    ),
-    [missions]
   );
   
   // Heures et gains de TOUTES les missions terminées (réalisé total)
@@ -59,19 +73,19 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     [allCompletedMissions]
   );
 
-  // CA réalisé : TOUTES les missions terminées (pas seulement celles du mois)
+  // CA réalisé : missions terminées du mois sélectionné
   const totalEarningsCompleted = useMemo(() => 
-    allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
-    [allCompletedMissions]
+    selectedMonthCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
+    [selectedMonthCompletedMissions]
   );
   
-  // Gains prévisionnels des missions planifiées du mois en cours
+  // Gains prévisionnels des missions planifiées du mois sélectionné
   const totalEarningsPlanned = useMemo(() => 
-    thisMonthPlannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
-    [thisMonthPlannedMissions]
+    selectedMonthPlannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
+    [selectedMonthPlannedMissions]
   );
   
-  // Total = Réalisé (toutes missions terminées) + Prévisionnel (missions planifiées du mois)
+  // Total = Réalisé (missions terminées du mois) + Prévisionnel (missions planifiées du mois)
   const totalEarnings = useMemo(() => 
     totalEarningsCompleted + totalEarningsPlanned,
     [totalEarningsCompleted, totalEarningsPlanned]
@@ -94,51 +108,88 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     [allCompletedMissions]
   );
 
-  // Vue d'ensemble
-  const todayMissions = useMemo(
-    () => missions.filter(m => isToday(new Date(m.startTime))),
-    [missions]
-  );
-
-  const todayHours = useMemo(
-    () =>
-      todayMissions.reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0),
-    [todayMissions]
-  );
-
-  const thisWeekMissions = useMemo(() => {
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-    return missions.filter(m => {
-      const start = new Date(m.startTime);
-      return start >= weekStart && start <= weekEnd;
-    });
-  }, [missions, now]);
-
-  const thisWeekHours = useMemo(
-    () =>
-      thisWeekMissions.reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0),
-    [thisWeekMissions]
-  );
-
-  const nextMission = useMemo(() => upcomingMissions[0] ?? null, [upcomingMissions]);
 
   // KPIs avancés
-  // Taux horaire moyen
+  // Taux horaire moyen - calculé en tenant compte des heures de jour et de nuit
+  // Utilise toutes les missions terminées (pas seulement le mois sélectionné)
   const averageHourlyRate = useMemo(() => {
-    if (totalHours === 0) return 0;
-    return totalEarningsCompleted / totalHours;
-  }, [totalHours, totalEarningsCompleted]);
+    if (allCompletedMissions.length === 0) return 0;
+    
+    // Calculer le total des heures de jour et de nuit séparément
+    let totalDayHours = 0;
+    let totalNightHours = 0;
+    let totalEarningsAll = 0;
+    
+    allCompletedMissions.forEach(m => {
+      totalEarningsAll += m.totalEarnings || 0;
+      
+      // Utiliser les détails si disponibles (plus précis)
+      if (m.details?.dayHours !== undefined && m.details?.nightHours !== undefined) {
+        totalDayHours += m.details.dayHours;
+        totalNightHours += m.details.nightHours;
+      } else {
+        // Fallback : estimer basé sur le rateType
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        const missionHours = (end - start) / (1000 * 60 * 60);
+        
+        if (m.rateType === 'day') {
+          totalDayHours += missionHours;
+        } else if (m.rateType === 'night') {
+          totalNightHours += missionHours;
+        } else if (m.rateType === 'mixed') {
+          // Pour les missions mixtes sans détails, estimer 50/50
+          totalDayHours += missionHours * 0.5;
+          totalNightHours += missionHours * 0.5;
+        } else {
+          // Par défaut, considérer comme jour
+          totalDayHours += missionHours;
+        }
+      }
+    });
+    
+    const totalHoursCalculated = totalDayHours + totalNightHours;
+    if (totalHoursCalculated === 0) return 0;
+    
+    // Utiliser les gains réels plutôt que les taux théoriques pour plus de précision
+    // Cela prend en compte les missions avec tarifs personnalisés
+    return totalEarningsAll / totalHoursCalculated;
+  }, [allCompletedMissions]);
 
-  // Comparaison mensuelle (ce mois vs mois précédent)
+  // Comparaison mensuelle pour le mois sélectionné (CA ce mois)
+  const selectedMonthComparison = useMemo(() => {
+    const selectedMonthStart = startOfMonth(selectedMonth);
+    const selectedMonthEnd = endOfMonth(selectedMonth);
+    const lastMonthStart = startOfMonth(subMonths(selectedMonth, 1));
+    const lastMonthEnd = endOfMonth(subMonths(selectedMonth, 1));
+
+    const selectedMonthRevenue = allCompletedMissions
+      .filter(m => {
+        const missionDate = new Date(m.endTime);
+        return missionDate >= selectedMonthStart && missionDate <= selectedMonthEnd;
+      })
+      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+
+    const lastMonthRevenue = allCompletedMissions
+      .filter(m => {
+        const missionDate = new Date(m.endTime);
+        return missionDate >= lastMonthStart && missionDate <= lastMonthEnd;
+      })
+      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+
+    const difference = selectedMonthRevenue - lastMonthRevenue;
+    const percentage = lastMonthRevenue > 0 ? (difference / lastMonthRevenue) * 100 : 0;
+
+    return {
+      thisMonth: selectedMonthRevenue,
+      lastMonth: lastMonthRevenue,
+      difference,
+      percentage: Math.round(percentage * 10) / 10,
+      isPositive: difference >= 0,
+    };
+  }, [allCompletedMissions, selectedMonth]);
+
+  // Comparaison mensuelle pour le mois en cours (Évolution mensuelle)
   const monthlyComparison = useMemo(() => {
     const now = new Date();
     const thisMonthStart = startOfMonth(now);
@@ -699,68 +750,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         </div>
       </header>
 
-      {/* Vue d'ensemble rapide */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 animate-slide-in-up mb-6">
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-primary-500/20 bg-gradient-to-br from-primary-600/20 via-primary-500/12 to-primary-400/8 hover:from-primary-600/25 hover:via-primary-500/18 hover:to-primary-400/12 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary-500/20 border border-primary-500/40 shadow-md shadow-primary-500/15">
-                <Clock className="w-5 h-5 text-primary-200" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-semibold text-primary-100 tracking-wide">Aujourd'hui</p>
-            </div>
-            <span className="text-xs font-medium text-gray-200 bg-primary-500/15 border border-primary-500/30 px-2.5 py-1 rounded-full">{todayMissions.length} mission(s)</span>
-          </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{todayHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-300 font-medium">Temps prévu ou réalisé sur la journée</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-emerald-500/20 bg-gradient-to-br from-emerald-600/18 via-emerald-500/12 to-emerald-400/8 hover:from-emerald-600/22 hover:via-emerald-500/18 hover:to-emerald-400/12 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 shadow-md shadow-emerald-500/15">
-                <TrendingUp className="w-5 h-5 text-emerald-200" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-semibold text-emerald-100 tracking-wide">Cette semaine</p>
-            </div>
-            <span className="text-xs font-medium text-gray-200 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-full">{thisWeekMissions.length} mission(s)</span>
-          </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{thisWeekHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-300 font-medium">Charge totale entre lundi et dimanche</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-orange-500/20 bg-gradient-to-br from-orange-600/18 via-orange-500/12 to-orange-400/8 hover:from-orange-600/22 hover:via-orange-500/18 hover:to-orange-400/12 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 shadow-md shadow-orange-500/15">
-                <Calendar className="w-5 h-5 text-orange-200" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-semibold text-orange-100 tracking-wide">Prochaine mission</p>
-            </div>
-            {nextMission ? (
-              <span className="text-xs font-medium text-orange-100 bg-orange-500/20 border border-orange-500/40 px-2.5 py-1 rounded-full shadow-sm">
-                {format(new Date(nextMission.startTime), 'dd MMM', { locale: fr })}
-              </span>
-            ) : (
-              <span className="text-xs text-gray-400">—</span>
-            )}
-          </div>
-          {nextMission ? (
-            <div className="mt-3 space-y-2">
-              <p className="text-lg md:text-xl font-bold text-gray-50 line-clamp-1 tracking-tight">{nextMission.title}</p>
-              <p className="text-sm text-gray-300 flex items-center gap-2 font-medium">
-                <Clock size={14} className="text-gray-400" strokeWidth={2} />
-                {format(new Date(nextMission.startTime), 'HH:mm')} • {nextMission.location}
-              </p>
-              <p className="text-xs text-gray-400 font-medium">
-                {nextMission.rateType === 'night' ? 'Mission de nuit' : 'Mission de jour'} · {nextMission.totalEarnings?.toFixed(0) ?? 0}€
-              </p>
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-gray-400 font-medium">Aucune mission planifiée. Ajoutez-en une pour rester prêt.</p>
-          )}
-        </div>
-      </div>
 
       {/* AI Summary Card */}
       <div className="glass-card bg-primary-500/10 rounded-2xl p-6 md:p-8 text-gray-100 relative overflow-hidden animate-slide-in-up mb-6 border-primary-500/20">
@@ -789,18 +778,58 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
       {/* Statistics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard 
-          icon={<Euro className="w-6 h-6 text-emerald-400" />}
-          label="CA ce mois"
-          value={`${totalEarnings.toFixed(0)} €`}
-          subtext={`Réalisé: ${totalEarningsCompleted.toFixed(0)}€ ${totalEarningsPlanned > 0 ? `+ Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€` : ''}`}
-          color="bg-emerald-500/10 border-emerald-500/30"
-          textColor="text-emerald-400"
-          trend={monthlyComparison.percentage !== 0 ? {
-            value: Math.abs(monthlyComparison.percentage),
-            isPositive: monthlyComparison.isPositive,
-          } : undefined}
-        />
+        {/* CA avec sélecteur de mois */}
+        <div className={`p-5 md:p-6 rounded-2xl glass-card transition-all hover:shadow-lg bg-emerald-500/10 border-emerald-500/30 group relative animate-slide-in-up shadow-md`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-3 rounded-xl bg-dark-50/80 shadow-lg border border-dark-100/50 text-emerald-400 group-hover:scale-110 transition-transform duration-300`}>
+                <Euro className="w-6 h-6" />
+              </div>
+              {/* Sélecteur de mois */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
+                  className="p-1.5 rounded-lg glass-button hover:bg-emerald-500/20 border border-emerald-500/30 transition-all"
+                  title="Mois précédent"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 text-emerald-300" />
+                </button>
+                <button
+                  onClick={() => setSelectedMonth(new Date())}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    isSameMonth(selectedMonth, now)
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'glass-button hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300'
+                  }`}
+                  title="Retour au mois en cours"
+                >
+                  {format(selectedMonth, 'MMM yyyy', { locale: fr })}
+                </button>
+                <button
+                  onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
+                  className="p-1.5 rounded-lg glass-button hover:bg-emerald-500/20 border border-emerald-500/30 transition-all"
+                  title="Mois suivant"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-emerald-300" />
+                </button>
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl md:text-4xl font-black text-gray-100 tracking-tight group-hover:scale-105 transition-transform duration-300 mb-1">{totalEarnings.toFixed(0)} €</p>
+              <p className={`text-xs md:text-sm font-bold mt-1 text-emerald-400 tracking-wide`}>CA ce mois</p>
+              <p className="text-[10px] md:text-xs text-gray-300 mt-2 font-medium">
+                Réalisé: {totalEarningsCompleted.toFixed(0)}€ {totalEarningsPlanned > 0 ? `+ Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€` : ''}
+              </p>
+              {selectedMonthComparison.percentage !== 0 && (
+                <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-lg mt-2 inline-flex ${selectedMonthComparison.isPositive ? 'text-green-300 bg-green-500/20 border border-green-500/30' : 'text-red-300 bg-red-500/20 border border-red-500/30'}`}>
+                  {selectedMonthComparison.isPositive ? <TrendingUp size={14} strokeWidth={2.5} /> : <TrendingDown size={14} strokeWidth={2.5} />}
+                  {selectedMonthComparison.isPositive ? '+' : ''}{selectedMonthComparison.percentage.toFixed(1)}% vs mois précédent
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         <StatCard 
           icon={<Clock className="w-6 h-6 text-primary-400" />}
           label="Heures totales"
