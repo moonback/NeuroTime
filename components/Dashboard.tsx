@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from '
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
 import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File } from 'lucide-react';
-import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday, isSameMonth, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
@@ -118,40 +118,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     [allCompletedMissions]
   );
 
-  // Vue d'ensemble
-  const todayMissions = useMemo(
-    () => missions.filter(m => isToday(new Date(m.startTime))),
-    [missions]
-  );
-
-  const todayHours = useMemo(
-    () =>
-      todayMissions.reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0),
-    [todayMissions]
-  );
-
-  const thisWeekMissions = useMemo(() => {
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-    return missions.filter(m => {
-      const start = new Date(m.startTime);
-      return start >= weekStart && start <= weekEnd;
-    });
-  }, [missions, now]);
-
-  const thisWeekHours = useMemo(
-    () =>
-      thisWeekMissions.reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0),
-    [thisWeekMissions]
-  );
 
   const nextMission = useMemo(() => upcomingMissions[0] ?? null, [upcomingMissions]);
 
@@ -684,90 +650,95 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
   return (
     <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in-up mb-6">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Tableau de bord</h1>
-          <p className="text-gray-300 text-sm md:text-base font-medium">Vue d'ensemble de votre activité</p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-2.5 rounded-full bg-primary-500/12 border border-primary-500/30 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-md shadow-primary-500/8">
-              <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/40" />
-              Mise à jour temps réel sur vos missions planifiées et réalisées
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="month-selector" className="text-xs text-gray-300 font-medium">
-                Période :
-              </label>
-              <input
-                id="month-selector"
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-200 border border-primary-500/30 hover:border-primary-500/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-              />
+      {/* Header amélioré */}
+      <header className="space-y-4 animate-slide-in-up">
+        {/* Titre et description */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary-500/20 to-primary-600/20 border border-primary-500/30 shadow-lg">
+                <Briefcase className="w-6 h-6 text-primary-300" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black text-gray-50 tracking-tight">Tableau de bord</h1>
+                <p className="text-gray-400 text-sm md:text-base font-medium mt-0.5">Vue d'ensemble de votre activité</p>
+              </div>
             </div>
           </div>
+          
+          {/* Boutons d'export groupés */}
+          <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl glass-card border border-primary-500/20 bg-primary-500/5">
+              <Download className="w-4 h-4 text-primary-300" strokeWidth={2} />
+              <span className="text-xs font-semibold text-gray-300">Exports</span>
+            </div>
+            <button 
+              onClick={downloadCSV}
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-md hover:shadow-lg hover:scale-105 border border-primary-500/20 hover:border-primary-500/40"
+              title="Exporter pour Excel"
+            >
+              <Download size={16} strokeWidth={2.5} />
+              <span className="hidden lg:inline">CSV</span>
+            </button>
+            <button 
+              onClick={downloadCompletedReportMD}
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-md hover:shadow-lg hover:scale-105 border border-primary-500/20 hover:border-primary-500/40"
+              title="Exporter les missions terminées en Markdown"
+            >
+              <FileText size={16} strokeWidth={2.5} />
+              <span className="hidden lg:inline">MD</span>
+            </button>
+            <button 
+              onClick={downloadCompletedReportPDF}
+              className="flex items-center justify-center gap-2 glass-button text-gray-200 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm shadow-md hover:shadow-lg hover:scale-105 border border-primary-500/20 hover:border-primary-500/40 bg-primary-500/10"
+              title="Exporter les missions terminées en PDF (pour paiement)"
+            >
+              <File size={16} strokeWidth={2.5} />
+              <span className="hidden lg:inline">PDF</span>
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2.5 flex-wrap">
-          <button 
-            onClick={downloadCSV}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
-            title="Exporter pour Excel"
-          >
-            <Download size={16} strokeWidth={2.5} />
-            <span className="hidden md:inline">Exporter CSV</span>
-            <span className="md:hidden">CSV</span>
-          </button>
-          <button 
-            onClick={downloadCompletedReportMD}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
-            title="Exporter les missions terminées en Markdown"
-          >
-            <FileText size={16} strokeWidth={2.5} />
-            <span className="hidden md:inline">Export MD</span>
-            <span className="md:hidden">MD</span>
-          </button>
-          <button 
-            onClick={downloadCompletedReportPDF}
-            className="flex items-center justify-center gap-2 glass-button text-gray-200 px-5 py-2.5 rounded-xl font-medium transition-all text-sm shadow-md"
-            title="Exporter les missions terminées en PDF (pour paiement)"
-          >
-            <File size={16} strokeWidth={2.5} />
-            <span className="hidden md:inline">Export PDF</span>
-            <span className="md:hidden">PDF</span>
-          </button>
+
+        {/* Contrôles et informations */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl glass-card border border-primary-500/20 bg-gradient-to-r from-primary-500/5 via-primary-500/3 to-transparent">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Badge temps réel */}
+            <div className="inline-flex items-center gap-2.5 rounded-full bg-green-500/15 border border-green-500/30 px-4 py-2 text-xs font-semibold text-green-200 shadow-md shadow-green-500/10">
+              <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/50" />
+              Mise à jour temps réel
+            </div>
+            
+            {/* Sélecteur de période amélioré */}
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl glass-light border border-primary-500/20 bg-primary-500/5">
+              <Calendar className="w-4 h-4 text-primary-300" strokeWidth={2.5} />
+              <div className="flex flex-col">
+                <label htmlFor="month-selector" className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                  Période
+                </label>
+                <input
+                  id="month-selector"
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="bg-transparent border-none text-sm font-bold text-gray-100 focus:outline-none cursor-pointer"
+                  style={{ colorScheme: 'dark' }}
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Affichage du mois sélectionné formaté */}
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl glass-light border border-primary-500/20">
+            <span className="text-xs text-gray-400 font-medium">Affichage :</span>
+            <span className="text-sm font-bold text-primary-200">
+              {format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}
+            </span>
+          </div>
         </div>
       </header>
 
       {/* Vue d'ensemble rapide */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 animate-slide-in-up mb-6">
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-primary-500/20 bg-gradient-to-br from-primary-600/20 via-primary-500/12 to-primary-400/8 hover:from-primary-600/25 hover:via-primary-500/18 hover:to-primary-400/12 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary-500/20 border border-primary-500/40 shadow-md shadow-primary-500/15">
-                <Clock className="w-5 h-5 text-primary-200" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-semibold text-primary-100 tracking-wide">Aujourd'hui</p>
-            </div>
-            <span className="text-xs font-medium text-gray-200 bg-primary-500/15 border border-primary-500/30 px-2.5 py-1 rounded-full">{todayMissions.length} mission(s)</span>
-          </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{todayHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-300 font-medium">Temps prévu ou réalisé sur la journée</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 md:p-6 border border-emerald-500/20 bg-gradient-to-br from-emerald-600/18 via-emerald-500/12 to-emerald-400/8 hover:from-emerald-600/22 hover:via-emerald-500/18 hover:to-emerald-400/12 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 shadow-md shadow-emerald-500/15">
-                <TrendingUp className="w-5 h-5 text-emerald-200" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-semibold text-emerald-100 tracking-wide">Cette semaine</p>
-            </div>
-            <span className="text-xs font-medium text-gray-200 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-full">{thisWeekMissions.length} mission(s)</span>
-          </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-50 mb-2 tracking-tight">{thisWeekHours.toFixed(1)}h</p>
-          <p className="text-xs text-gray-300 font-medium">Charge totale entre lundi et dimanche</p>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-5 animate-slide-in-up mb-6">
         <div className="glass-card rounded-2xl p-5 md:p-6 border border-orange-500/20 bg-gradient-to-br from-orange-600/18 via-orange-500/12 to-orange-400/8 hover:from-orange-600/22 hover:via-orange-500/18 hover:to-orange-400/12 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
