@@ -1,22 +1,23 @@
 import React, { useMemo } from 'react';
 import { Mission } from '../types';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths, isThisMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths, isThisMonth, isSameMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { TrendingUp, Moon, Sun } from 'lucide-react';
 
 interface DashboardChartsProps {
   missions: Mission[];
+  selectedMonth?: Date;
 }
 
 const COLORS = ['#008CFF', '#76CCFF', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions }) => {
+const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMonth }) => {
   // Données des revenus mensuels (6 derniers mois)
   const monthlyRevenue = useMemo(() => {
-    const now = new Date();
-    const start = startOfMonth(subMonths(now, 5));
-    const months = eachMonthOfInterval({ start, end: now });
+    const referenceDate = selectedMonth || new Date();
+    const start = startOfMonth(subMonths(referenceDate, 5));
+    const months = eachMonthOfInterval({ start, end: referenceDate });
     
     return months.map(month => {
       const monthStart = startOfMonth(month);
@@ -39,11 +40,20 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions }) => {
         count,
       };
     });
-  }, [missions]);
+  }, [missions, selectedMonth]);
 
-  // Répartition jour/nuit
+  // Répartition jour/nuit (pour le mois sélectionné)
   const dayNightDistribution = useMemo(() => {
-    const completedMissions = missions.filter(m => m.status === 'completed');
+    const referenceDate = selectedMonth || new Date();
+    const monthStart = startOfMonth(referenceDate);
+    const monthEnd = endOfMonth(referenceDate);
+    
+    const completedMissions = missions
+      .filter(m => m.status === 'completed')
+      .filter(m => {
+        const missionDate = new Date(m.endTime);
+        return missionDate >= monthStart && missionDate <= monthEnd;
+      });
     
     const dayHours = completedMissions
       .filter(m => m.rateType === 'day')
@@ -99,7 +109,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions }) => {
         percentage: Math.round((mixedHours / total) * 100)
       },
     ].filter(item => item.hours > 0);
-  }, [missions]);
+  }, [missions, selectedMonth]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

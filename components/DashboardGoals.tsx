@@ -7,6 +7,7 @@ import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, save
 
 interface DashboardGoalsProps {
   missions: Mission[];
+  selectedMonth?: Date;
 }
 
 interface GoalWithProgress extends Goal {
@@ -15,7 +16,7 @@ interface GoalWithProgress extends Goal {
   isCompleted: boolean;
 }
 
-const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions }) => {
+const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth }) => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,36 +54,53 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions }) => {
     loadGoals();
   }, []);
 
-  // Calculer les valeurs actuelles
+  // Calculer les valeurs actuelles pour le mois sélectionné (optimisé)
   const goalsWithProgress = useMemo((): GoalWithProgress[] => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    if (goals.length === 0) return [];
+    
+    const referenceDate = selectedMonth || new Date();
+    const monthStart = startOfMonth(referenceDate);
+    const monthEnd = endOfMonth(referenceDate);
+    
+    // Convertir les dates limites en timestamps pour comparaisons plus rapides
+    const monthStartTime = monthStart.getTime();
+    const monthEndTime = monthEnd.getTime();
 
-    const thisMonthMissions = missions.filter(m => {
-      if (m.status === 'completed') {
-        const missionDate = new Date(m.endTime);
-        return missionDate >= monthStart && missionDate <= monthEnd;
-      }
-      return false;
-    });
+    // Filtrer et calculer en une seule passe pour optimiser les performances
+    let thisMonthRevenue = 0;
+    let thisMonthHours = 0;
+    let thisMonthMissionsCount = 0;
 
-    const thisMonthRevenue = thisMonthMissions.reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
-    const thisMonthHours = thisMonthMissions.reduce((sum, m) => {
-      const start = new Date(m.startTime).getTime();
-      const end = new Date(m.endTime).getTime();
-      return sum + (end - start) / (1000 * 60 * 60);
-    }, 0);
+    for (const m of missions) {
+      if (m.status !== 'completed') continue;
+      
+      const missionEndTime = new Date(m.endTime).getTime();
+      if (missionEndTime < monthStartTime || missionEndTime > monthEndTime) continue;
+      
+      thisMonthMissionsCount++;
+      thisMonthRevenue += m.totalEarnings || 0;
+      
+      // Calcul d'heures plus précis
+      const startTime = new Date(m.startTime).getTime();
+      const endTime = missionEndTime;
+      const hours = (endTime - startTime) / (1000 * 60 * 60);
+      thisMonthHours += hours;
+    }
+
+    // Arrondir les valeurs pour éviter les erreurs de précision
+    thisMonthRevenue = Math.round(thisMonthRevenue * 100) / 100;
+    thisMonthHours = Math.round(thisMonthHours * 10) / 10;
 
     return goals.map(goal => {
       let current = 0;
+      
       if (goal.period === 'month') {
         switch (goal.type) {
           case 'revenue':
             current = thisMonthRevenue;
             break;
           case 'missions':
-            current = thisMonthMissions.length;
+            current = thisMonthMissionsCount;
             break;
           case 'hours':
             current = thisMonthHours;
@@ -90,14 +108,19 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions }) => {
         }
       }
       
+      // Calcul du pourcentage avec protection contre division par zéro
+      const percentage = goal.target > 0 
+        ? Math.min((current / goal.target) * 100, 100) 
+        : 0;
+      
       return {
         ...goal,
         current: Math.round(current * 100) / 100,
-        percentage: Math.min((current / goal.target) * 100, 100),
+        percentage: Math.round(percentage * 10) / 10,
         isCompleted: current >= goal.target,
       };
     });
-  }, [goals, missions]);
+  }, [goals, missions, selectedMonth]);
 
   const handleEditGoal = (goal: Goal) => {
     setEditingGoal({ ...goal });

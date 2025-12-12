@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, memo, useCallback } from '
 import { Mission } from '../types';
 import { generateSummary } from '../services/geminiService';
 import { Clock, CheckCircle, TrendingUp, Calendar, MapPin, Briefcase, Euro, Download, Moon, Sun, Upload, Database, Save, TrendingDown, Award, DollarSign, ChevronDown, ChevronUp, RefreshCcw, FileText, File } from 'lucide-react';
-import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
+import { format, isThisMonth, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, isToday, isSameMonth, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { formatTimeSlots } from '../utils/timeSlots';
 import DashboardCharts from './DashboardCharts';
@@ -25,6 +25,20 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
   const now = new Date();
   
+  // Sélecteur de mois - format YYYY-MM (défaut: mois en cours)
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    const currentMonth = format(now, 'yyyy-MM');
+    return currentMonth;
+  });
+  
+  // Date du mois sélectionné
+  const selectedMonthDate = useMemo(() => {
+    return parseISO(`${selectedMonth}-01`);
+  }, [selectedMonth]);
+  
+  const selectedMonthStart = useMemo(() => startOfMonth(selectedMonthDate), [selectedMonthDate]);
+  const selectedMonthEnd = useMemo(() => endOfMonth(selectedMonthDate), [selectedMonthDate]);
+  
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
   // Missions terminées : toutes celles avec status 'completed'
   const allCompletedMissions = useMemo(() => 
@@ -32,46 +46,56 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     [missions]
   );
   
-  // Missions du mois en cours (pour les statistiques mensuelles)
-  // Pour les missions terminées : on vérifie si elles se sont terminées ce mois-ci
-  // Pour les missions planifiées : on vérifie si elles commencent ce mois-ci
-  const thisMonthCompletedMissions = useMemo(() => 
-    allCompletedMissions.filter(m => 
-      isThisMonth(new Date(m.endTime))
-    ),
-    [allCompletedMissions]
-  );
+  // Missions du mois sélectionné (pour les statistiques mensuelles) - calcul optimisé
+  // Utilisation de timestamps pour comparaisons plus rapides
+  const selectedMonthStartTime = useMemo(() => selectedMonthStart.getTime(), [selectedMonthStart]);
+  const selectedMonthEndTime = useMemo(() => selectedMonthEnd.getTime(), [selectedMonthEnd]);
   
-  const thisMonthPlannedMissions = useMemo(() => 
-    missions.filter(m => 
-      m.status === 'planned' && isThisMonth(new Date(m.startTime))
-    ),
-    [missions]
-  );
+  const selectedMonthCompletedMissions = useMemo(() => {
+    return allCompletedMissions.filter(m => {
+      const missionEndTime = new Date(m.endTime).getTime();
+      return missionEndTime >= selectedMonthStartTime && missionEndTime <= selectedMonthEndTime;
+    });
+  }, [allCompletedMissions, selectedMonthStartTime, selectedMonthEndTime]);
   
-  // Heures et gains de TOUTES les missions terminées (réalisé total)
-  const totalHours = useMemo(() => 
-    allCompletedMissions.reduce((acc, m) => {
+  const selectedMonthPlannedMissions = useMemo(() => {
+    return missions.filter(m => {
+      if (m.status !== 'planned') return false;
+      const missionStartTime = new Date(m.startTime).getTime();
+      return missionStartTime >= selectedMonthStartTime && missionStartTime <= selectedMonthEndTime;
+    });
+  }, [missions, selectedMonthStartTime, selectedMonthEndTime]);
+  
+  // Heures et gains des missions terminées du mois sélectionné - calcul optimisé
+  const totalHours = useMemo(() => {
+    let hours = 0;
+    for (const m of selectedMonthCompletedMissions) {
       const start = new Date(m.startTime).getTime();
       const end = new Date(m.endTime).getTime();
-      return acc + (end - start) / (1000 * 60 * 60);
-    }, 0),
-    [allCompletedMissions]
-  );
+      hours += (end - start) / (1000 * 60 * 60);
+    }
+    return Math.round(hours * 10) / 10; // Arrondir à 1 décimale
+  }, [selectedMonthCompletedMissions]);
 
-  // CA réalisé : TOUTES les missions terminées (pas seulement celles du mois)
-  const totalEarningsCompleted = useMemo(() => 
-    allCompletedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
-    [allCompletedMissions]
-  );
+  // CA réalisé : missions terminées du mois sélectionné - calcul optimisé
+  const totalEarningsCompleted = useMemo(() => {
+    let earnings = 0;
+    for (const m of selectedMonthCompletedMissions) {
+      earnings += m.totalEarnings || 0;
+    }
+    return Math.round(earnings * 100) / 100; // Arrondir à 2 décimales
+  }, [selectedMonthCompletedMissions]);
   
-  // Gains prévisionnels des missions planifiées du mois en cours
-  const totalEarningsPlanned = useMemo(() => 
-    thisMonthPlannedMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0),
-    [thisMonthPlannedMissions]
-  );
+  // Gains prévisionnels des missions planifiées du mois sélectionné - calcul optimisé
+  const totalEarningsPlanned = useMemo(() => {
+    let earnings = 0;
+    for (const m of selectedMonthPlannedMissions) {
+      earnings += m.totalEarnings || 0;
+    }
+    return Math.round(earnings * 100) / 100; // Arrondir à 2 décimales
+  }, [selectedMonthPlannedMissions]);
   
-  // Total = Réalisé (toutes missions terminées) + Prévisionnel (missions planifiées du mois)
+  // Total = Réalisé (missions terminées du mois) + Prévisionnel (missions planifiées du mois)
   const totalEarnings = useMemo(() => 
     totalEarningsCompleted + totalEarningsPlanned,
     [totalEarningsCompleted, totalEarningsPlanned]
@@ -132,53 +156,54 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   const nextMission = useMemo(() => upcomingMissions[0] ?? null, [upcomingMissions]);
 
   // KPIs avancés
-  // Taux horaire moyen
+  // Taux horaire moyen du mois sélectionné - calcul optimisé
   const averageHourlyRate = useMemo(() => {
-    if (totalHours === 0) return 0;
-    return totalEarningsCompleted / totalHours;
+    if (totalHours === 0 || totalEarningsCompleted === 0) return 0;
+    const rate = totalEarningsCompleted / totalHours;
+    return Math.round(rate * 100) / 100; // Arrondir à 2 décimales
   }, [totalHours, totalEarningsCompleted]);
 
-  // Comparaison mensuelle (ce mois vs mois précédent)
+  // Comparaison mensuelle (mois sélectionné vs mois précédent) - calcul optimisé
   const monthlyComparison = useMemo(() => {
-    const now = new Date();
-    const thisMonthStart = startOfMonth(now);
-    const thisMonthEnd = endOfMonth(now);
-    const lastMonthStart = startOfMonth(subMonths(now, 1));
-    const lastMonthEnd = endOfMonth(subMonths(now, 1));
+    const lastMonthStart = startOfMonth(subMonths(selectedMonthDate, 1));
+    const lastMonthEnd = endOfMonth(subMonths(selectedMonthDate, 1));
+    const lastMonthStartTime = lastMonthStart.getTime();
+    const lastMonthEndTime = lastMonthEnd.getTime();
 
-    const thisMonthRevenue = allCompletedMissions
-      .filter(m => {
-        const missionDate = new Date(m.endTime);
-        return missionDate >= thisMonthStart && missionDate <= thisMonthEnd;
-      })
-      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+    // Revenu du mois sélectionné (déjà calculé)
+    const thisMonthRevenue = totalEarningsCompleted;
 
-    const lastMonthRevenue = allCompletedMissions
-      .filter(m => {
-        const missionDate = new Date(m.endTime);
-        return missionDate >= lastMonthStart && missionDate <= lastMonthEnd;
-      })
-      .reduce((sum, m) => sum + (m.totalEarnings || 0), 0);
+    // Revenu du mois précédent - calcul optimisé
+    let lastMonthRevenue = 0;
+    for (const m of allCompletedMissions) {
+      const missionEndTime = new Date(m.endTime).getTime();
+      if (missionEndTime >= lastMonthStartTime && missionEndTime <= lastMonthEndTime) {
+        lastMonthRevenue += m.totalEarnings || 0;
+      }
+    }
+    lastMonthRevenue = Math.round(lastMonthRevenue * 100) / 100;
 
     const difference = thisMonthRevenue - lastMonthRevenue;
-    const percentage = lastMonthRevenue > 0 ? (difference / lastMonthRevenue) * 100 : 0;
+    const percentage = lastMonthRevenue > 0 
+      ? Math.round((difference / lastMonthRevenue) * 100 * 10) / 10 
+      : 0;
 
     return {
       thisMonth: thisMonthRevenue,
       lastMonth: lastMonthRevenue,
-      difference,
-      percentage: Math.round(percentage * 10) / 10,
+      difference: Math.round(difference * 100) / 100,
+      percentage,
       isPositive: difference >= 0,
     };
-  }, [allCompletedMissions]);
+  }, [totalEarningsCompleted, allCompletedMissions, selectedMonthDate]);
 
-  // Mission la plus rentable
+  // Mission la plus rentable du mois sélectionné
   const mostProfitableMission = useMemo(() => {
-    if (allCompletedMissions.length === 0) return null;
-    return allCompletedMissions.reduce((max, m) => 
+    if (selectedMonthCompletedMissions.length === 0) return null;
+    return selectedMonthCompletedMissions.reduce((max, m) => 
       (m.totalEarnings || 0) > (max.totalEarnings || 0) ? m : max
     );
-  }, [allCompletedMissions]);
+  }, [selectedMonthCompletedMissions]);
 
   const refreshSummary = useCallback(async () => {
     if (missions.length === 0) {
@@ -663,9 +688,23 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Tableau de bord</h1>
           <p className="text-gray-300 text-sm md:text-base font-medium">Vue d'ensemble de votre activité</p>
-          <div className="mt-3 inline-flex items-center gap-2.5 rounded-full bg-primary-500/12 border border-primary-500/30 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-md shadow-primary-500/8">
-            <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/40" />
-            Mise à jour temps réel sur vos missions planifiées et réalisées
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2.5 rounded-full bg-primary-500/12 border border-primary-500/30 px-4 py-1.5 text-xs text-primary-100 font-medium shadow-md shadow-primary-500/8">
+              <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/40" />
+              Mise à jour temps réel sur vos missions planifiées et réalisées
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="month-selector" className="text-xs text-gray-300 font-medium">
+                Période :
+              </label>
+              <input
+                id="month-selector"
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-200 border border-primary-500/30 hover:border-primary-500/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+              />
+            </div>
           </div>
         </div>
         <div className="flex gap-2.5 flex-wrap">
@@ -791,7 +830,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard 
           icon={<Euro className="w-6 h-6 text-emerald-400" />}
-          label="CA ce mois"
+          label={`CA ${format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}`}
           value={`${totalEarnings.toFixed(0)} €`}
           subtext={`Réalisé: ${totalEarningsCompleted.toFixed(0)}€ ${totalEarningsPlanned > 0 ? `+ Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€` : ''}`}
           color="bg-emerald-500/10 border-emerald-500/30"
@@ -805,15 +844,15 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           icon={<Clock className="w-6 h-6 text-primary-400" />}
           label="Heures totales"
           value={`${totalHours.toFixed(1)} h`}
-          subtext="Cumul mensuel (missions terminées)"
+          subtext={`${format(selectedMonthDate, 'MMMM yyyy', { locale: fr })} (missions terminées)`}
           color="bg-primary-500/10 border-primary-500/30"
           textColor="text-primary-400"
         />
         <StatCard 
           icon={<CheckCircle className="w-6 h-6 text-purple-400" />}
           label="Missions finies"
-          value={allCompletedMissions.length.toString()}
-          subtext={`${thisMonthCompletedMissions.length} ce mois`}
+          value={selectedMonthCompletedMissions.length.toString()}
+          subtext={`${format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}`}
           color="bg-purple-500/10 border-purple-500/30"
           textColor="text-purple-400"
         />
@@ -858,12 +897,12 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Graphiques */}
-      <DashboardCharts missions={missions} />
+      <DashboardCharts missions={missions} selectedMonth={selectedMonthDate} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardStats missions={missions} />
-        <DashboardGoals missions={missions} />
+        <DashboardStats missions={missions} selectedMonth={selectedMonthDate} />
+        <DashboardGoals missions={missions} selectedMonth={selectedMonthDate} />
       </div>
 
       {/* Upcoming / Planned Missions List */}
