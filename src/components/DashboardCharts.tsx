@@ -4,13 +4,17 @@ import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tool
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths, isThisMonth, isSameMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { TrendingUp, Moon, Sun } from 'lucide-react';
+import { calculateEarnings } from '../utils/calculations';
 
 interface DashboardChartsProps {
   missions: Mission[];
   selectedMonth?: Date;
 }
 
-const COLORS = ['#008CFF', '#76CCFF', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = {
+  day: '#f59e0b', // Amber-500
+  night: '#6366f1', // Indigo-500
+};
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMonth }) => {
   // Données des revenus mensuels (6 derniers mois)
@@ -55,66 +59,64 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMon
         return missionDate >= monthStart && missionDate <= monthEnd;
       });
     
-    const dayHours = completedMissions
-      .filter(m => m.rateType === 'day')
-      .reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0);
-    
-    const nightHours = completedMissions
-      .filter(m => m.rateType === 'night')
-      .reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0);
-    
-    const mixedHours = completedMissions
-      .filter(m => m.rateType === 'mixed')
-      .reduce((acc, m) => {
-        const start = new Date(m.startTime).getTime();
-        const end = new Date(m.endTime).getTime();
-        return acc + (end - start) / (1000 * 60 * 60);
-      }, 0);
+    let totalDayHours = 0;
+    let totalNightHours = 0;
 
-    const total = dayHours + nightHours + mixedHours;
+    completedMissions.forEach(m => {
+      if (m.details) {
+        // Use pre-calculated details if available
+        totalDayHours += m.details.dayHours || 0;
+        totalNightHours += m.details.nightHours || 0;
+      } else {
+        // Fallback calculation
+        try {
+          // Extract HH:mm from ISO strings if possible, otherwise use full date objects
+          // Mission dates are ISO strings. We need to respect the day/night calc logic.
+          const dateStr = format(new Date(m.startTime), 'yyyy-MM-dd');
+          const startTime = format(new Date(m.startTime), 'HH:mm');
+          const endTime = format(new Date(m.endTime), 'HH:mm');
+          
+          const details = calculateEarnings(dateStr, startTime, endTime);
+          totalDayHours += details.dayHours;
+          totalNightHours += details.nightHours;
+        } catch (e) {
+          console.warn('Could not calculate hours for mission', m.id, e);
+          // Rough fallback based on time difference (assuming day if failed)
+          const start = new Date(m.startTime).getTime();
+          const end = new Date(m.endTime).getTime();
+          totalDayHours += (end - start) / (1000 * 60 * 60);
+        }
+      }
+    });
+    
+    const total = totalDayHours + totalNightHours;
     
     if (total === 0) {
-      return [
-        { name: 'Jour', value: 0, hours: 0, percentage: 0 },
-        { name: 'Nuit', value: 0, hours: 0, percentage: 0 },
-        { name: 'Mixte', value: 0, hours: 0, percentage: 0 },
-      ];
+      return [];
     }
 
     return [
       { 
-        name: 'Jour', 
-        value: Math.round((dayHours / total) * 100), 
-        hours: Math.round(dayHours * 10) / 10,
-        percentage: Math.round((dayHours / total) * 100)
+        name: 'Heures Jour', 
+        value: totalDayHours, 
+        hours: Math.round(totalDayHours * 10) / 10,
+        percentage: Math.round((totalDayHours / total) * 100),
+        fill: COLORS.day
       },
       { 
-        name: 'Nuit', 
-        value: Math.round((nightHours / total) * 100), 
-        hours: Math.round(nightHours * 10) / 10,
-        percentage: Math.round((nightHours / total) * 100)
-      },
-      { 
-        name: 'Mixte', 
-        value: Math.round((mixedHours / total) * 100), 
-        hours: Math.round(mixedHours * 10) / 10,
-        percentage: Math.round((mixedHours / total) * 100)
-      },
-    ].filter(item => item.hours > 0);
+        name: 'Heures Nuit', 
+        value: totalNightHours, 
+        hours: Math.round(totalNightHours * 10) / 10,
+        percentage: Math.round((totalNightHours / total) * 100),
+        fill: COLORS.night
+      }
+    ].filter(item => item.value > 0);
   }, [missions, selectedMonth]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="glass-card p-3 border border-primary-500/30 rounded-lg">
+        <div className="glass-card p-3 border border-primary-500/30 rounded-lg shadow-xl backdrop-blur-md bg-dark-200/90">
           <p className="text-sm font-semibold text-gray-200 mb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-xs" style={{ color: entry.color }}>
@@ -131,8 +133,11 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMon
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="glass-card p-3 border border-primary-500/30 rounded-lg">
-          <p className="text-sm font-semibold text-gray-200 mb-1">{data.name}</p>
+        <div className="glass-card p-3 border border-primary-500/30 rounded-lg shadow-xl backdrop-blur-md bg-dark-200/90">
+          <div className="flex items-center gap-2 mb-1">
+             {data.name === 'Heures Jour' ? <Sun size={14} className="text-amber-500" /> : <Moon size={14} className="text-indigo-500" />}
+             <p className="text-sm font-semibold text-gray-200">{data.name}</p>
+          </div>
           <p className="text-xs text-gray-300">
             {data.hours}h ({data.percentage}%)
           </p>
@@ -143,7 +148,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMon
   };
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Graphique de revenus mensuels */}
       <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
         <div className="flex items-center justify-between mb-6">
@@ -157,80 +162,99 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ missions, selectedMon
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={monthlyRevenue} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#3b82f6" opacity={0.2} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#3b82f6" opacity={0.1} vertical={false} />
             <XAxis 
               dataKey="month" 
               stroke="#9ca3af" 
               style={{ fontSize: '12px' }}
+              tickLine={false}
+              axisLine={false}
+              dy={10}
             />
             <YAxis 
               stroke="#9ca3af" 
               style={{ fontSize: '12px' }}
               tickFormatter={(value) => `${value}€`}
+              tickLine={false}
+              axisLine={false}
+              dx={-10}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '5 5' }} />
             <Line 
               type="monotone" 
               dataKey="revenue" 
               stroke="#008CFF" 
               strokeWidth={3}
-              dot={{ fill: '#008CFF', r: 5 }}
-              activeDot={{ r: 7, fill: '#76CCFF' }}
+              dot={{ fill: '#008CFF', r: 4, strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: '#76CCFF', stroke: '#fff', strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Répartition jour/nuit */}
-      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up delay-100">
         <div className="flex items-center gap-2.5 mb-6">
-          <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-500/30">
-            <Moon className="w-5 h-5 text-purple-400" />
+          <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
+            <Moon className="w-5 h-5 text-indigo-400" />
           </div>
-          <h3 className="text-lg md:text-xl font-bold text-gray-100">Répartition jour/nuit</h3>
+          <h3 className="text-lg md:text-xl font-bold text-gray-100">Répartition Jour / Nuit</h3>
         </div>
         {dayNightDistribution.length > 0 ? (
-          <>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={dayNightDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percentage }) => `${name}: ${percentage}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {dayNightDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-4 space-y-2">
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
+            <div className="relative w-[200px] h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
+                    data={dayNightDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                    >
+                    {dayNightDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                </PieChart>
+                </ResponsiveContainer>
+                {/* Center Stats */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-2xl font-bold text-gray-100">
+                        {Math.round((dayNightDistribution.reduce((acc, curr) => acc + curr.value, 0)) * 10) / 10}h
+                    </span>
+                    <span className="text-xs text-gray-400">Total</span>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-4 w-full sm:w-auto">
               {dayNightDistribution.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <span className="text-gray-300">{item.name}</span>
-                  </div>
+                <div key={index} className="flex items-center justify-between sm:justify-start gap-4 p-3 rounded-xl bg-dark-300/30 border border-white/5 w-full sm:w-[180px]">
                   <div className="flex items-center gap-3">
-                    <span className="text-gray-400">{item.hours}h</span>
-                    <span className="text-primary-300 font-semibold">{item.percentage}%</span>
+                    <div 
+                      className="p-2 rounded-lg" 
+                      style={{ backgroundColor: `${item.fill}20`, color: item.fill }}
+                    >
+                      {item.name === 'Heures Jour' ? <Sun size={18} /> : <Moon size={18} />}
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm text-gray-300">{item.name === 'Heures Jour' ? 'Jour' : 'Nuit'}</span>
+                        <span className="text-lg font-bold text-gray-100">{item.hours}h</span>
+                    </div>
                   </div>
+                  <span className="text-xs font-mono text-gray-400 bg-dark-400/50 px-1.5 py-0.5 rounded">{item.percentage}%</span>
                 </div>
               ))}
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex items-center justify-center h-[250px] text-gray-400">
-            <p>Aucune donnée disponible</p>
+          <div className="flex flex-col items-center justify-center h-[250px] text-gray-400 gap-3">
+            <Moon className="w-12 h-12 text-gray-600 opacity-50" />
+            <p>Aucune donnée pour cette période</p>
           </div>
         )}
       </div>
