@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, MapPin, Clock, Moon, Sun, Briefcase, Euro, Edit, CheckCircle } from 'lucide-react';
-import { format, differenceInHours, differenceInDays, differenceInMinutes, isToday, isTomorrow } from 'date-fns';
+import { format, differenceInHours, differenceInCalendarDays, differenceInMinutes, isToday, isTomorrow } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { Mission } from '../../types';
 import { formatTimeSlots } from '../../utils/timeSlots';
@@ -56,31 +56,59 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
               <Calendar className="w-5 h-5 text-orange-200" strokeWidth={2.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-orange-100 tracking-wide mb-1">Prochaine mission</p>
               {(() => {
                 const missionStart = new Date(nextMission.startTime);
+                const missionEnd = new Date(nextMission.endTime);
                 const now = new Date();
-                const hoursUntil = differenceInHours(missionStart, now);
-                const daysUntil = differenceInDays(missionStart, now);
-                const minutesUntil = differenceInMinutes(missionStart, now);
                 
+                // Vérifier si la mission est en cours
+                const isOngoing = now >= missionStart && now < missionEnd;
+                
+                // Titre dynamique
+                const title = isOngoing ? 'Mission en cours' : 'Prochaine mission';
+                
+                // Calcul du temps restant
                 let timeText = '';
-                if (minutesUntil < 60) {
-                  timeText = `Dans ${minutesUntil} min`;
-                } else if (hoursUntil < 24) {
-                  timeText = isToday(missionStart) ? `Aujourd'hui dans ${hoursUntil}h` : `Dans ${hoursUntil}h`;
-                } else if (daysUntil === 1 || isTomorrow(missionStart)) {
-                  timeText = 'Demain';
+                let isUrgent = false;
+
+                if (isOngoing) {
+                  const hoursLeft = differenceInHours(missionEnd, now);
+                  const minutesLeft = differenceInMinutes(missionEnd, now) % 60;
+                  
+                  if (hoursLeft === 0) {
+                     timeText = `Se termine dans ${minutesLeft} min`;
+                  } else {
+                     timeText = `Se termine dans ${hoursLeft}h`;
+                  }
+                  isUrgent = true;
                 } else {
-                  timeText = `Dans ${daysUntil} jour${daysUntil > 1 ? 's' : ''}`;
+                  // Mission future
+                  const hoursUntil = differenceInHours(missionStart, now);
+                  const minutesUntil = differenceInMinutes(missionStart, now);
+                  const calendarDays = differenceInCalendarDays(missionStart, now);
+                  
+                  if (minutesUntil < 60) {
+                    timeText = `Dans ${minutesUntil} min`;
+                    isUrgent = true;
+                  } else if (isToday(missionStart)) {
+                    timeText = `Aujourd'hui dans ${hoursUntil}h`;
+                    isUrgent = true;
+                  } else if (isTomorrow(missionStart)) {
+                    timeText = 'Demain';
+                  } else {
+                    timeText = `Dans ${calendarDays} jour${calendarDays > 1 ? 's' : ''}`;
+                  }
                 }
                 
                 return (
-                  <p className={`text-xs font-medium ${
-                    hoursUntil < 24 ? 'text-orange-300' : 'text-orange-200/80'
-                  }`}>
-                    {timeText}
-                  </p>
+                  <>
+                    <p className={`text-sm font-semibold tracking-wide mb-1 ${isOngoing ? 'text-orange-50' : 'text-orange-100'}`}>
+                      {title}
+                    </p>
+                    <p className={`text-xs font-medium ${isUrgent ? 'text-orange-300' : 'text-orange-200/80'}`}>
+                      {timeText}
+                    </p>
+                  </>
                 );
               })()}
             </div>

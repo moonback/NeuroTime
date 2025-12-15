@@ -79,13 +79,19 @@ export const useDashboardStats = (missions: Mission[]) => {
   );
 
   // Upcoming missions
-  const upcomingMissions = useMemo(() => 
-    missions
-      .filter(m => m.status === 'planned')
+  const upcomingMissions = useMemo(() => {
+    const nowTime = new Date().getTime();
+    return missions
+      .filter(m => {
+        // Une mission est "à venir" si elle est planifiée ET qu'elle n'est pas encore terminée
+        // (Cela inclut les missions en cours)
+        if (m.status !== 'planned') return false;
+        const endTime = new Date(m.endTime).getTime();
+        return endTime > nowTime;
+      })
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-      .slice(0, 4),
-    [missions]
-  );
+      .slice(0, 4);
+  }, [missions]);
 
   // Recent completed missions
   const recentCompletedMissions = useMemo(() => 

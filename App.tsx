@@ -12,7 +12,6 @@ import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
-import PublicMissionsView from './components/PublicMissionsView';
 import { Mission, ViewState } from './types';
 import { loadMissions, saveMissions } from './services/storageService';
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from './services/authService';
@@ -227,15 +226,44 @@ const App: React.FC = () => {
 
   if (!user) {
     return (
-      <>
-        <PublicMissionsView onLoginClick={() => setIsAuthModalOpen(true)} />
+      <div className="min-h-screen neo-aurora flex items-center justify-center relative overflow-hidden">
+        <div className="aurora-layer">
+          <div className="aurora-blob primary" style={{ top: '-10%', left: '-10%' }} />
+          <div className="aurora-blob pink" style={{ top: '20%', right: '-10%' }} />
+          <div className="aurora-blob teal small" style={{ bottom: '-10%', left: '20%' }} />
+        </div>
+        
+        {/* Simple Welcome/Login container if AuthModal is not immediately visible or to provide background */}
+        <div className="z-10 text-center">
+             {/* AuthModal handles the login form. 
+                If we want it always visible when !user, we can just render it. 
+                The previous code used isAuthModalOpen. 
+                We'll keep using it but ensure it's true or the modal is triggered.
+             */}
+        </div>
+
         <AuthModal 
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
           onSuccess={handleAuthSuccess}
           initialMode="login"
         />
-      </>
+        
+        {/* Fallback button in case modal is closed but user is not logged in */}
+        {!isAuthModalOpen && (
+          <div className="glass-card p-8 rounded-2xl border-white/10 flex flex-col items-center gap-4 z-20 animate-fade-in">
+             <img src="/logo.png" alt="NeuroTime" className="w-24 h-24 object-contain mb-2" />
+             <h1 className="text-3xl font-bold text-white">NeuroTime</h1>
+             <p className="text-gray-400 mb-4">Gestion intelligente pour freelances</p>
+             <button 
+               onClick={() => setIsAuthModalOpen(true)}
+               className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-105"
+             >
+               Se connecter
+             </button>
+          </div>
+        )}
+      </div>
     );
   }
 
