@@ -15,9 +15,16 @@ interface MissionFormProps {
   initialData?: Mission | null;
   defaultDate?: string;
   missions?: Mission[]; // List for auto-complete/copy
+  hidePrices?: boolean;
 }
 
-const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, initialData, defaultDate, missions = [] }) => {
+const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, initialData, defaultDate, missions = [], hidePrices = false }) => {
+  // Fonction utilitaire pour formater les montants avec masquage optionnel
+  const formatPrice = (value: number | null | undefined, decimals: number = 0): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0';
+    return value.toFixed(decimals);
+  };
   // Base fields
   const [title, setTitle] = useState('');
   const [client, setClient] = useState('');
@@ -790,12 +797,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     <div className="flex justify-between items-start gap-4">
                        <div>
                          <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
-                         <p className="text-[10px] md:text-xs text-gray-400">Jour ({RATE_DAY}€) et nuit ({RATE_NIGHT}€ {'>'} 22h)</p>
+                         <p className="text-[10px] md:text-xs text-gray-400">
+                           {hidePrices ? 'Calcul automatique jour/nuit' : `Jour (${RATE_DAY}€) et nuit (${RATE_NIGHT}€ > 22h)`}
+                         </p>
                        </div>
                        <div className="text-right">
                           <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
                           <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
-                            {computedTotal.toFixed(2)} <Euro size={20} strokeWidth={2.5} />
+                            {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={20} strokeWidth={2.5} />}
                           </span>
                        </div>
                     </div>
@@ -816,7 +825,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                              <div className="flex items-center gap-2 text-gray-200">
                                <Sun size={16} className="text-orange-400" />
                                <span className="font-semibold">{dayHours.toFixed(1)}h</span>
-                               <span className="text-gray-400">× {RATE_DAY}€</span>
+                               {!hidePrices && <span className="text-gray-400">× {RATE_DAY}€</span>}
                              </div>
                           ) : <span />}
                           
@@ -824,7 +833,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                              <div className="flex items-center gap-2 text-gray-200">
                                <Moon size={16} className="text-primary-400" />
                                <span className="font-semibold">{nightHours.toFixed(1)}h</span>
-                               <span className="text-gray-400">× {RATE_NIGHT}€</span>
+                               {!hidePrices && <span className="text-gray-400">× {RATE_NIGHT}€</span>}
                              </div>
                           ) : <span />}
                         </div>
@@ -841,14 +850,20 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                      <div className="w-1/2">
                        <div className="relative">
                         <input
-                          type="number"
+                          type={hidePrices ? "password" : "number"}
                           min="0"
                           step="1"
-                          value={manualTotal}
-                          onChange={(e) => setManualTotal(parseFloat(e.target.value))}
+                          value={hidePrices ? '' : manualTotal}
+                          onChange={(e) => {
+                            if (!hidePrices) {
+                              setManualTotal(parseFloat(e.target.value) || 0);
+                            }
+                          }}
+                          placeholder={hidePrices ? '•••' : undefined}
                           className="w-full pl-4 pr-10 py-3 glass-input rounded-xl text-right font-bold text-xl outline-none text-gray-100"
+                          disabled={hidePrices}
                         />
-                        <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+                        {!hidePrices && <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />}
                        </div>
                      </div>
                    </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff } from 'lucide-react';
+import { usePreferences } from './hooks/usePreferences';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
@@ -36,6 +37,9 @@ const App: React.FC = () => {
   
   // Splash screen - se masque une fois l'auth vérifiée
   const [showSplash, setShowSplash] = useState(true);
+  
+  // Préférences utilisateur
+  const { hidePrices, toggleHidePrices } = usePreferences();
 
   // Vérifier l'authentification au démarrage
   useEffect(() => {
@@ -311,6 +315,14 @@ const App: React.FC = () => {
               <span className="truncate text-gray-200 font-medium">{user.email || 'Utilisateur'}</span>
             </div>
             <button 
+              onClick={toggleHidePrices}
+              className="w-full glass-button hover:bg-orange-500/10 text-gray-300 hover:text-orange-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-orange-500/30 transition-all text-sm mb-2"
+              title={hidePrices ? "Afficher les tarifs" : "Masquer les tarifs"}
+            >
+              {hidePrices ? <EyeOff size={14} /> : <Eye size={14} />}
+              <span>{hidePrices ? 'Afficher tarifs' : 'Masquer tarifs'}</span>
+            </button>
+            <button 
               onClick={handleSignOut}
               className="w-full glass-button hover:bg-red-500/10 text-gray-300 hover:text-red-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:border-red-500/30 transition-all text-sm"
             >
@@ -321,8 +333,33 @@ const App: React.FC = () => {
         </div>
       </aside>
 
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 left-0 right-0 glass-strong border-b border-gray-700/30 z-30 pb-safe backdrop-blur-xl">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-8 object-contain"
+            />
+            <span className="text-lg font-bold text-gray-100">NeuroTime</span>
+          </div>
+          <button 
+            onClick={toggleHidePrices}
+            className={`flex items-center justify-center p-2.5 rounded-lg transition-all ${
+              hidePrices 
+                ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400' 
+                : 'bg-gray-700/30 border border-gray-600/40 text-gray-300 hover:bg-gray-600/40'
+            }`}
+            title={hidePrices ? "Afficher les tarifs" : "Masquer les tarifs"}
+          >
+            {hidePrices ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative">
+      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0">
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
@@ -331,6 +368,7 @@ const App: React.FC = () => {
                 onEdit={handleEditMission} 
                 onValidate={handleValidateMission}
                 onImport={handleImportData}
+                hidePrices={hidePrices}
               />
             )}
             {view === 'missions' && (
@@ -342,6 +380,7 @@ const App: React.FC = () => {
                 onTogglePaid={handleTogglePaid}
                 onComplete={handleCompleteMission}
                 onUploadImage={() => setIsImageUploadOpen(true)}
+                hidePrices={hidePrices}
               />
             )}
             {view === 'calendar' && (
@@ -351,12 +390,14 @@ const App: React.FC = () => {
                 onDelete={handleDeleteMission} 
                 onValidate={handleValidateMission}
                 onNewMission={openNewMissionModal}
+                hidePrices={hidePrices}
               />
             )}
             {view === 'payments' && (
               <PaymentsView 
                 missions={missions} 
                 onTogglePaid={handleTogglePaid}
+                hidePrices={hidePrices}
               />
             )}
           </Suspense>
@@ -414,6 +455,7 @@ const App: React.FC = () => {
           initialData={editingMission}
           defaultDate={selectedDateForNew}
           missions={missions}
+          hidePrices={hidePrices}
         />
         <ImageUploadMission
           isOpen={isImageUploadOpen}

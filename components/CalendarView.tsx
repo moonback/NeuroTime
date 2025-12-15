@@ -26,11 +26,18 @@ interface CalendarViewProps {
   onDelete: (id: string) => void;
   onValidate: (mission: Mission) => void;
   onNewMission: (date: string) => void;
+  hidePrices?: boolean;
 }
 
 type ViewMode = 'month' | 'week' | 'list';
 
-const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete, onValidate, onNewMission }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete, onValidate, onNewMission, hidePrices = false }) => {
+  // Fonction utilitaire pour formater les montants avec masquage optionnel
+  const formatPrice = (value: number | null | undefined, decimals: number = 0): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0';
+    return value.toFixed(decimals);
+  };
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -342,7 +349,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
              </div>
              <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-lg font-bold border border-emerald-500/30 flex items-center justify-center gap-1.5">
                 <Euro size={14} />
-            <span>{periodRevenue.toFixed(0)}€</span>
+            <span>{formatPrice(periodRevenue)}€</span>
              </div>
           <div className="flex-1 md:flex-none px-2.5 py-1.5 bg-blue-500/20 text-blue-300 rounded-lg font-medium border border-blue-500/30 flex items-center justify-center gap-1.5">
             <Briefcase size={14} />
@@ -420,7 +427,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                            <div className="hidden lg:flex flex-col items-end gap-0.5">
                              {dayRevenue > 0 && (
                                <span className="text-[8px] font-semibold text-emerald-300 bg-emerald-500/20 px-1 rounded border border-emerald-500/30">
-                       {Math.round(dayRevenue)}€
+                       {formatPrice(Math.round(dayRevenue))}€
                      </span>
                              )}
                              {dayHours > 0 && (
@@ -558,7 +565,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                                   {timeSlots.length > 1 && ` (+${timeSlots.length - 1})`}
                                 </div>
                                 <div className="flex items-center justify-between mt-1">
-                                  <span className="text-[9px] font-bold">{m.totalEarnings?.toFixed(0)}€</span>
+                                  {!hidePrices && <span className="text-[9px] font-bold">{formatPrice(m.totalEarnings)}€</span>}
                                   {m.isPaid && <DollarSign size={10} className="text-emerald-400" />}
                                 </div>
                               </div>
@@ -650,7 +657,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
                         
                         <div className="flex flex-col items-end gap-2">
                           <span className="font-bold text-base md:text-lg text-gray-100">
-                            {mission.totalEarnings?.toFixed(0)}€
+                            {formatPrice(mission.totalEarnings)}€
                           </span>
                           <div className="flex gap-1">
                             {mission.status === 'planned' && (
@@ -711,7 +718,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
              <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
                <div className="flex-1 glass-light p-2 md:p-2.5 rounded-lg border-primary-500/20 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Revenu</span>
-                 <p className="text-base md:text-lg font-bold text-gray-100">{dailyTotal.toFixed(0)}€</p>
+                 <p className="text-base md:text-lg font-bold text-gray-100">{formatPrice(dailyTotal)}€</p>
                </div>
                <div className="flex-1 glass-light p-2 md:p-2.5 rounded-lg border-primary-500/20 flex flex-col items-center">
                  <span className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-wider">Missions</span>

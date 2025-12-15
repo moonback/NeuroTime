@@ -13,9 +13,16 @@ interface MissionsListProps {
   onTogglePaid: (mission: Mission) => void;
   onComplete: (mission: Mission) => void;
   onUploadImage: () => void;
+  hidePrices?: boolean;
 }
 
-const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete, onUploadImage }) => {
+const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete, onUploadImage, hidePrices = false }) => {
+  // Fonction utilitaire pour formater les montants avec masquage optionnel
+  const formatPrice = (value: number | null | undefined): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0';
+    return value.toFixed(0);
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('planned');
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -123,7 +130,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           <span className="font-medium"><b className="text-gray-50 font-bold">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
           <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
           <span className="flex items-center gap-1.5 font-medium">
-            Total : <b className="text-primary-300 font-bold">{totalFilteredEarnings.toFixed(0)} €</b>
+            Total : <b className="text-primary-300 font-bold">{formatPrice(totalFilteredEarnings)} €</b>
           </span>
         </div>
         {statusFilter === 'completed' && (
@@ -181,7 +188,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                   </div>
                 </div>
                 <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-2.5 py-1.5 rounded-lg shadow-sm text-sm">
-                  {mission.totalEarnings?.toFixed(0)} <Euro size={12} strokeWidth={2.5} />
+                  {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
                 </div>
               </div>
 
@@ -317,7 +324,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-3 py-1.5 rounded-lg w-fit shadow-sm text-sm">
-                        {mission.totalEarnings?.toFixed(0)} <Euro size={12} strokeWidth={2.5} />
+                        {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
                       </div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">

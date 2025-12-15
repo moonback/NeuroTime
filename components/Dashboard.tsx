@@ -15,9 +15,22 @@ interface DashboardProps {
   onEdit: (mission: Mission) => void;
   onValidate: (mission: Mission) => void;
   onImport: (missions: Mission[]) => void;
+  hidePrices?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onImport }) => {
+const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onImport, hidePrices = false }) => {
+  // Fonction utilitaire pour formater les montants avec masquage optionnel
+  const formatPrice = (value: number | null | undefined, decimals: number = 0): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0';
+    return value.toFixed(decimals);
+  };
+  
+  const formatPriceWithSymbol = (value: number | null | undefined, decimals: number = 0): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0 €';
+    return `${value.toFixed(decimals)} €`;
+  };
   const [summary, setSummary] = useState<string>('Analyse de vos activités en cours...');
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -763,7 +776,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                 {format(new Date(nextMission.startTime), 'HH:mm')} • {nextMission.location}
               </p>
               <p className="text-xs text-gray-400 font-medium">
-                {nextMission.rateType === 'night' ? 'Mission de nuit' : 'Mission de jour'} · {nextMission.totalEarnings?.toFixed(0) ?? 0}€
+                {nextMission.rateType === 'night' ? 'Mission de nuit' : 'Mission de jour'}{!hidePrices && ` · ${formatPrice(nextMission.totalEarnings)}€`}
               </p>
             </div>
           ) : (
@@ -802,8 +815,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <StatCard 
           icon={<Euro className="w-6 h-6 text-emerald-400" />}
           label={`CA ${format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}`}
-          value={`${totalEarnings.toFixed(0)} €`}
-          subtext={`Réalisé: ${totalEarningsCompleted.toFixed(0)}€ ${totalEarningsPlanned > 0 ? `+ Prévisionnel: ${totalEarningsPlanned.toFixed(0)}€` : ''}`}
+          value={formatPriceWithSymbol(totalEarnings, 0)}
+          subtext={hidePrices ? '***' : `Réalisé: ${formatPrice(totalEarningsCompleted)}€ ${totalEarningsPlanned > 0 ? `+ Prévisionnel: ${formatPrice(totalEarningsPlanned)}€` : ''}`}
           color="bg-emerald-500/10 border-emerald-500/30"
           textColor="text-emerald-400"
           trend={monthlyComparison.percentage !== 0 ? {
@@ -842,7 +855,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <StatCard 
           icon={<DollarSign className="w-5 h-5 text-blue-400" />}
           label="Taux horaire moyen"
-          value={`${averageHourlyRate.toFixed(2)} €/h`}
+          value={hidePrices ? '***' : `${averageHourlyRate.toFixed(2)} €/h`}
           subtext="Revenus moyens par heure"
           color="bg-blue-500/10 border-blue-500/30"
           textColor="text-blue-400"
@@ -851,7 +864,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           icon={monthlyComparison.isPositive ? <TrendingUp className="w-5 h-5 text-green-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
           label="Évolution mensuelle"
           value={`${monthlyComparison.isPositive ? '+' : ''}${monthlyComparison.percentage.toFixed(1)}%`}
-          subtext={`vs mois précédent (${monthlyComparison.lastMonth.toFixed(0)}€)`}
+          subtext={hidePrices ? 'vs mois précédent' : `vs mois précédent (${formatPrice(monthlyComparison.lastMonth)}€)`}
           color={monthlyComparison.isPositive ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"}
           textColor={monthlyComparison.isPositive ? "text-green-400" : "text-red-400"}
         />
@@ -859,7 +872,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
           <StatCard 
             icon={<Award className="w-5 h-5 text-yellow-400" />}
             label="Mission la plus rentable"
-            value={`${mostProfitableMission.totalEarnings?.toFixed(0) || 0} €`}
+            value={formatPriceWithSymbol(mostProfitableMission.totalEarnings, 0)}
             subtext={mostProfitableMission.title}
             color="bg-yellow-500/10 border-yellow-500/30"
             textColor="text-yellow-400"
@@ -940,9 +953,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit(mission)}>
                   <div className="flex justify-between items-start gap-2">
                     <h4 className="font-bold text-gray-100 text-base md:text-lg truncate group-hover:text-primary-300 transition-colors">{mission.title}</h4>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30 flex-shrink-0">
-                       {mission.totalEarnings?.toFixed(0)}€
-                    </span>
+                    {!hidePrices && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30 flex-shrink-0">
+                        {formatPrice(mission.totalEarnings)}€
+                      </span>
+                    )}
                   </div>
                   
                   <div className="flex flex-wrap gap-y-1.5 gap-x-3 mt-2 text-xs md:text-sm text-gray-400">
@@ -1047,9 +1062,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit(mission)}>
                   <div className="flex justify-between items-start gap-2">
                     <h4 className="font-bold text-gray-100 text-base md:text-lg truncate group-hover:text-green-300 transition-colors">{mission.title}</h4>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30 flex-shrink-0">
-                       {mission.totalEarnings?.toFixed(0)}€
-                    </span>
+                    {!hidePrices && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30 flex-shrink-0">
+                        {formatPrice(mission.totalEarnings)}€
+                      </span>
+                    )}
                   </div>
                   
                   <div className="flex flex-wrap gap-y-1.5 gap-x-3 mt-2 text-xs md:text-sm text-gray-400">

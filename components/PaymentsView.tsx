@@ -20,9 +20,16 @@ import { formatTimeSlots } from '../utils/timeSlots';
 interface PaymentsViewProps {
   missions: Mission[];
   onTogglePaid: (mission: Mission) => void;
+  hidePrices?: boolean;
 }
 
-const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) => {
+const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid, hidePrices = false }) => {
+  // Fonction utilitaire pour formater les montants avec masquage optionnel
+  const formatPrice = (value: number | null | undefined, decimals: number = 2): string => {
+    if (hidePrices) return '***';
+    if (value === null || value === undefined) return '0';
+    return value.toFixed(decimals);
+  };
   // Filtrer uniquement les missions terminées
   const completedMissions = useMemo(() => 
     missions.filter(m => m.status === 'completed'),
@@ -99,7 +106,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
               {paidMissions.length} mission{paidMissions.length > 1 ? 's' : ''}
             </span>
           </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{totalPaid.toFixed(2)} €</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{formatPrice(totalPaid)} €</p>
           <p className="text-xs text-gray-300 font-medium">Total payé</p>
         </div>
 
@@ -113,7 +120,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
               {unpaidMissions.length} mission{unpaidMissions.length > 1 ? 's' : ''}
             </span>
           </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{totalUnpaid.toFixed(2)} €</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{formatPrice(totalUnpaid)} €</p>
           <p className="text-xs text-gray-300 font-medium">En attente</p>
         </div>
 
@@ -127,7 +134,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
               {completedMissions.length} mission{completedMissions.length > 1 ? 's' : ''}
             </span>
           </div>
-          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{totalCompleted.toFixed(2)} €</p>
+          <p className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-tight">{formatPrice(totalCompleted)} €</p>
           <p className="text-xs text-gray-300 font-medium">Total terminé</p>
         </div>
 
@@ -151,7 +158,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
               <Circle size={20} className="text-orange-400" strokeWidth={2.5} />
               Missions en attente de paiement ({unpaidMissions.length})
             </h2>
-            <p className="text-sm text-gray-400 mt-1">Total en attente : <span className="font-bold text-orange-300">{totalUnpaid.toFixed(2)} €</span></p>
+            {!hidePrices && <p className="text-sm text-gray-400 mt-1">Total en attente : <span className="font-bold text-orange-300">{formatPrice(totalUnpaid)} €</span></p>}
           </div>
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[800px]">
@@ -197,7 +204,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
                       </td>
                       <td className="px-5 md:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-1 font-black text-gray-100 bg-orange-500/20 border border-orange-500/40 px-3 py-1.5 rounded-lg w-fit text-sm">
-                          {mission.totalEarnings?.toFixed(2) || '0.00'} <Euro size={12} strokeWidth={2.5} />
+                          {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
                         </div>
                       </td>
                       <td className="px-5 md:px-6 py-4 text-center">
@@ -226,7 +233,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
               <CheckCircle2 size={20} className="text-emerald-400" strokeWidth={2.5} />
               Missions payées ({paidMissions.length})
             </h2>
-            <p className="text-sm text-gray-400 mt-1">Total payé : <span className="font-bold text-emerald-300">{totalPaid.toFixed(2)} €</span></p>
+            {!hidePrices && <p className="text-sm text-gray-400 mt-1">Total payé : <span className="font-bold text-emerald-300">{formatPrice(totalPaid)} €</span></p>}
           </div>
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[800px]">
@@ -272,7 +279,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({ missions, onTogglePaid }) =
                       </td>
                       <td className="px-5 md:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-1 font-black text-gray-100 bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 rounded-lg w-fit text-sm">
-                          {mission.totalEarnings?.toFixed(2) || '0.00'} <Euro size={12} strokeWidth={2.5} />
+                          {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
                         </div>
                       </td>
                       <td className="px-5 md:px-6 py-4 text-center">
