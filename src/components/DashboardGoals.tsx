@@ -4,6 +4,8 @@ import { Target, TrendingUp, Award, Edit2, X } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth } from 'date-fns';
 import fr from 'date-fns/locale/fr';
 import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, Goal } from '../services/goalsService';
+import { toast } from 'sonner';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 interface DashboardGoalsProps {
   missions: Mission[];
@@ -21,6 +23,7 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   // Charger les objectifs depuis Supabase
   useEffect(() => {
@@ -145,9 +148,10 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
       
       setIsEditing(false);
       setEditingGoal(null);
+      toast.success('Objectif sauvegardé.');
     } catch (error) {
       console.error('Erreur lors de la sauvegarde de l\'objectif:', error);
-      alert('Erreur lors de la sauvegarde de l\'objectif. Veuillez réessayer.');
+      toast.error('Erreur lors de la sauvegarde de l’objectif.');
     }
   };
 
@@ -163,14 +167,22 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
   };
 
   const handleDeleteGoal = async (id: string) => {
-    if (!window.confirm('Supprimer cet objectif ?')) return;
+    const ok = await confirm({
+      title: 'Supprimer cet objectif ?',
+      description: 'Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'danger',
+    });
+    if (!ok) return;
     
     try {
       await deleteGoalFromSupabase(id);
       setGoals(goals.filter(g => g.id !== id));
+      toast.success('Objectif supprimé.');
     } catch (error) {
       console.error('Erreur lors de la suppression de l\'objectif:', error);
-      alert('Erreur lors de la suppression de l\'objectif. Veuillez réessayer.');
+      toast.error('Erreur lors de la suppression de l’objectif.');
     }
   };
 
@@ -384,6 +396,8 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
           </div>
         </div>
       )}
+
+      {confirmDialog}
     </div>
   );
 };

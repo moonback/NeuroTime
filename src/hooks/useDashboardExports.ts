@@ -4,6 +4,7 @@ import { fr } from 'date-fns/locale/fr';
 import { jsPDF } from 'jspdf';
 import { Mission } from '../types';
 import { formatTimeSlots } from '../utils/timeSlots';
+import { toast } from 'sonner';
 
 export const useDashboardExports = (missions: Mission[], allCompletedMissions: Mission[]) => {
 
@@ -56,7 +57,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
 
   const downloadCompletedReportMD = useCallback(() => {
     if (allCompletedMissions.length === 0) {
-      alert("Aucune mission terminée à exporter.");
+      toast.info('Aucune mission terminée à exporter.');
       return;
     }
 
@@ -154,7 +155,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
 
   const downloadCompletedReportPDF = useCallback(() => {
     if (allCompletedMissions.length === 0) {
-      alert("Aucune mission terminée à exporter.");
+      toast.info('Aucune mission terminée à exporter.');
       return;
     }
 
@@ -420,7 +421,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       doc.save(`missions_terminees_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
-      alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+      toast.error('Erreur lors de la génération du PDF. Veuillez réessayer.');
     }
   }, [allCompletedMissions]);
 

@@ -108,16 +108,14 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           color={monthlyComparison.isPositive ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"}
           textColor={monthlyComparison.isPositive ? "text-green-400" : "text-red-400"}
         />
-        {mostProfitableMission && (
-          <StatCard 
-            icon={<Award className="w-5 h-5 text-yellow-400" />}
-            label="Top Mission"
-            value={formatPriceWithSymbol(mostProfitableMission.totalEarnings)}
-            subtext={mostProfitableMission.title}
-            color="bg-yellow-500/10 border-yellow-500/30"
-            textColor="text-yellow-400"
-          />
-        )}
+        <StatCard 
+          icon={<Award className={`w-5 h-5 ${mostProfitableMission ? 'text-yellow-400' : 'text-gray-500'}`} />}
+          label="Top Mission"
+          value={mostProfitableMission ? formatPriceWithSymbol(mostProfitableMission.totalEarnings) : '—'}
+          subtext={mostProfitableMission ? mostProfitableMission.title : 'Aucune mission terminée'}
+          color={mostProfitableMission ? "bg-yellow-500/10 border-yellow-500/30" : "bg-white/5 border-white/10"}
+          textColor={mostProfitableMission ? "text-yellow-400" : "text-gray-400"}
+        />
       </div>
     </>
   );

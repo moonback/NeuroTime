@@ -1,10 +1,11 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { usePreferences } from './hooks/usePreferences';
 import { useAuth } from './context/AuthContext';
 import { useMissions } from './context/MissionContext';
+import { useConfirmDialog } from './hooks/useConfirmDialog';
 
 // Lazy loading
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -24,6 +25,7 @@ const App: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
@@ -33,7 +35,8 @@ const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Préférences
-  const { hidePrices, toggleHidePrices } = usePreferences();
+  const { hidePrices, toggleHidePrices, sidebarPinned, toggleSidebarPinned } = usePreferences();
+  const sidebarOpen = sidebarPinned || isSidebarOpen;
 
   // Handlers
   const handleSaveMission = useCallback((mission: Mission) => {
@@ -67,38 +70,61 @@ const App: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCompleteMission = useCallback((mission: Mission) => {
-    if (window.confirm(`Marquer la mission "${mission.title}" comme terminée ?`)) {
-      updateMission({ ...mission, status: 'completed' });
-    }
-  }, [updateMission]);
+  const handleCompleteMission = useCallback(async (mission: Mission) => {
+    const ok = await confirm({
+      title: 'Marquer la mission comme terminée ?',
+      description: `“${mission.title}” passera en statut terminé.`,
+      confirmText: 'Terminer',
+      cancelText: 'Annuler',
+    });
+    if (!ok) return;
+    updateMission({ ...mission, status: 'completed' });
+  }, [confirm, updateMission]);
 
-  const handleDeleteMission = useCallback((id: string) => {
+  const handleDeleteMission = useCallback(async (id: string) => {
     const mission = missions.find(m => m.id === id);
     if (mission?.isPaid) {
       toast.warning('Cette mission a été payée et ne peut plus être supprimée.');
       return;
     }
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette mission ?")) {
-      deleteMission(id);
-    }
-  }, [missions, deleteMission]);
+    const ok = await confirm({
+      title: 'Supprimer cette mission ?',
+      description: 'Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    deleteMission(id);
+  }, [missions, confirm, deleteMission]);
 
   const handleTogglePaid = useCallback((mission: Mission) => {
     updateMission({ ...mission, isPaid: !mission.isPaid });
   }, [updateMission]);
 
-  const handleImportData = useCallback((importedMissions: Mission[]) => {
-    if (window.confirm(`Attention, l'importation va remplacer vos ${missions.length} missions actuelles par ${importedMissions.length} missions importées. Continuer ?`)) {
-      importMissions(importedMissions);
-    }
-  }, [missions, importMissions]);
+  const handleImportData = useCallback(async (importedMissions: Mission[]) => {
+    const ok = await confirm({
+      title: 'Remplacer vos données par l’import ?',
+      description: `Vos ${missions.length} missions actuelles seront remplacées par ${importedMissions.length} missions importées.`,
+      confirmText: 'Importer',
+      cancelText: 'Annuler',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    importMissions(importedMissions);
+    toast.success('Import terminé.');
+  }, [confirm, missions.length, importMissions]);
 
   const handleSignOut = useCallback(async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-      await signOut();
-    }
-  }, [signOut]);
+    const ok = await confirm({
+      title: 'Se déconnecter ?',
+      description: 'Vous pourrez vous reconnecter à tout moment.',
+      confirmText: 'Déconnexion',
+      cancelText: 'Annuler',
+    });
+    if (!ok) return;
+    await signOut();
+  }, [confirm, signOut]);
 
   const openNewMissionModal = (dateStr?: string) => {
     setEditingMission(null);
@@ -158,24 +184,37 @@ const App: React.FC = () => {
       </div>
 
       {/* Sidebar Desktop */}
-      <div 
-        className="hidden md:block fixed inset-y-0 left-0 z-20 w-4 h-full group"
-        onMouseEnter={() => setIsSidebarOpen(true)}
-      />
+      {!sidebarPinned && (
+        <div
+          className="hidden md:block fixed inset-y-0 left-0 z-20 w-4 h-full group"
+          onMouseEnter={() => setIsSidebarOpen(true)}
+        />
+      )}
 
       <aside 
         className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        onMouseLeave={() => setIsSidebarOpen(false)}
+        onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false); }}
       >
-        <div className="p-6 border-b border-gray-700/30 flex justify-between items-center">
+        <div className="p-6 border-b border-gray-700/30 flex justify-between items-center gap-3">
           <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
             <img src="/logo.png" alt="Logo" className="w-full h-20 object-contain" />
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">
-            <ChevronLeft size={24} />
-          </button>
+          <div className="flex flex-col items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={toggleSidebarPinned}
+              className={`p-2 glass-button rounded-lg ${sidebarPinned ? 'text-primary-300' : 'text-gray-400 hover:text-gray-100'}`}
+              title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
+              aria-label={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
+            >
+              {sidebarPinned ? <PinOff size={18} /> : <Pin size={18} />}
+            </button>
+            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-white">
+              <ChevronLeft size={24} />
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
@@ -250,12 +289,12 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
+      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
           
           <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
-             {!isSidebarOpen && (
-               <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-button rounded-lg text-gray-400 hover:text-white">
+             {!sidebarOpen && (
+               <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-button rounded-lg text-gray-400 hover:text-white" aria-label="Ouvrir la sidebar">
                  <Menu size={24} />
                </button>
              )}
@@ -341,6 +380,7 @@ const App: React.FC = () => {
       </Suspense>
       
       <PWAInstallPrompt />
+      {confirmDialog}
       
       {isSaving && (
         <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">

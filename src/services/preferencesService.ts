@@ -2,10 +2,12 @@ const PREFERENCES_KEY = 'neurotime_preferences_v1';
 
 export interface UserPreferences {
   hidePrices: boolean;
+  sidebarPinned: boolean;
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   hidePrices: false,
+  sidebarPinned: false,
 };
 
 /**

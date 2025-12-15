@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Database, Save, Upload } from 'lucide-react';
 import { Mission } from '../../types';
+import { toast } from 'sonner';
 
 interface DataPersistenceProps {
   onImport: (missions: Mission[]) => void;
@@ -20,11 +21,12 @@ const DataPersistence: React.FC<DataPersistenceProps> = ({ onImport, onBackup })
         const json = JSON.parse(event.target?.result as string);
         if (Array.isArray(json)) {
           onImport(json);
+          toast.success('Fichier importé. Vérifiez vos missions.');
         } else {
-          alert("Le fichier ne semble pas valide.");
+          toast.error('Le fichier ne semble pas valide.');
         }
       } catch (err) {
-        alert("Erreur lors de la lecture du fichier de sauvegarde.");
+        toast.error('Erreur lors de la lecture du fichier de sauvegarde.');
       }
     };
     reader.readAsText(file);

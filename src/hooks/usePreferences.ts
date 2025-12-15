@@ -63,6 +63,9 @@ export const usePreferences = () => {
     hidePrices: preferences.hidePrices,
     setHidePrices: (value: boolean) => update('hidePrices', value),
     toggleHidePrices: () => toggle('hidePrices'),
+    sidebarPinned: preferences.sidebarPinned,
+    setSidebarPinned: (value: boolean) => update('sidebarPinned', value),
+    toggleSidebarPinned: () => toggle('sidebarPinned'),
   };
 };
 
