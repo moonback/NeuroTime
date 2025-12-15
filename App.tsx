@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft } from 'lucide-react';
 import { usePreferences } from './hooks/usePreferences';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Authentification
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -271,34 +272,56 @@ const App: React.FC = () => {
         <div className="aurora-blob pink" style={{ top: '-80px', right: '-100px' }} />
         <div className="aurora-blob teal small" style={{ bottom: '-120px', left: '20%' }} />
       </div>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 animate-slide-in-left shadow-lg backdrop-blur-xl">
-        <div className="p-6 border-b border-gray-700/30">
-          <div className="w-full  rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
+      {/* Desktop Sidebar with Auto-hide */}
+      <div 
+        className="hidden md:block fixed inset-y-0 left-0 z-20 w-4 h-full group"
+        onMouseEnter={() => setIsSidebarOpen(true)}
+      >
+        {/* Trigger zone */}
+      </div>
+
+      <aside 
+        className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        onMouseLeave={() => setIsSidebarOpen(false)}
+      >
+        <div className="absolute -right-8 top-4">
+           {/* Visual hint that sidebar exists when closed (optional, removed for pure auto-hide) */}
+        </div>
+
+        <div className="p-6 border-b border-gray-700/30 flex justify-between items-center">
+          <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
             <img
               src="/logo.png"
               alt="Logo"
               className="w-full h-20 object-contain"
             />
           </div>
+          <button 
+             onClick={() => setIsSidebarOpen(false)}
+             className="md:hidden text-gray-400 hover:text-white"
+          >
+            <ChevronLeft size={24} />
+          </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
           <NavButton 
             active={view === 'dashboard'} 
-            onClick={() => setView('dashboard')} 
+            onClick={() => { setView('dashboard'); setIsSidebarOpen(false); }} 
             icon={<LayoutDashboard size={19} />} 
             label="Tableau de bord" 
           />
           <NavButton 
             active={view === 'missions'} 
-            onClick={() => setView('missions')} 
+            onClick={() => { setView('missions'); setIsSidebarOpen(false); }} 
             icon={<ListChecks size={19} />} 
             label="Missions" 
           />
           <NavButton 
             active={view === 'payments'} 
-            onClick={() => setView('payments')} 
+            onClick={() => { setView('payments'); setIsSidebarOpen(false); }} 
             icon={<Euro size={19} />} 
             label="Paiements" 
           />
@@ -306,7 +329,7 @@ const App: React.FC = () => {
 
         <div className="p-4 space-y-3 border-t border-gray-700/30">
            <button
-            onClick={openNewMissionModal}
+            onClick={() => { openNewMissionModal(); setIsSidebarOpen(false); }}
             className="
               w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500
               hover:from-primary-600 hover:to-primary-700 hover:shadow-xl
@@ -378,8 +401,22 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0">
+      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
+          
+          {/* Menu Trigger for Mobile (Existing) and Desktop hint (Optional) */}
+          <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
+             {!isSidebarOpen && (
+               <button 
+                 onClick={() => setIsSidebarOpen(true)}
+                 className="p-2 glass-button rounded-lg text-gray-400 hover:text-white"
+                 title="Ouvrir le menu"
+               >
+                 <Menu size={24} />
+               </button>
+             )}
+          </div>
+
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             {view === 'dashboard' && (
               <Dashboard 
