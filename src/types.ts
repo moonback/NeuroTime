@@ -38,6 +38,9 @@ export interface Mission {
   
   // Timestamps (optionnels pour compatibilité avec anciennes missions)
   updatedAt?: string; // ISO String - Date de dernière modification
+  
+  // Chronomètre
+  timerStartedAt?: string; // ISO String - Date de début du chronomètre (si actif)
 }
 
 export type ViewState = 'dashboard' | 'calendar' | 'missions' | 'payments';

@@ -15,12 +15,13 @@ import DataPersistence from './dashboard/DataPersistence';
 interface DashboardProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
+  onUpdate: (mission: Mission) => void;
   onValidate: (mission: Mission) => void;
   onImport: (missions: Mission[]) => void;
   hidePrices?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onImport, hidePrices = false }) => {
+const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onUpdate, onValidate, onImport, hidePrices = false }) => {
   // Logic extraction via Custom Hooks
   const {
     selectedMonth,
@@ -64,6 +65,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         <NextMissionCard 
           nextMission={nextMission}
           onEdit={onEdit}
+          onUpdate={onUpdate}
           onValidate={onValidate}
           hidePrices={hidePrices}
         />

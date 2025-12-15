@@ -3,14 +3,43 @@ import { Mission } from '../types';
 import { getSupabase } from './authService';
 import { retry } from '../utils/retry';
 
+// Types pour la base de données (snake_case)
+interface MissionRow {
+  id: string;
+  user_id: string | null;
+  title: string;
+  client: string;
+  location: string;
+  description: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  rate_type: string;
+  hourly_rate: number;
+  total_earnings: number;
+  details: any; // JSONB
+  is_paid?: boolean;
+  logistics?: any; // JSONB
+  time_slots?: any; // JSONB
+  updated_at?: string;
+  timer_started_at?: string;
+}
+
+interface ClientRow {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+}
+
 // Initialisation du client Supabase (utilise le même client que l'auth)
 const getSupabaseClient = () => {
   return getSupabase();
 };
 
 // Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL)
-const missionToDb = (mission: Mission, userId?: string) => {
-  const dbRow: any = {
+const missionToDb = (mission: Mission, userId?: string): Partial<MissionRow> => {
+  const dbRow: Partial<MissionRow> = {
     id: mission.id,
     user_id: userId || null,
     title: mission.title,
@@ -40,11 +69,16 @@ const missionToDb = (mission: Mission, userId?: string) => {
   if (mission.timeSlots !== undefined) {
     dbRow.time_slots = mission.timeSlots.length > 1 ? mission.timeSlots : null;
   }
+
+  // Ajouter timer_started_at
+  if (mission.timerStartedAt !== undefined) {
+    dbRow.timer_started_at = mission.timerStartedAt;
+  }
   
   return dbRow;
 };
 
-const dbToMission = (dbRow: any): Mission => ({
+const dbToMission = (dbRow: MissionRow): Mission => ({
   id: dbRow.id,
   title: dbRow.title,
   client: dbRow.client,
@@ -52,8 +86,8 @@ const dbToMission = (dbRow: any): Mission => ({
   description: dbRow.description,
   startTime: dbRow.start_time,
   endTime: dbRow.end_time,
-  status: dbRow.status,
-  rateType: dbRow.rate_type,
+  status: dbRow.status as 'planned' | 'completed' | 'cancelled',
+  rateType: dbRow.rate_type as 'day' | 'night' | 'mixed' | 'custom',
   hourlyRate: dbRow.hourly_rate,
   totalEarnings: dbRow.total_earnings,
   details: dbRow.details,
@@ -61,6 +95,7 @@ const dbToMission = (dbRow: any): Mission => ({
   timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
   isPaid: dbRow.is_paid || false, // Récupérer le statut de paiement (par défaut false)
   updatedAt: dbRow.updated_at || undefined, // Récupérer la date de mise à jour
+  timerStartedAt: dbRow.timer_started_at || undefined, // Récupérer le chronomètre
 });
 
 // Obtenir l'ID de l'utilisateur connecté
@@ -123,7 +158,9 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
         const missionsDbFiltered = missionsDb.map(mission => {
           const filtered: any = {};
           Object.keys(mission).forEach(key => {
+            // @ts-ignore
             if (mission[key] !== undefined) {
+              // @ts-ignore
               filtered[key] = mission[key];
             }
           });
@@ -286,14 +323,14 @@ export interface Client {
 }
 
 // Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL) pour les clients
-const clientToDb = (client: Client, userId: string) => ({
+const clientToDb = (client: Client, userId: string): ClientRow => ({
   id: client.id,
   user_id: userId,
   name: client.name,
   created_at: client.createdAt,
 });
 
-const dbToClient = (dbRow: any): Client => ({
+const dbToClient = (dbRow: ClientRow): Client => ({
   id: dbRow.id,
   name: dbRow.name,
   createdAt: dbRow.created_at,

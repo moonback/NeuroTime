@@ -4,15 +4,17 @@ import { format, differenceInHours, differenceInMinutes, isToday, isTomorrow, di
 import { fr } from 'date-fns/locale/fr';
 import { Mission } from '../../types';
 import { formatTimeSlots } from '../../utils/timeSlots';
+import { MissionTimer } from '../MissionTimer';
 
 interface NextMissionCardProps {
   nextMission: Mission | null;
   onEdit: (mission: Mission) => void;
+  onUpdate: (mission: Mission) => void;
   onValidate: (mission: Mission) => void;
   hidePrices?: boolean;
 }
 
-const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, onValidate, hidePrices = false }) => {
+const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, onUpdate, onValidate, hidePrices = false }) => {
   
   const formatPrice = (value: number | null | undefined): string => {
     if (hidePrices) return '***';
@@ -87,6 +89,7 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
                 {isOngoing ? 'En cours' : timeText}
               </span>
               <div className="flex items-center gap-2">
+                 <MissionTimer mission={nextMission} onUpdate={onUpdate} />
                  {/* Badges Type */}
                  <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${
                     nextMission.rateType === 'night' 

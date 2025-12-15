@@ -4,10 +4,12 @@ import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
+import { MissionTimer } from './MissionTimer';
 
 interface MissionsListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
+  onUpdate: (mission: Mission) => void;
   onDelete: (id: string) => void;
   onNew: () => void;
   onTogglePaid: (mission: Mission) => void;
@@ -15,7 +17,7 @@ interface MissionsListProps {
   hidePrices?: boolean;
 }
 
-const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete, hidePrices = false }) => {
+const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onUpdate, onDelete, onNew, onTogglePaid, onComplete, hidePrices = false }) => {
   // Fonction utilitaire pour formater les montants avec masquage optionnel
   const formatPrice = (value: number | null | undefined): string => {
     if (hidePrices) return '***';
@@ -291,8 +293,13 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                         </div>
                       )}
 
-                      {/* Actions */}
-                      <div className="pt-2 border-t border-primary-500/10 flex items-center gap-2">
+                        {/* Actions */}
+                        <div className="pt-2 border-t border-primary-500/10 flex items-center gap-2">
+                          <div className="flex-1 flex justify-center">
+                            <MissionTimer mission={mission} onUpdate={onUpdate} />
+                          </div>
+                        </div>
+                        <div className="pt-2 border-t border-primary-500/10 flex items-center gap-2">
                         {mission.status === 'planned' && !mission.isPaid && (
                           <button 
                             onClick={() => onComplete(mission)}
@@ -354,6 +361,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                   <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Montant</th>
                   <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Statut</th>
                   <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Paiement</th>
+                  <th className="px-6 py-5 text-center text-xs font-bold text-gray-300 uppercase tracking-widest">Chrono</th>
                   <th className="px-6 py-5 text-right text-xs font-bold text-gray-300 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
@@ -367,7 +375,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     <React.Fragment key={monthKey}>
                       {/* Month Header Row */}
                       <tr className="bg-dark-200/50">
-                        <td colSpan={7} className="px-6 py-3 text-sm font-bold text-primary-300 border-y border-primary-500/10 sticky top-0 backdrop-blur-sm">
+                        <td colSpan={8} className="px-6 py-3 text-sm font-bold text-primary-300 border-y border-primary-500/10 sticky top-0 backdrop-blur-sm">
                            <div className="flex items-center gap-2">
                              <CalendarDays size={16} />
                              <span className="capitalize">{format(monthDate, 'MMMM yyyy', { locale: fr })}</span>
@@ -439,6 +447,11 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                             ) : (
                               <span className="text-xs text-gray-500 italic">—</span>
                             )}
+                          </td>
+                          <td className="px-6 py-5 whitespace-nowrap">
+                            <div className="flex justify-center">
+                              <MissionTimer mission={mission} onUpdate={onUpdate} />
+                            </div>
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

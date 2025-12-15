@@ -267,6 +267,7 @@ const App: React.FC = () => {
                 <Dashboard 
                   missions={missions} 
                   onEdit={handleEditMission} 
+                  onUpdate={updateMission}
                   onValidate={handleValidateMission}
                   onImport={handleImportData}
                   hidePrices={hidePrices}
@@ -276,6 +277,7 @@ const App: React.FC = () => {
                 <MissionsList 
                   missions={missions} 
                   onEdit={handleEditMission} 
+                  onUpdate={updateMission}
                   onDelete={handleDeleteMission} 
                   onNew={() => openNewMissionModal()}
                   onTogglePaid={handleTogglePaid}
