@@ -176,36 +176,40 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         
         {/* Enhanced curved connecting paths */}
         <path
-          d="M 25% 25% Q 35% 40%, 50% 50% T 75% 25%"
+          d="M 25 25 Q 35 40, 50 50 T 75 25"
           fill="none"
           stroke="url(#accentGradient)"
           strokeWidth="2"
           opacity="0.4"
           className="circuit-path"
+          vectorEffect="non-scaling-stroke"
         />
         <path
-          d="M 25% 75% Q 35% 60%, 50% 50% T 75% 75%"
+          d="M 25 75 Q 35 60, 50 50 T 75 75"
           fill="none"
           stroke="url(#accentGradient)"
           strokeWidth="2"
           opacity="0.4"
           className="circuit-path"
+          vectorEffect="non-scaling-stroke"
         />
         <path
-          d="M 20% 40% Q 30% 50%, 50% 50% T 80% 40%"
+          d="M 20 40 Q 30 50, 50 50 T 80 40"
           fill="none"
           stroke="url(#circuitGradient)"
           strokeWidth="1.5"
           opacity="0.5"
           className="circuit-path"
+          vectorEffect="non-scaling-stroke"
         />
         <path
-          d="M 20% 60% Q 30% 50%, 50% 50% T 80% 60%"
+          d="M 20 60 Q 30 50, 50 50 T 80 60"
           fill="none"
           stroke="url(#circuitGradient)"
           strokeWidth="1.5"
           opacity="0.5"
           className="circuit-path"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
 

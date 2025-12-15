@@ -18,6 +18,9 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
 import { Mission } from './types';
 
+import { MissionTimer } from './components/MissionTimer';
+import { AiAssistant } from './components/AiAssistant';
+
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { missions, isLoading, isSaving, addMission, updateMission, deleteMission, importMissions } = useMissions();
@@ -343,6 +346,8 @@ const App: React.FC = () => {
       </Suspense>
       
       <PWAInstallPrompt />
+
+      <AiAssistant />
       
       {isSaving && (
         <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
