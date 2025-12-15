@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { LayoutDashboard, Calendar as CalendarIcon, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff } from 'lucide-react';
 import { usePreferences } from './hooks/usePreferences';
 // Lazy loading pour optimiser les performances
 const Dashboard = lazy(() => import('./components/Dashboard'));
-const CalendarView = lazy(() => import('./components/CalendarView'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
@@ -298,12 +297,6 @@ const App: React.FC = () => {
             label="Missions" 
           />
           <NavButton 
-            active={view === 'calendar'} 
-            onClick={() => setView('calendar')} 
-            icon={<CalendarIcon size={19} />} 
-            label="Agenda" 
-          />
-          <NavButton 
             active={view === 'payments'} 
             onClick={() => setView('payments')} 
             icon={<Euro size={19} />} 
@@ -408,16 +401,6 @@ const App: React.FC = () => {
                 hidePrices={hidePrices}
               />
             )}
-            {view === 'calendar' && (
-              <CalendarView 
-                missions={missions} 
-                onEdit={handleEditMission} 
-                onDelete={handleDeleteMission} 
-                onValidate={handleValidateMission}
-                onNewMission={openNewMissionModal}
-                hidePrices={hidePrices}
-              />
-            )}
             {view === 'payments' && (
               <PaymentsView 
                 missions={missions} 
@@ -456,12 +439,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <MobileNavButton 
-            active={view === 'calendar'} 
-            onClick={() => setView('calendar')} 
-            icon={<CalendarIcon size={22} />} 
-            label="Agenda"
-          />
           
           <MobileNavButton 
             active={view === 'payments'} 
