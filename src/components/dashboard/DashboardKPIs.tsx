@@ -51,7 +51,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   return (
     <>
       {/* Statistics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard 
           icon={<Euro className="w-6 h-6 text-emerald-400" />}
           label={`CA ${format(selectedMonthDate, 'MMM yy', { locale: fr })}`}
@@ -91,7 +91,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       </div>
 
       {/* KPIs Avancés - Compact Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <StatCard 
           icon={<DollarSign className="w-5 h-5 text-blue-400" />}
           label="Taux horaire"
