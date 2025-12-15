@@ -9,7 +9,6 @@ import DashboardHeader from './dashboard/DashboardHeader';
 import NextMissionCard from './dashboard/NextMissionCard';
 import DashboardKPIs from './dashboard/DashboardKPIs';
 import UpcomingMissionsList from './dashboard/UpcomingMissionsList';
-import CompletedMissionsList from './dashboard/CompletedMissionsList';
 import DataPersistence from './dashboard/DataPersistence';
 
 interface DashboardProps {
@@ -33,7 +32,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     totalEarningsCompleted,
     totalEarningsPlanned,
     upcomingMissions,
-    recentCompletedMissions,
     nextMission,
     averageHourlyRate,
     monthlyComparison,
@@ -102,12 +100,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         hidePrices={hidePrices}
       />
 
-      {/* Completed Missions List */}
-      <CompletedMissionsList 
-        completedMissions={recentCompletedMissions}
-        onEdit={onEdit}
-        hidePrices={hidePrices}
-      />
 
        {/* Data Persistence Section */}
        <DataPersistence 
