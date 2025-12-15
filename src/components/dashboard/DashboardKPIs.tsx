@@ -68,7 +68,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           icon={<Clock className="w-6 h-6 text-primary-400" />}
           label="Heures"
           value={`${totalHours.toFixed(1)} h`}
-          subtext="Total heures"
+          subtext="Heures terminées"
           color="bg-primary-500/10 border-primary-500/30"
           textColor="text-primary-400"
         />

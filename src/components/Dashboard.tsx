@@ -1,6 +1,5 @@
 import React from 'react';
 import { Mission } from '../types';
-import DashboardCharts from './DashboardCharts';
 import DashboardStats from './DashboardStats';
 import DashboardGoals from './DashboardGoals';
 import { useDashboardStats } from '../hooks/useDashboardStats';
@@ -82,9 +81,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         mostProfitableMission={mostProfitableMission}
         hidePrices={hidePrices}
       />
-
-      {/* Graphiques */}
-      <DashboardCharts missions={missions} selectedMonth={selectedMonthDate} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
