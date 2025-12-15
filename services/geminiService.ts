@@ -43,43 +43,6 @@ export const enhanceDescription = async (
   }
 };
 
-export const generateSummary = async (missions: Mission[]): Promise<string> => {
-  const ai = getAiClient();
-  if (!ai) return "Clé API manquante.";
-
-  try {
-    const totalEarnings = missions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
-    const missionCount = missions.length;
-    const missionData = JSON.stringify(missions.slice(0, 8).map(m => ({
-        title: m.title,
-        earnings: m.totalEarnings,
-        date: m.startTime
-    })));
-
-    const prompt = `
-      Tu es un coach business pour un freelance événementiel.
-      Données récentes :
-      - Total missions: ${missionCount}
-      - Chiffre d'affaires estimé cumulé: ${totalEarnings}€
-      - Liste des dernières missions: ${missionData}
-      
-      Génère un court paragraphe (max 40 mots) encourageant.
-      Si le CA est bon, félicite-le sur l'aspect financier.
-      Si peu de missions, encourage la prospection.
-      Adopte un ton dynamique et positif. Ne mentionne pas de détails techniques JSON.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-
-    return response.text?.trim() || "Impossible de générer le résumé.";
-  } catch (error) {
-    console.error("Error generating summary:", error);
-    return "Impossible de générer l'analyse pour le moment. Veuillez réessayer.";
-  }
-};
 
 export const analyzeImageAndExtractMissions = async (imageBase64: string, mimeType: string): Promise<Partial<Mission>[]> => {
   const ai = getAiClient();

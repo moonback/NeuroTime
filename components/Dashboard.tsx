@@ -7,7 +7,6 @@ import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useDashboardExports } from '../hooks/useDashboardExports';
 import DashboardHeader from './dashboard/DashboardHeader';
 import NextMissionCard from './dashboard/NextMissionCard';
-import DashboardSummary from './dashboard/DashboardSummary';
 import DashboardKPIs from './dashboard/DashboardKPIs';
 import UpcomingMissionsList from './dashboard/UpcomingMissionsList';
 import CompletedMissionsList from './dashboard/CompletedMissionsList';
@@ -70,8 +69,6 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         />
       </div>
 
-      {/* AI Summary Card */}
-      <DashboardSummary missions={missions} />
 
       {/* KPI Stats Grid */}
       <DashboardKPIs 
