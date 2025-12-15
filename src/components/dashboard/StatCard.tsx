@@ -14,34 +14,75 @@ interface StatCardProps {
   };
 }
 
-const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, color, textColor, trend }) => (
-  <div className={`p-3 md:p-4 rounded-xl glass-card transition-all hover:shadow-md ${color} group relative animate-slide-in-up border-opacity-50`}>
-    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    <div className="relative z-10 flex items-center justify-between gap-3">
-      {/* Icon & Value Block */}
-      <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg bg-dark-50/50 shadow-sm border border-dark-100/30 ${textColor} group-hover:scale-105 transition-transform duration-300`}>
-          {React.cloneElement(icon as React.ReactElement, { size: 18, strokeWidth: 2.5 })}
-        </div>
-        <div>
-           <p className={`text-[10px] uppercase font-bold tracking-wider opacity-80 ${textColor}`}>{label}</p>
-           <p className="text-xl md:text-2xl font-black text-gray-100 tracking-tight leading-none mt-0.5">{value}</p>
-        </div>
-      </div>
+const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, color, textColor, trend }) => {
+  const renderedIcon = React.isValidElement(icon)
+    ? React.cloneElement(icon as React.ReactElement, { strokeWidth: 2.5 })
+    : icon;
 
-      {/* Trend or Subtext */}
-      <div className="flex flex-col items-end text-right">
-        {trend && (
-          <div className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${trend.isPositive ? 'text-green-300 bg-green-500/10 border border-green-500/20' : 'text-red-300 bg-red-500/10 border border-red-500/20'}`}>
-            {trend.isPositive ? <TrendingUp size={10} strokeWidth={3} /> : <TrendingDown size={10} strokeWidth={3} />}
-            {trend.value}%
+  return (
+    <div
+      className={[
+        'group relative overflow-hidden rounded-2xl p-3 sm:p-4 glass-card border border-opacity-60',
+        'transition-all duration-300 animate-slide-in-up',
+        'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20',
+        'focus-within:ring-2 focus-within:ring-primary-500/40',
+        color,
+      ].join(' ')}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/7 via-white/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/5" />
+
+      <div className="relative z-10 flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className={[
+                'shrink-0 p-2.5 rounded-xl',
+                'bg-dark-50/40 border border-white/10 shadow-sm',
+                'transition-transform duration-300 group-hover:scale-[1.03]',
+                textColor,
+              ].join(' ')}
+            >
+              {renderedIcon}
+            </div>
+
+            <div className="min-w-0">
+              <p className={`text-[11px] sm:text-xs uppercase font-extrabold tracking-wider opacity-80 ${textColor} truncate`}>
+                {label}
+              </p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-gray-50 tracking-tight leading-none truncate">
+                {value}
+              </p>
+            </div>
           </div>
+
+          {trend && (
+            <div
+              className={[
+                'shrink-0 flex items-center gap-1.5',
+                'text-[11px] font-extrabold px-2 py-1 rounded-lg border',
+                trend.isPositive
+                  ? 'text-green-200 bg-green-500/10 border-green-500/25'
+                  : 'text-red-200 bg-red-500/10 border-red-500/25',
+              ].join(' ')}
+              aria-label={`Évolution ${trend.isPositive ? 'positive' : 'négative'} de ${trend.value}%`}
+              title={`Évolution: ${trend.isPositive ? '+' : '-'}${trend.value}%`}
+            >
+              {trend.isPositive ? <TrendingUp size={12} strokeWidth={3} /> : <TrendingDown size={12} strokeWidth={3} />}
+              <span className="tabular-nums">{trend.value}%</span>
+            </div>
+          )}
+        </div>
+
+        {subtext && (
+          <p className="text-[11px] sm:text-xs text-gray-400 font-medium truncate">
+            {subtext}
+          </p>
         )}
-        <p className="text-[9px] text-gray-400 mt-1 font-medium max-w-[80px] truncate">{subtext}</p>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 StatCard.displayName = 'StatCard';
 
