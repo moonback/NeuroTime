@@ -154,27 +154,37 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full text-white font-medium py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg ${
-              loading
-                ? 'bg-gray-500 cursor-not-allowed'
-                : 'bg-primary-500 hover:bg-primary-600'
-            }`}
+            aria-busy={loading}
+            className={`w-full font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg
+              ${loading
+                ? 'bg-gray-500/80 cursor-not-allowed text-gray-200'
+                : 'bg-primary-500 hover:bg-primary-600 text-white'}
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2`}
           >
             {loading ? (
-              <span className="relative z-10 flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-dark-300 border-t-transparent rounded-full animate-spin" />
-                <span>{mode === 'login' ? 'Connexion...' : 'Inscription...'}</span>
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-primary-200" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"/>
+                </svg>
+                <span>
+                  {mode === 'login' ? 'Connexion...' : 'Inscription...'}
+                </span>
               </span>
             ) : (
-              <span className="relative z-10 flex items-center gap-2">
-                {mode === 'login' ? <LogIn size={16} /> : <UserPlus size={16} />}
-                <span>{mode === 'login' ? 'Se connecter' : 'S\'inscrire'}</span>
+              <span className="flex items-center gap-2">
+                {mode === 'login'
+                  ? <LogIn size={18} className="text-white" aria-hidden="true" />
+                  : <UserPlus size={18} className="text-white" aria-hidden="true" />}
+                <span>
+                  {mode === 'login' ? 'Se connecter' : 'S\'inscrire'}
+                </span>
               </span>
             )}
           </button>
 
           {/* Switch Mode */}
-          <div className="text-center pt-2">
+          {/* <div className="text-center pt-2">
             <button
               type="button"
               onClick={switchMode}
@@ -184,7 +194,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 ? 'Pas encore de compte ? S\'inscrire' 
                 : 'Déjà un compte ? Se connecter'}
             </button>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>
