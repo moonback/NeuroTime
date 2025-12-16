@@ -49,7 +49,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `eventflow_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.setAttribute("download", `NeuroTime_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -429,7 +429,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(missions, null, 2));
     const link = document.createElement("a");
     link.setAttribute("href", dataStr);
-    link.setAttribute("download", `eventflow_backup_${format(new Date(), 'yyyy-MM-dd')}.json`);
+    link.setAttribute("download", `neurotime_backup_${format(new Date(), 'yyyy-MM-dd')}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -4,7 +4,7 @@ import {
   loadMissionsFromSupabase 
 } from './supabaseService';
 
-const STORAGE_KEY = 'eventflow_missions_v1';
+const STORAGE_KEY = 'NeuroTime_missions_v1';
 
 // Fonction de sauvegarde avec fallback sur localStorage
 export const saveMissions = async (missions: Mission[]): Promise<void> => {
