@@ -28,9 +28,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-primary-500/20 to-primary-600/20 border border-primary-500/30 shadow-lg">
+            {/* <div className="p-2 rounded-xl bg-gradient-to-br from-primary-500/20 to-primary-600/20 border border-primary-500/30 shadow-lg">
               <Briefcase className="w-6 h-6 text-primary-300" strokeWidth={2.5} />
-            </div>
+            </div> */}
             <div>
               <h1 className="text-3xl md:text-4xl font-black text-gray-50 tracking-tight">Tableau de bord</h1>
               <p className="text-gray-400 text-sm md:text-base font-medium mt-0.5">Vue d'ensemble de votre activité</p>
