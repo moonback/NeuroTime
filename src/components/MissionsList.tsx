@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
+import { SwipeableItem } from './SwipeableItem';
 
 interface MissionsListProps {
   missions: Mission[];
@@ -224,8 +225,22 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     </span>
                  </div>
                  
-                 {missionsInMonth.map((mission) => (
-                    <div key={mission.id} className="glass-card rounded-2xl p-4 space-y-3">
+                 {missionsInMonth.map((mission) => {
+                    const canComplete = mission.status === 'planned' && !mission.isPaid;
+                    const canDelete = !mission.isPaid;
+                    
+                    return (
+                    <SwipeableItem
+                      key={mission.id}
+                      onSwipeRight={canComplete ? () => onComplete(mission) : undefined}
+                      onSwipeLeft={canDelete ? () => onDelete(mission.id) : undefined}
+                      leftActionColor="bg-emerald-500"
+                      rightActionColor="bg-red-500"
+                      leftActionIcon={<div className="flex flex-col items-center gap-1"><CheckCircle2 size={24} className="text-white" /><span className="text-[10px] font-bold text-white uppercase tracking-wider">Terminer</span></div>}
+                      rightActionIcon={<div className="flex flex-col items-center gap-1"><Trash2 size={24} className="text-white" /><span className="text-[10px] font-bold text-white uppercase tracking-wider">Supprimer</span></div>}
+                      disabled={!canComplete && !canDelete}
+                    >
+                    <div className="glass-card rounded-2xl p-4 space-y-3">
                       {/* Header avec Date et Statut */}
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -298,7 +313,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                             onClick={() => onComplete(mission)}
                             className="flex-1 text-emerald-300 hover:text-emerald-200 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
                           >
-                            <CheckCircle size={14} strokeWidth={2} />
+                            <CheckCircle2 size={14} strokeWidth={2.5} />
                             Terminer
                           </button>
                         )}
@@ -308,14 +323,14 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                               onClick={() => onEdit(mission)}
                               className="flex-1 text-primary-300 hover:text-primary-200 bg-primary-500/20 hover:bg-primary-500/30 border border-primary-500/30 hover:border-primary-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
                             >
-                              <Edit size={14} strokeWidth={2} />
+                              <Edit size={14} strokeWidth={2.5} />
                               Modifier
                             </button>
                             <button 
                               onClick={() => onDelete(mission.id)}
                               className="flex-1 text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 hover:border-red-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
                             >
-                              <Trash2 size={14} strokeWidth={2} />
+                              <Trash2 size={14} strokeWidth={2.5} />
                               Supprimer
                             </button>
                           </>
@@ -326,7 +341,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                         )}
                       </div>
                     </div>
-                 ))}
+                    </SwipeableItem>
+                 );})}
               </div>
             );
           })
