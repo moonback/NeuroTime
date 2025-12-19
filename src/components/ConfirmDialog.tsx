@@ -61,8 +61,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         if (e.target === e.currentTarget) onCancel();
       }}
     >
-      <div className="w-full max-w-md glass-card rounded-2xl border border-white/10 shadow-2xl overflow-hidden animate-scale-in">
-        <div className="flex items-start justify-between gap-3 p-5 border-b border-white/10 bg-white/5">
+      <div className="w-full max-w-md glass-card rounded-2xl border border-gray-500/10 shadow-2xl overflow-hidden animate-scale-in">
+        <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-500/10 bg-gray-500/5">
           <div className="flex items-start gap-3">
             <div
               className={[
@@ -91,7 +91,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-white/10 transition-colors"
+            className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-gray-500/10 transition-colors"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -128,3 +128,4 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 export default ConfirmDialog;
 
 
+

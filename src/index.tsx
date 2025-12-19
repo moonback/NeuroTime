@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { MissionProvider } from './context/MissionContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,11 +16,13 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <MissionProvider>
-          <App />
-        </MissionProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <MissionProvider>
+            <App />
+          </MissionProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

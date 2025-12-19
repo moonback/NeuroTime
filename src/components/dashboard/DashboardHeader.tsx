@@ -87,9 +87,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Modal d'export */}
       {isExportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setIsExportModalOpen(false)}>
-          <div className="w-full max-w-md bg-dark-200 glass-card rounded-2xl shadow-2xl border border-primary-500/30 overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md glass-card rounded-2xl shadow-2xl border border-primary-500/30 overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
             {/* Header Modal */}
-            <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
+            <div className="flex items-center justify-between p-5 border-b border-gray-500/10 bg-gray-500/5">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary-500/20 text-primary-300">
                   <Download size={20} />
@@ -101,7 +101,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </div>
               <button 
                 onClick={() => setIsExportModalOpen(false)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-100 hover:bg-gray-500/10 rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -134,4 +134,3 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 };
 
 export default DashboardHeader;
-

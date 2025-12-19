@@ -76,7 +76,7 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 
 ### 🎨 Interface utilisateur
 
-- [ ] **Thème clair/sombre** : Toggle pour basculer entre les thèmes
+- [x] **Thème clair/sombre** : Toggle pour basculer entre les thèmes
 - [x] Animations et transitions fluides ✅
 - [x] Gestion des états de chargement améliorée ✅
 - [x] Messages d'erreur explicites ✅

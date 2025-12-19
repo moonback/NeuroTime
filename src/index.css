@@ -20,6 +20,48 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme Overrides */
+html.light body {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+html.light .glass-card,
+html.light .glass-strong,
+html.light .glass-light {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+html.light .text-gray-50 { color: #0f172a; }
+html.light .text-gray-100 { color: #1e293b; }
+html.light .text-gray-200 { color: #334155; }
+html.light .text-gray-300 { color: #475569; }
+html.light .text-gray-400 { color: #64748b; }
+html.light .text-gray-500 { color: #94a3b8; }
+
+html.light .glass-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 1);
+  color: #475569;
+}
+
+html.light .glass-button:hover {
+  background: #fff;
+  color: #0f172a;
+}
+
+html.light .neo-aurora {
+  background: #f8fafc;
+}
+
+html.light .aurora-layer {
+  opacity: 0.4;
+  mix-blend-mode: multiply;
 }
 
 /* Custom scrollbar for dark theme */
@@ -427,5 +469,32 @@ textarea:disabled {
   background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.2), transparent);
   border: none;
   margin: 1.5rem 0;
+}
+
+/* Light theme overrides for form elements */
+html.light .glass-input {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #0f172a;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+html.light .glass-input:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+html.light .glass-input:focus {
+  background: #ffffff;
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+html.light .glass-input::placeholder {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+html.light .glass-separator {
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.4), transparent);
 }
 

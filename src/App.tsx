@@ -1,6 +1,6 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3, X } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -22,6 +22,8 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
 import { Mission } from './types';
 import { NetworkStatusBadge } from './components/NetworkStatusBadge';
+import { ThemeToggle } from './components/ThemeToggle';
+import { useTheme } from './context/ThemeContext';
 
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -30,6 +32,7 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
+  const { theme } = useTheme();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
@@ -203,8 +206,12 @@ const App: React.FC = () => {
       >
         <div className="p-6 border-b border-gray-700/30 flex flex-col gap-3">
           <div className="flex justify-between items-center gap-3">
-            <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
-              <img src="/logo.png" alt="Logo" className="w-full h-20 object-contain" />
+            <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden p-2 glass-light">
+              <img 
+                src={theme === 'dark' ? "/logo.png" : "/logo-light.png"} 
+                alt="Logo" 
+                className="w-full h-20 object-contain" 
+              />
             </div>
             <div className="flex flex-col items-center gap-2 shrink-0">
               <button
@@ -212,12 +219,14 @@ const App: React.FC = () => {
                 onClick={toggleSidebarPinned}
                 className={`p-2 glass-button rounded-lg ${sidebarPinned ? 'text-primary-300' : 'text-gray-400 hover:text-gray-100'}`}
                 title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
-                aria-label={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
               >
-                {sidebarPinned ? <PinOff size={18} /> : <Pin size={18} />}
+                {sidebarPinned ? <Pin size={20} className="fill-current" /> : <PinOff size={20} />}
               </button>
-              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-white">
-                <ChevronLeft size={24} />
+              <button 
+                onClick={() => setIsSidebarOpen(false)} 
+                className="md:hidden p-2 text-gray-400 hover:text-gray-100"
+              >
+                <X size={24} />
               </button>
             </div>
           </div>
@@ -285,6 +294,10 @@ const App: React.FC = () => {
               <LogOut size={14} />
               <span>Déconnexion</span>
             </button>
+            
+            <div className="flex justify-center mt-2">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </aside>
@@ -293,7 +306,11 @@ const App: React.FC = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 glass-strong border-b border-gray-700/30 z-30 pb-safe backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
+            <img 
+              src={theme === 'dark' ? "/logo.png" : "/logo-light.png"} 
+              alt="Logo" 
+              className="h-8 object-contain" 
+            />
             <div className="flex flex-col">
               {/* <span className="text-lg font-bold text-gray-100">NeuroTime</span> */}
               <span className="text-xs text-gray-400 font-medium">
@@ -307,6 +324,9 @@ const App: React.FC = () => {
           >
             {hidePrices ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
+          <div className="ml-2">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -316,7 +336,7 @@ const App: React.FC = () => {
           
           <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
              {!sidebarOpen && (
-               <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-button rounded-lg text-gray-400 hover:text-white" aria-label="Ouvrir la sidebar">
+               <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-button rounded-lg text-gray-400 hover:text-gray-100" aria-label="Ouvrir la sidebar">
                  <Menu size={24} />
                </button>
              )}

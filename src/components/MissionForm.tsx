@@ -461,7 +461,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
       <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
         
         {/* Header */}
@@ -485,16 +485,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-primary-500/25 border border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
-                 <Copy size={16} className="text-primary-300" strokeWidth={2.5} />
+               <div className="bg-primary-500/10 dark:bg-primary-500/25 border border-primary-500/20 dark:border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
+                 <Copy size={16} className="text-primary-600 dark:text-primary-300" strokeWidth={2.5} />
                  <select 
                    onChange={handleCopyFromMission}
-                   className="bg-transparent text-xs md:text-sm text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
+                   className="bg-transparent text-xs md:text-sm text-primary-700 dark:text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
                    defaultValue=""
                  >
-                   <option value="" disabled>Copier depuis une mission précédente...</option>
+                   <option value="" disabled className="text-gray-500">Copier depuis une mission précédente...</option>
                    {missions.slice(-10).reverse().map(m => (
-                     <option key={m.id} value={m.id} className="bg-dark-50">{m.title} - {m.client}</option>
+                     <option key={m.id} value={m.id} className="bg-white dark:bg-dark-50 text-gray-900 dark:text-gray-100">{m.title} - {m.client}</option>
                    ))}
                  </select>
                </div>
@@ -502,16 +502,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
             {/* Section 1: Informations Générales */}
             <section className="space-y-4 md:space-y-5">
-              <h3 className="text-xs md:text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2.5 mb-1">
-                <Briefcase size={14} className="text-primary-400" strokeWidth={2.5} /> Détails de la mission
+              <h3 className="text-xs md:text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-widest flex items-center gap-2.5 mb-1">
+                <Briefcase size={14} className="text-primary-600 dark:text-primary-400" strokeWidth={2.5} /> Détails de la mission
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                 <div className="space-y-2">
-                  <label className="text-xs md:text-sm font-bold text-gray-200 flex items-center gap-1.5 tracking-wide">
+                  <label className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1.5 tracking-wide">
                     Titre de la mission
                     <Tooltip content="Nom descriptif de votre mission (ex: Régie Son, Accueil VIP)">
-                      <AlertCircle size={12} className="text-gray-400 cursor-help hover:text-primary-400 transition-colors" />
+                      <AlertCircle size={12} className="text-gray-500 dark:text-gray-400 cursor-help hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
                     </Tooltip>
                   </label>
                   <input
@@ -546,7 +546,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       <select
                         value={client}
                         onChange={handleClientChange}
-                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 ${
+                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100 ${
                           errors.client ? 'border-red-500/50' : ''
                         }`}
                       >
@@ -582,7 +582,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           }}
                           placeholder="Nom du nouveau client"
                           autoFocus
-                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${
                             errors.newClient ? 'border-red-500/50' : ''
                           }`}
                         />
@@ -611,7 +611,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                         </button>
                       </div>
                       {errors.newClient && (
-                        <p className="text-xs text-red-400 flex items-center gap-1">
+                        <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                           <AlertCircle size={12} /> {errors.newClient}
                         </p>
                       )}
@@ -619,7 +619,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   )}
                   
                   {errors.client && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
+                    <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.client}
                     </p>
                   )}
@@ -627,10 +627,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
-                  <MapPin size={12} className="text-gray-500" /> Lieu
+                <label className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
+                  <MapPin size={12} className="text-gray-500 dark:text-gray-400" /> Lieu
                   <Tooltip content="Adresse ou lieu de la mission">
-                    <AlertCircle size={12} className="text-gray-500 cursor-help ml-1" />
+                    <AlertCircle size={12} className="text-gray-500 dark:text-gray-400 cursor-help ml-1" />
                   </Tooltip>
                 </label>
                 <input
@@ -642,12 +642,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     if (errors.location) setErrors(prev => ({ ...prev, location: '' }));
                   }}
                   placeholder="Ex: Paris La Défense Arena"
-                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
+                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${
                     errors.location ? 'border-red-500/50' : ''
                   }`}
                 />
                 {errors.location && (
-                  <p className="text-xs text-red-400 flex items-center gap-1">
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <AlertCircle size={12} /> {errors.location}
                   </p>
                 )}
@@ -659,12 +659,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             {/* Section 2: Date & Horaires */}
             <section className="space-y-3 md:space-y-4">
                <div className="flex justify-between items-center">
-                 <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                 <h3 className="text-[10px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Calculator size={12} /> Horaires & Calcul
                 </h3>
                 
                 {/* Toggle Mode */}
-                <div className="bg-gray-100 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium">
+                <div className="bg-gray-100 dark:bg-dark-200 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium">
                   <button
                     type="button"
                     onClick={() => setCalculationMode('auto')}
@@ -693,12 +693,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       setDate(e.target.value);
                       if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
                     }}
-                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-100 ${
+                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-900 dark:text-gray-100 ${
                       errors.date ? 'border-red-500/50' : ''
                     }`}
                   />
                   {errors.date && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
+                    <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.date}
                     </p>
                   )}
@@ -711,7 +711,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     <button
                       type="button"
                       onClick={addTimeSlot}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-100 dark:bg-primary-500/20 hover:bg-primary-200 dark:hover:bg-primary-500/30 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-500/30 rounded-lg text-xs font-medium transition-all"
                     >
                       <Plus size={14} />
                       Ajouter un créneau
@@ -726,7 +726,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           <button
                             type="button"
                             onClick={() => removeTimeSlot(index)}
-                            className="p-1.5 hover:bg-red-500/20 text-red-400 rounded transition-colors"
+                            className="p-1.5 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 rounded transition-colors"
                             title="Supprimer ce créneau"
                           >
                             <Trash2 size={14} />
@@ -741,7 +741,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.startTime}
                             onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-900 dark:text-gray-100 ${
                               errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
                             }`}
                           />
@@ -758,7 +758,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.endTime}
                             onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-900 dark:text-gray-100 ${
                               errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
                             }`}
                           />
@@ -781,8 +781,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   {/* Avertissement de doublon */}
                   {duplicateWarning && (
                     <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-3 flex items-start gap-2">
-                      <AlertCircle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-yellow-300 flex-1">{duplicateWarning}</p>
+                      <AlertCircle size={16} className="text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300 flex-1">{duplicateWarning}</p>
                     </div>
                   )}
                 </div>
@@ -790,20 +790,20 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
               {/* Smart Calculator Display */}
               <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
                 
                 {calculationMode === 'auto' ? (
                   <div className="space-y-3 md:space-y-4 relative z-10">
                     <div className="flex justify-between items-start gap-4">
                        <div>
-                         <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
-                         <p className="text-[10px] md:text-xs text-gray-400">
+                         <label className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-200 block mb-1">Calcul Automatique</label>
+                         <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                            {hidePrices ? 'Calcul automatique jour/nuit' : `Jour (${RATE_DAY}€) et nuit (${RATE_NIGHT}€ > 22h)`}
                          </p>
                        </div>
                        <div className="text-right">
-                          <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
+                          <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
+                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-600 dark:text-green-300' : 'text-primary-600 dark:text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
                             {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={20} strokeWidth={2.5} />}
                           </span>
                        </div>
@@ -811,8 +811,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
                     {/* Visual Bar Breakdown */}
                     {(dayHours > 0 || nightHours > 0) && (
-                      <div className="glass-light rounded-xl border-primary-500/20 p-3">
-                        <div className="flex h-3 w-full rounded-full overflow-hidden bg-dark-200 mb-3">
+                      <div className="glass-light rounded-xl border-gray-200 dark:border-primary-500/20 p-3">
+                        <div className="flex h-3 w-full rounded-full overflow-hidden bg-gray-200 dark:bg-dark-200 mb-3">
                           {dayHours > 0 && (
                             <div className="bg-orange-400 h-full" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
@@ -822,18 +822,18 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           {dayHours > 0 ? (
-                             <div className="flex items-center gap-2 text-gray-200">
+                             <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
                                <Sun size={16} className="text-orange-400" />
                                <span className="font-semibold">{dayHours.toFixed(1)}h</span>
-                               {!hidePrices && <span className="text-gray-400">× {RATE_DAY}€</span>}
+                               {!hidePrices && <span className="text-gray-500 dark:text-gray-400">× {RATE_DAY}€</span>}
                              </div>
                           ) : <span />}
                           
                           {nightHours > 0 ? (
-                             <div className="flex items-center gap-2 text-gray-200">
+                             <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
                                <Moon size={16} className="text-primary-400" />
                                <span className="font-semibold">{nightHours.toFixed(1)}h</span>
-                               {!hidePrices && <span className="text-gray-400">× {RATE_NIGHT}€</span>}
+                               {!hidePrices && <span className="text-gray-500 dark:text-gray-400">× {RATE_NIGHT}€</span>}
                              </div>
                           ) : <span />}
                         </div>
@@ -844,8 +844,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   // Manual Mode
                    <div className="flex items-center justify-between gap-4">
                      <div className="flex-1">
-                        <label className="text-sm font-bold text-gray-200 block mb-1">Montant Forfaitaire</label>
-                         <p className="text-xs text-gray-400">Saisie manuelle du total</p>
+                        <label className="text-sm font-bold text-gray-700 dark:text-gray-200 block mb-1">Montant Forfaitaire</label>
+                         <p className="text-xs text-gray-500 dark:text-gray-400">Saisie manuelle du total</p>
                      </div>
                      <div className="w-1/2">
                        <div className="relative">
@@ -860,10 +860,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             }
                           }}
                           placeholder={hidePrices ? '•••' : undefined}
-                          className="w-full pl-4 pr-10 py-3 glass-input rounded-xl text-right font-bold text-xl outline-none text-gray-100"
+                          className="w-full pl-4 pr-10 py-3 glass-input rounded-xl text-right font-bold text-xl outline-none text-gray-900 dark:text-gray-100"
                           disabled={hidePrices}
                         />
-                        {!hidePrices && <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />}
+                        {!hidePrices && <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />}
                        </div>
                      </div>
                    </div>
@@ -876,14 +876,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             {/* Section 3: IA & Notes */}
             <section className="space-y-4">
               <div className="flex justify-between items-center">
-                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                 <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Sparkles size={14} /> Description (IA)
                 </h3>
                 <button
                   type="button"
                   onClick={handleEnhanceDescription}
                   disabled={isEnhancing || !description}
-                  className="text-xs flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-100 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-xs flex items-center gap-1.5 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full hover:bg-purple-100 dark:hover:bg-purple-500/20 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles size={12} />
                   {isEnhancing ? 'Réécriture en cours...' : 'Reformuler pro'}
@@ -896,14 +896,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Notes rapides : monté les spots, câblage régie, fin 2h du mat..."
                   rows={3}
-                  className="w-full px-4 py-3 glass-input rounded-xl outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
+                  className="w-full px-4 py-3 glass-input rounded-xl outline-none transition-all resize-none text-sm leading-relaxed text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </div>
             </section>
 
             {/* Status Selector */}
-             <div className="flex gap-4 items-center glass-light p-3 rounded-xl border-primary-500/20">
-               <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
+             <div className="flex gap-4 items-center glass-light p-3 rounded-xl border border-gray-200 dark:border-primary-500/20">
+               <span className="text-sm font-medium text-gray-700 dark:text-gray-200 pl-2">Statut :</span>
                <div className="flex gap-2">
                  {(['planned', 'completed', 'cancelled'] as const).map(s => (
                    <button
@@ -912,10 +912,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     onClick={() => setStatus(s)}
                     className={`px-3 py-1 text-xs rounded-full border transition-all capitalize ${
                       status === s 
-                      ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold' 
-                        : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
-                        : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
-                      : 'glass-button text-gray-400 hover:text-primary-300'
+                      ? s === 'completed' ? 'bg-green-100 dark:bg-green-500/20 border-green-200 dark:border-green-500/30 text-green-700 dark:text-green-300 font-bold' 
+                        : s === 'cancelled' ? 'bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 font-bold'
+                        : 'bg-primary-100 dark:bg-primary-500/20 border-primary-200 dark:border-primary-500/30 text-primary-700 dark:text-primary-300 font-bold'
+                      : 'glass-button text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-300'
                     }`}
                    >
                      {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -926,12 +926,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           </div>
 
           {/* Footer Actions */}
-          <div className="p-5 md:p-7 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 md:p-7 border-t border-gray-200 dark:border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 md:py-3.5 px-5 rounded-xl glass-button text-gray-200 font-bold hover:shadow-lg transition-all text-sm md:text-base relative z-10 tracking-wide"
+              className="flex-1 py-3 md:py-3.5 px-5 rounded-xl glass-button text-gray-700 dark:text-gray-200 font-bold hover:shadow-lg transition-all text-sm md:text-base relative z-10 tracking-wide"
             >
               Annuler
             </button>
@@ -939,8 +939,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               type="submit"
               className={`flex-[2] text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${
                 isConverting 
-                ? 'bg-green-500 hover:bg-green-600 glow-green' 
-                : 'bg-primary-500 hover:bg-primary-600 glow-primary'
+                ? 'bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 glow-green' 
+                : 'bg-blue-600 dark:bg-primary-500 hover:bg-blue-700 dark:hover:bg-primary-600 glow-primary'
               }`}
             >
               <span className="flex items-center gap-2.5 tracking-wide">
