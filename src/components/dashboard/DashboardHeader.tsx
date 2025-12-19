@@ -110,32 +110,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             {/* Content Modal */}
             <div className="p-5 space-y-3">
               <button 
-                onClick={() => { onDownloadCSV(); setIsExportModalOpen(false); }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl glass-light border border-primary-500/10 hover:border-primary-500/40 hover:bg-primary-500/5 transition-all group text-left"
-              >
-                <div className="p-3 rounded-lg bg-green-500/20 text-green-300 group-hover:scale-110 transition-transform">
-                  <FileSpreadsheet size={24} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-100 group-hover:text-primary-300 transition-colors">Format CSV / Excel</h4>
-                  <p className="text-xs text-gray-400">Pour une analyse détaillée dans un tableur</p>
-                </div>
-              </button>
-
-              <button 
-                onClick={() => { onDownloadMD(); setIsExportModalOpen(false); }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl glass-light border border-primary-500/10 hover:border-primary-500/40 hover:bg-primary-500/5 transition-all group text-left"
-              >
-                <div className="p-3 rounded-lg bg-blue-500/20 text-blue-300 group-hover:scale-110 transition-transform">
-                  <FileText size={24} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-100 group-hover:text-primary-300 transition-colors">Rapport Markdown</h4>
-                  <p className="text-xs text-gray-400">Document texte formaté pour documentation</p>
-                </div>
-              </button>
-
-              <button 
                 onClick={() => { onDownloadPDF(); setIsExportModalOpen(false); }}
                 className="w-full flex items-center gap-4 p-4 rounded-xl glass-light border border-primary-500/10 hover:border-primary-500/40 hover:bg-primary-500/5 transition-all group text-left"
               >
