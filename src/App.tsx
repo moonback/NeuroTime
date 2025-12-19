@@ -21,6 +21,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SplashScreen from './components/SplashScreen';
 import { Mission } from './types';
+import { NetworkStatusBadge } from './components/NetworkStatusBadge';
 
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -413,6 +414,7 @@ const App: React.FC = () => {
       </Suspense>
       
       <PWAInstallPrompt />
+      <NetworkStatusBadge />
       {confirmDialog}
       
       {isSaving && (

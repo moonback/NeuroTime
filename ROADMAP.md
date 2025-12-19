@@ -82,7 +82,7 @@ Ce document détaille l'évolution prévue de NeuroTime, de la version MVP actue
 - [x] Messages d'erreur explicites ✅
 - [x] Tooltips et aide contextuelle ✅
 - [ ] **Système de notifications** : Toasts unifiés pour feedback utilisateur
-- [ ] **Indicateurs d'état réseau** : Badge visible quand offline/online
+- [x] **Indicateurs d'état réseau** : Badge visible quand offline/online
 - [x] **Amélioration mobile** : Navigation tactile optimisée, gestes swipe
 
 ### 🐛 Corrections et robustesse
