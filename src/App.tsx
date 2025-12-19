@@ -505,7 +505,7 @@ const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, on
     
     {/* Label */}
     {label && (
-      <span className={`relative z-10 text-[10px] mt-1.5 font-bold leading-tight tracking-wide transition-all duration-300 ${
+      <span className={`relative z-10 text-[9px] mt-1 font-bold leading-tight tracking-wide transition-all duration-300 ${
         active 
           ? 'text-primary-300' 
           : 'text-gray-500 group-active:text-primary-400'

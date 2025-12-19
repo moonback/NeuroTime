@@ -6,6 +6,16 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
+        'sm': ['0.8125rem', { lineHeight: '1.25rem' }],  // 13px (au lieu de 14px)
+        'base': ['0.875rem', { lineHeight: '1.375rem' }], // 14px (au lieu de 16px)
+        'lg': ['1rem', { lineHeight: '1.5rem' }],        // 16px (au lieu de 18px)
+        'xl': ['1.125rem', { lineHeight: '1.75rem' }],   // 18px (au lieu de 20px)
+        '2xl': ['1.25rem', { lineHeight: '1.75rem' }],    // 20px (au lieu de 24px)
+        '3xl': ['1.5rem', { lineHeight: '2rem' }],       // 24px (au lieu de 30px)
+        '4xl': ['1.875rem', { lineHeight: '2.25rem' }],   // 30px (au lieu de 36px)
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
