@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Mission } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -15,6 +15,280 @@ interface MissionsListProps {
   hidePrices?: boolean;
 }
 
+interface SwipeableCardProps {
+  mission: Mission;
+  onEdit: () => void;
+  onDelete: () => void;
+  onTogglePaid: () => void;
+  onComplete: () => void;
+  hidePrices: boolean;
+  formatPrice: (value: number | null | undefined) => string;
+  swipedMissionId: string | null;
+  onSwipeChange: (missionId: string | null) => void;
+}
+
+const SwipeableCard: React.FC<SwipeableCardProps> = ({
+  mission,
+  onEdit,
+  onDelete,
+  onTogglePaid,
+  onComplete,
+  hidePrices,
+  formatPrice,
+  swipedMissionId,
+  onSwipeChange,
+}) => {
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const isSwiped = swipedMissionId === mission.id;
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const SWIPE_THRESHOLD = 80; // Distance minimale pour déclencher le swipe
+  const MAX_SWIPE = 200; // Distance maximale de swipe
+  const SWIPE_ANGLE_THRESHOLD = 0.5; // Ratio pour déterminer si c'est un swipe horizontal
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Ne pas permettre le swipe si la mission est payée
+    if (mission.isPaid) return;
+    
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    isSwiping.current = false;
+  }, [mission.isPaid]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+
+    // Détecter si c'est un mouvement horizontal ou vertical
+    const isHorizontalSwipe = absDeltaX > absDeltaY * SWIPE_ANGLE_THRESHOLD;
+    
+    // Si le mouvement est principalement horizontal, activer le swipe
+    if (isHorizontalSwipe && absDeltaX > 10) {
+      if (!isSwiping.current) {
+        isSwiping.current = true;
+      }
+      // Empêcher le scroll seulement si on swipe horizontalement
+      e.preventDefault();
+
+      // Swipe uniquement vers la gauche (deltaX négatif)
+      if (deltaX < 0) {
+        const offset = Math.max(-MAX_SWIPE, deltaX);
+        setSwipeOffset(offset);
+      } else if (deltaX > 0 && isSwiped) {
+        // Permettre de revenir en arrière si déjà swipé
+        const offset = Math.min(0, deltaX);
+        setSwipeOffset(offset);
+      }
+    }
+  }, [isSwiped]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null) return;
+
+    // Si le swipe dépasse le seuil, maintenir l'état swipé
+    if (swipeOffset < -SWIPE_THRESHOLD) {
+      setSwipeOffset(-MAX_SWIPE);
+      onSwipeChange(mission.id);
+    } else {
+      // Sinon, revenir à la position initiale
+      setSwipeOffset(0);
+      onSwipeChange(null);
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwiping.current = false;
+  }, [swipeOffset, mission.id, onSwipeChange]);
+
+  const handleActionClick = useCallback((action: () => void) => {
+    action();
+    // Réinitialiser le swipe après l'action
+    setSwipeOffset(0);
+    onSwipeChange(null);
+  }, [onSwipeChange]);
+
+  // Réinitialiser le swipe si une autre carte est swipée ou si la mission change
+  React.useEffect(() => {
+    const MAX_SWIPE_VALUE = 200;
+    if (swipedMissionId !== mission.id) {
+      setSwipeOffset(0);
+    } else if (swipedMissionId === mission.id) {
+      setSwipeOffset(-MAX_SWIPE_VALUE);
+    }
+  }, [swipedMissionId, mission.id]);
+
+  // Fermer le swipe si l'utilisateur clique ailleurs ou fait défiler
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isSwiped && cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setSwipeOffset(0);
+        onSwipeChange(null);
+      }
+    };
+
+    const handleScroll = () => {
+      if (isSwiped) {
+        setSwipeOffset(0);
+        onSwipeChange(null);
+      }
+    };
+
+    if (isSwiped) {
+      document.addEventListener('click', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [isSwiped, onSwipeChange]);
+
+  const hasSwipeActions = !mission.isPaid || (mission.status === 'planned' && !mission.isPaid);
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      {/* Actions rapides révélées par le swipe */}
+      {hasSwipeActions && (
+        <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-gradient-to-l from-primary-500/40 via-primary-500/30 to-transparent pointer-events-none">
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {mission.status === 'planned' && !mission.isPaid && (
+              <button
+                onClick={() => handleActionClick(onComplete)}
+                className="p-3 rounded-xl bg-emerald-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-emerald-600"
+                aria-label="Terminer"
+              >
+                <CheckCircle size={18} strokeWidth={2.5} />
+              </button>
+            )}
+            {!mission.isPaid && (
+              <>
+                <button
+                  onClick={() => handleActionClick(onEdit)}
+                  className="p-3 rounded-xl bg-primary-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-primary-600"
+                  aria-label="Modifier"
+                >
+                  <Edit size={18} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => handleActionClick(onDelete)}
+                  className="p-3 rounded-xl bg-red-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-red-600"
+                  aria-label="Supprimer"
+                >
+                  <Trash2 size={18} strokeWidth={2.5} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Carte principale */}
+      <div
+        ref={cardRef}
+        className="glass-card rounded-2xl p-4 space-y-3 relative bg-dark-200/80 transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Indicateur de swipe (visible uniquement si pas swipé et si actions disponibles) */}
+        {!isSwiped && hasSwipeActions && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none animate-pulse">
+            <div className="flex items-center gap-1 text-primary-400">
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+            </div>
+          </div>
+        )}
+        {/* Header avec Date et Statut */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-black text-gray-50 text-sm tracking-tight">
+                {format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}
+              </span>
+              <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold border
+                ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' : 
+                  mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' : 
+                  'bg-red-500/25 text-red-200 border-red-500/40'}`}>
+                {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+              <Clock size={12} className="text-gray-500" strokeWidth={2} />
+              {formatTimeSlots(mission)}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-2.5 py-1.5 rounded-lg shadow-sm text-sm">
+            {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
+          </div>
+        </div>
+
+        {/* Titre et Client */}
+        <div>
+          <h3 className="font-bold text-gray-50 text-base tracking-tight mb-1.5">{mission.title}</h3>
+          <div className="flex items-center gap-1.5 text-xs text-primary-300 font-semibold">
+            <Briefcase size={12} className="text-primary-400" strokeWidth={2} />
+            {mission.client}
+          </div>
+        </div>
+
+        {/* Lieu */}
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <MapPin size={14} className="text-gray-400" strokeWidth={2} />
+          <span className="font-medium">{mission.location}</span>
+        </div>
+
+        {/* Paiement (si terminé) */}
+        {mission.status === 'completed' && (
+          <div className="pt-2 border-t border-primary-500/10">
+            <button
+              onClick={onTogglePaid}
+              className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border shadow-sm transition-all ${
+                mission.isPaid 
+                  ? 'bg-emerald-500/25 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/35' 
+                  : 'bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25 hover:text-gray-300'
+              }`}
+            >
+              {mission.isPaid ? (
+                <>
+                  <CheckCircle2 size={14} strokeWidth={2.5} />
+                  Payé
+                </>
+              ) : (
+                <>
+                  <Circle size={14} strokeWidth={2.5} />
+                  Non payé
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Actions (masquées sur mobile car disponibles via swipe, affichées uniquement si mission payée) */}
+        {mission.isPaid && (
+          <div className="pt-2 border-t border-primary-500/10">
+            <div className="w-full text-center text-xs text-gray-500 italic py-2.5">
+              Mission verrouillée (payée)
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete, onNew, onTogglePaid, onComplete, hidePrices = false }) => {
   // Fonction utilitaire pour formater les montants avec masquage optionnel
   const formatPrice = (value: number | null | undefined): string => {
@@ -26,6 +300,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('planned');
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [clientFilter, setClientFilter] = useState<string>('all');
+  const [swipedMissionId, setSwipedMissionId] = useState<string | null>(null);
 
   // Extraire les clients uniques
   const uniqueClients = useMemo(() => {
@@ -225,107 +500,18 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                  </div>
                  
                  {missionsInMonth.map((mission) => (
-                    <div key={mission.id} className="glass-card rounded-2xl p-4 space-y-3">
-                      {/* Header avec Date et Statut */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-black text-gray-50 text-sm tracking-tight">
-                              {format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}
-                            </span>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold border
-                              ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' : 
-                                mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' : 
-                                'bg-red-500/25 text-red-200 border-red-500/40'}`}>
-                              {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                            <Clock size={12} className="text-gray-500" strokeWidth={2} />
-                            {formatTimeSlots(mission)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-2.5 py-1.5 rounded-lg shadow-sm text-sm">
-                          {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
-                        </div>
-                      </div>
-
-                      {/* Titre et Client */}
-                      <div>
-                        <h3 className="font-bold text-gray-50 text-base tracking-tight mb-1.5">{mission.title}</h3>
-                        <div className="flex items-center gap-1.5 text-xs text-primary-300 font-semibold">
-                          <Briefcase size={12} className="text-primary-400" strokeWidth={2} />
-                          {mission.client}
-                        </div>
-                      </div>
-
-                      {/* Lieu */}
-                      <div className="flex items-center gap-2 text-sm text-gray-300">
-                        <MapPin size={14} className="text-gray-400" strokeWidth={2} />
-                        <span className="font-medium">{mission.location}</span>
-                      </div>
-
-                      {/* Paiement (si terminé) */}
-                      {mission.status === 'completed' && (
-                        <div className="pt-2 border-t border-primary-500/10">
-                          <button
-                            onClick={() => onTogglePaid(mission)}
-                            className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border shadow-sm transition-all ${
-                              mission.isPaid 
-                                ? 'bg-emerald-500/25 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/35' 
-                                : 'bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25 hover:text-gray-300'
-                            }`}
-                          >
-                            {mission.isPaid ? (
-                              <>
-                                <CheckCircle2 size={14} strokeWidth={2.5} />
-                                Payé
-                              </>
-                            ) : (
-                              <>
-                                <Circle size={14} strokeWidth={2.5} />
-                                Non payé
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="pt-2 border-t border-primary-500/10 flex items-center gap-2">
-                        {mission.status === 'planned' && !mission.isPaid && (
-                          <button 
-                            onClick={() => onComplete(mission)}
-                            className="flex-1 text-emerald-300 hover:text-emerald-200 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
-                          >
-                            <CheckCircle size={14} strokeWidth={2} />
-                            Terminer
-                          </button>
-                        )}
-                        {!mission.isPaid ? (
-                          <>
-                            <button 
-                              onClick={() => onEdit(mission)}
-                              className="flex-1 text-primary-300 hover:text-primary-200 bg-primary-500/20 hover:bg-primary-500/30 border border-primary-500/30 hover:border-primary-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
-                            >
-                              <Edit size={14} strokeWidth={2} />
-                              Modifier
-                            </button>
-                            <button 
-                              onClick={() => onDelete(mission.id)}
-                              className="flex-1 text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 hover:border-red-500/50 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-xs font-semibold"
-                            >
-                              <Trash2 size={14} strokeWidth={2} />
-                              Supprimer
-                            </button>
-                          </>
-                        ) : (
-                          <div className="w-full text-center text-xs text-gray-500 italic py-2.5">
-                            Mission verrouillée (payée)
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <SwipeableCard
+                      key={mission.id}
+                      mission={mission}
+                      onEdit={() => onEdit(mission)}
+                      onDelete={() => onDelete(mission.id)}
+                      onTogglePaid={() => onTogglePaid(mission)}
+                      onComplete={() => onComplete(mission)}
+                      hidePrices={hidePrices}
+                      formatPrice={formatPrice}
+                      swipedMissionId={swipedMissionId}
+                      onSwipeChange={setSwipedMissionId}
+                    />
                  ))}
               </div>
             );
