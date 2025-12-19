@@ -95,7 +95,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   <Download size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-100">Exporter les données</h3>
+                  <h3 className="text-lg font-bold text-gray-100">Exporter les données {format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}</h3>
                   <p className="text-xs text-gray-400">Choisir le format d'export</p>
                 </div>
               </div>

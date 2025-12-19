@@ -164,7 +164,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
     URL.revokeObjectURL(url);
   }, [allCompletedMissions]);
 
-  const downloadCompletedReportPDF = useCallback(() => {
+  const downloadCompletedReportPDF = useCallback(async () => {
     try {
       const now = new Date();
       const monthStartTime = startOfMonth(now).getTime();
@@ -181,14 +181,30 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
         return;
       }
 
+      // Charger le logo depuis /logo.png
+      const loadImage = (src: string) =>
+        new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = (e) => reject(e);
+          img.src = src;
+        });
+
+      let logoImg: HTMLImageElement | null = null;
+      try {
+        logoImg = await loadImage('/logo.png');
+      } catch (e) {
+        console.warn('Impossible de charger le logo pour le PDF, utilisation du header sans logo.', e);
+      }
+
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 15;
-      const headerHeight = 40;
+      const headerHeight = 60;
       let currentPage = 1;
 
-      // Fonction pour dessiner l'en-tête (bandeau corporate sombre + accent)
+      // Fonction pour dessiner l'en-tête (bandeau corporate sombre + accent + logo centré)
       const drawHeader = (yPos: number) => {
         // Barre principale (bleu nuit)
         doc.setFillColor(15, 23, 42); // #0F172A
@@ -196,27 +212,48 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
         // Liseré inférieur accent (bleu primaire)
         doc.setFillColor(59, 130, 246); // #3B82F6
         doc.rect(0, headerHeight - 4, pageWidth, 4, 'F');
+
+        // Logo NeuroTime (logo.png) centré en haut si disponible
+        if (logoImg) {
+          const maxLogoHeight = 24;
+          const maxLogoWidth = 50;
+          const ratio = logoImg.width / logoImg.height || 1;
+
+          let logoWidth = maxLogoWidth;
+          let logoHeight = logoWidth / ratio;
+
+          if (logoHeight > maxLogoHeight) {
+            logoHeight = maxLogoHeight;
+            logoWidth = logoHeight * ratio;
+          }
+
+          const logoX = (pageWidth - logoWidth) / 2;
+          const logoY = 8;
+          // @ts-ignore jsPDF accepte bien HTMLImageElement
+          doc.addImage(logoImg, 'PNG', logoX, logoY, logoWidth, logoHeight);
+        }
         
-        // Titre
+        // Titre (sous le logo, décalé pour ne pas chevaucher)
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(20);
         doc.setFont(undefined, 'bold');
-        doc.text('RAPPORT DES MISSIONS TERMINÉES', pageWidth / 2, 18, { align: 'center' });
+        doc.text('RAPPORT DES MISSIONS TERMINÉES', pageWidth / 2, 34, { align: 'center' });
         
-        // Sous-titre
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text('NeuroTime - Activité Professionnelle', pageWidth / 2, 26, { align: 'center' });
+         // Sous-titre
+         doc.setFontSize(10);
+         doc.setFont(undefined, 'normal');
+         doc.text('NeuroTime - Activité Professionnelle', pageWidth / 2, 40, { align: 'center' });
 
-        // Mois concerné
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Mois de ${monthLabel}`, pageWidth / 2, 32, { align: 'center' });
+         // Mois concerné
+         doc.setFontSize(11);
+         doc.setFont(undefined, 'bold');
+         doc.text(`Mois de ${monthLabel}`, pageWidth / 2, 46, { align: 'center' });
         
-        // Date de génération
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Généré le ${format(now, 'dd MMMM yyyy à HH:mm', { locale: fr })}`, pageWidth / 2, 38, { align: 'center' });
+         // Date de génération + technicien
+         doc.setFontSize(9);
+         doc.setFont(undefined, 'normal');
+         doc.text(`Généré le ${format(now, 'dd MMMM yyyy à HH:mm', { locale: fr })}`, pageWidth / 2, 52, { align: 'center' });
+         doc.text(`Technicien : Maysson Devoye`, pageWidth / 2, 58, { align: 'center' });
         
         doc.setTextColor(0, 0, 0);
         return headerHeight + 5;
@@ -265,6 +302,9 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       // Box 1: Nombre de missions
       doc.setFillColor(239, 246, 255); // bleu très clair
       doc.rect(margin, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      // Accent gauche
+      doc.setFillColor(59, 130, 246);
+      doc.rect(margin, statsY, 3, statsBoxHeight, 'F');
       doc.setDrawColor(200, 200, 200);
       doc.rect(margin, statsY, statsBoxWidth, statsBoxHeight, 'S');
       doc.setFontSize(10);
@@ -277,46 +317,55 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       doc.text(currentMonthMissions.length.toString(), margin + 5, statsY + 16);
 
       // Box 2: Heures de jour
+      const box2X = margin + statsBoxWidth + 5;
       doc.setFillColor(249, 250, 251); // gris très clair
-      doc.rect(margin + statsBoxWidth + 5, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.rect(box2X, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setFillColor(59, 130, 246);
+      doc.rect(box2X, statsY, 3, statsBoxHeight, 'F');
       doc.setDrawColor(200, 200, 200);
-      doc.rect(margin + statsBoxWidth + 5, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.rect(box2X, statsY, statsBoxWidth, statsBoxHeight, 'S');
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(100, 100, 100);
-      doc.text('Heures jour', margin + statsBoxWidth + 10, statsY + 7);
+      doc.text('Heures jour', box2X + 8, statsY + 7);
       doc.setFontSize(16);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0, 0, 0);
-      doc.text(`${totalDayHours.toFixed(1)}h`, margin + statsBoxWidth + 10, statsY + 16);
+      doc.text(`${totalDayHours.toFixed(1)}h`, box2X + 8, statsY + 16);
 
       // Box 3: Heures de nuit
+      const box3X = margin + (statsBoxWidth + 5) * 2;
       doc.setFillColor(249, 250, 251);
-      doc.rect(margin + (statsBoxWidth + 5) * 2, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.rect(box3X, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setFillColor(37, 99, 235);
+      doc.rect(box3X, statsY, 3, statsBoxHeight, 'F');
       doc.setDrawColor(200, 200, 200);
-      doc.rect(margin + (statsBoxWidth + 5) * 2, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.rect(box3X, statsY, statsBoxWidth, statsBoxHeight, 'S');
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(100, 100, 100);
-      doc.text('Heures nuit', margin + (statsBoxWidth + 5) * 2 + 5, statsY + 7);
+      doc.text('Heures nuit', box3X + 8, statsY + 7);
       doc.setFontSize(16);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0, 0, 0);
-      doc.text(`${totalNightHours.toFixed(1)}h`, margin + (statsBoxWidth + 5) * 2 + 5, statsY + 16);
+      doc.text(`${totalNightHours.toFixed(1)}h`, box3X + 8, statsY + 16);
 
       // Box 4: Total heures (toutes)
+      const box4X = margin + (statsBoxWidth + 5) * 3;
       doc.setFillColor(249, 250, 251);
-      doc.rect(margin + (statsBoxWidth + 5) * 3, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.rect(box4X, statsY, statsBoxWidth, statsBoxHeight, 'F');
+      doc.setFillColor(15, 23, 42);
+      doc.rect(box4X, statsY, 3, statsBoxHeight, 'F');
       doc.setDrawColor(200, 200, 200);
-      doc.rect(margin + (statsBoxWidth + 5) * 3, statsY, statsBoxWidth, statsBoxHeight, 'S');
+      doc.rect(box4X, statsY, statsBoxWidth, statsBoxHeight, 'S');
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(100, 100, 100);
-      doc.text('Total heures', margin + (statsBoxWidth + 5) * 3 + 5, statsY + 7);
+      doc.text('Total heures', box4X + 8, statsY + 7);
       doc.setFontSize(16);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0, 0, 0);
-      doc.text(`${totalHours.toFixed(1)}h`, margin + (statsBoxWidth + 5) * 3 + 5, statsY + 16);
+      doc.text(`${totalHours.toFixed(1)}h`, box4X + 8, statsY + 16);
 
       yPos = statsY + statsBoxHeight + 15;
 
@@ -324,7 +373,11 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.text('Détail des Missions', margin, yPos);
-      yPos += 8;
+      // Soulignement léger sous le titre
+      doc.setDrawColor(209, 213, 219);
+      doc.setLineWidth(0.4);
+      doc.line(margin, yPos + 2, pageWidth - margin, yPos + 2);
+      yPos += 10;
 
       // Tableau avec bordures (sans colonnes tarifaires)
       // Largeurs ajustées pour rester dans la zone de page (somme = pageWidth - 2 * margin)
@@ -420,10 +473,23 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
         xPos += colWidths[3];
         doc.text(location, xPos, yPos);
         xPos += colWidths[4];
-        // Statut en vert discret pour signaler la complétion, sans montant
+        // Statut présenté comme un "badge" vert, sans montant
+        const statusLabel = status || 'terminée';
+        const badgePaddingX = 2;
+        const badgePaddingY = 1.5;
+        const badgeTextWidth = doc.getTextWidth(statusLabel);
+        const badgeWidth = badgeTextWidth + badgePaddingX * 2;
+        const badgeHeight = 5;
+        const badgeX = xPos;
+        const badgeY = yPos - 4;
+
+        doc.setFillColor(220, 252, 231); // vert très clair
+        doc.setDrawColor(187, 247, 208); // bordure verte claire
+        doc.rect(badgeX, badgeY, badgeWidth, badgeHeight, 'FD');
+
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(34, 197, 94);
-        doc.text(status || 'terminée', xPos, yPos);
+        doc.setTextColor(22, 163, 74); // vert plus soutenu
+        doc.text(statusLabel, badgeX + badgePaddingX, yPos - 0.5);
         doc.setTextColor(0, 0, 0);
         doc.setFont(undefined, 'normal');
 
