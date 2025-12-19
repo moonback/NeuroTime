@@ -373,8 +373,14 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg backdrop-blur-xl" aria-label="Navigation mobile">
-        <div className="flex justify-around items-center px-3 py-2.5">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe" aria-label="Navigation mobile">
+        {/* Background avec blur et gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-200/95 via-dark-200/90 to-dark-200/85 backdrop-blur-2xl border-t border-primary-500/20 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]" />
+        
+        {/* Effet de lueur en haut */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500/50 to-transparent" />
+        
+        <div className="relative flex justify-around items-center px-2 py-3">
           <MobileNavButton 
             active={location.pathname === '/'} 
             onClick={() => navigate('/')} 
@@ -387,15 +393,24 @@ const App: React.FC = () => {
             icon={<ListChecks size={22} />} 
             label="Missions"
           />
-          <div className="relative -top-8">
+          
+          {/* Floating Action Button amélioré */}
+          <div className="relative -top-10 flex items-center justify-center">
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-primary-500/30 rounded-full blur-xl animate-pulse" />
             <button 
               onClick={() => openNewMissionModal()}
-              className="bg-primary-500 hover:bg-primary-600 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform"
+              className="relative bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white p-5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-primary-400/50 hover:border-primary-300"
               aria-label="Ajouter une mission"
+              style={{
+                boxShadow: '0 8px 32px rgba(0,140,255,0.4), 0 0 0 0 rgba(0,140,255,0.5)',
+                animation: 'fabPulse 2s ease-in-out infinite'
+              }}
             >
-              <Plus size={24} strokeWidth={2.5} />
+              <Plus size={26} strokeWidth={3} className="drop-shadow-lg" />
             </button>
           </div>
+          
           <MobileNavButton 
             active={location.pathname === '/payments'} 
             onClick={() => navigate('/payments')} 
@@ -465,19 +480,47 @@ const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick:
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all min-w-[60px] relative ${
+    className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 min-w-[64px] relative group ${
       active 
-        ? 'text-primary-400 bg-primary-500/15 shadow-md border border-primary-500/30' 
-        : 'text-gray-500 active:text-primary-400 active:bg-primary-500/10'
+        ? 'text-primary-300' 
+        : 'text-gray-400 active:text-primary-400'
     }`}
   >
-    <span className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
+    {/* Background actif avec animation */}
+    {active && (
+      <>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-primary-500/10 rounded-xl border border-primary-500/30 shadow-lg shadow-primary-500/20" />
+        <div className="absolute inset-0 bg-primary-500/5 rounded-xl animate-pulse" />
+      </>
+    )}
+    
+    {/* Icône avec effet */}
+    <span className={`relative z-10 transition-all duration-300 ${
+      active 
+        ? 'scale-110 drop-shadow-[0_0_12px_rgba(0,140,255,0.6)]' 
+        : 'group-active:scale-105'
+    }`}>
       {icon}
     </span>
-    {label && <span className={`text-[10px] mt-1 font-semibold leading-tight tracking-wide ${active ? 'text-primary-300' : ''}`}>{label}</span>}
-    {active && (
-      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-500"></span>
+    
+    {/* Label */}
+    {label && (
+      <span className={`relative z-10 text-[10px] mt-1.5 font-bold leading-tight tracking-wide transition-all duration-300 ${
+        active 
+          ? 'text-primary-300' 
+          : 'text-gray-500 group-active:text-primary-400'
+      }`}>
+        {label}
+      </span>
     )}
+    
+    {/* Indicateur actif en haut */}
+    {active && (
+      <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary-400 to-transparent rounded-full shadow-[0_0_8px_rgba(0,140,255,0.8)]" />
+    )}
+    
+    {/* Effet de hover */}
+    <div className="absolute inset-0 rounded-xl bg-primary-500/0 group-active:bg-primary-500/10 transition-all duration-200" />
   </button>
 );
 
