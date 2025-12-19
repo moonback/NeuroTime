@@ -179,14 +179,17 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen neo-aurora text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
+      {/* Notifications */}
       <Toaster position="top-right" theme="dark" />
-      <div className="aurora-layer">
+
+      {/* Decorative Aurora Layer */}
+      <div className="aurora-layer pointer-events-none select-none">
         <div className="aurora-blob primary" style={{ top: '-120px', left: '-60px' }} />
         <div className="aurora-blob pink" style={{ top: '-80px', right: '-100px' }} />
         <div className="aurora-blob teal small" style={{ bottom: '-120px', left: '20%' }} />
       </div>
 
-      {/* Sidebar Desktop */}
+      {/* Desktop Sidebar Opener */}
       {!sidebarPinned && (
         <div
           className="hidden md:block fixed inset-y-0 left-0 z-20 w-4 h-full group"
@@ -194,16 +197,17 @@ const App: React.FC = () => {
         />
       )}
 
+      {/* Sidebar */}
       <aside 
         className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false); }}
+        onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
         <div className="p-6 border-b border-gray-700/30 flex flex-col gap-3">
           <div className="flex justify-between items-center gap-3">
             <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
-              <img src="/logo.png" alt="Logo" className="w-full h-20 object-contain" />
+              <img src="/logo.png" alt="Logo NeuroTime" className="w-full h-20 object-contain" />
             </div>
             <div className="flex flex-col items-center gap-2 shrink-0">
               <button
@@ -227,37 +231,38 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
           <NavButton 
             active={location.pathname === '/'} 
-            onClick={() => { navigate('/'); setIsSidebarOpen(false); }} 
+            onClick={() => { navigate('/'); setIsSidebarOpen(false) }} 
             icon={<LayoutDashboard size={19} />} 
             label="Tableau de bord" 
           />
           <NavButton 
             active={location.pathname === '/missions'} 
-            onClick={() => { navigate('/missions'); setIsSidebarOpen(false); }} 
+            onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }} 
             icon={<ListChecks size={19} />} 
             label="Missions" 
           />
           <NavButton 
             active={location.pathname === '/payments'} 
-            onClick={() => { navigate('/payments'); setIsSidebarOpen(false); }} 
+            onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }} 
             icon={<Euro size={19} />} 
             label="Paiements" 
           />
           <NavButton 
             active={location.pathname === '/stats'} 
-            onClick={() => { navigate('/stats'); setIsSidebarOpen(false); }} 
+            onClick={() => { navigate('/stats'); setIsSidebarOpen(false) }} 
             icon={<BarChart3 size={19} />} 
             label="Statistiques" 
           />
         </nav>
 
         <div className="p-4 space-y-3 border-t border-gray-700/30">
-           <button
-            onClick={() => { openNewMissionModal(); setIsSidebarOpen(false); }}
+          <button
+            onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
             className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-md"
+            aria-label="Ajouter une nouvelle mission"
           >
             <Plus size={18} strokeWidth={2.3} />
             <span className="tracking-wide font-medium">Nouvelle mission</span>
@@ -268,11 +273,12 @@ const App: React.FC = () => {
               <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
                 <User size={12} className="text-primary-400" />
               </div>
-              <span className="truncate text-gray-200 font-medium">{user.email}</span>
+              <span className="truncate text-gray-200 font-medium" title={user.email}>{user.email}</span>
             </div>
             <button 
               onClick={toggleHidePrices}
               className="w-full glass-button hover:bg-orange-500/10 text-gray-300 hover:text-orange-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 mb-2 text-sm"
+              aria-pressed={hidePrices}
             >
               {hidePrices ? <EyeOff size={14} /> : <Eye size={14} />}
               <span>{hidePrices ? 'Afficher tarifs' : 'Masquer tarifs'}</span>
@@ -292,9 +298,8 @@ const App: React.FC = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 glass-strong border-b border-gray-700/30 z-30 pb-safe backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
+            <img src="/logo.png" alt="Logo NeuroTime" className="h-8 object-contain" />
             <div className="flex flex-col">
-              {/* <span className="text-lg font-bold text-gray-100">NeuroTime</span> */}
               <span className="text-xs text-gray-400 font-medium">
                 {format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}
               </span>
@@ -303,6 +308,7 @@ const App: React.FC = () => {
           <button 
             onClick={toggleHidePrices}
             className={`flex items-center justify-center p-2.5 rounded-lg transition-all ${hidePrices ? 'text-orange-400 bg-orange-500/20' : 'text-gray-300 bg-gray-700/30'}`}
+            aria-pressed={hidePrices}
           >
             {hidePrices ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -312,10 +318,14 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
-          
+          {/* Sidebar Toggle Button (Desktop) */}
           <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
              {!sidebarOpen && (
-               <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-button rounded-lg text-gray-400 hover:text-white" aria-label="Ouvrir la sidebar">
+               <button 
+                 onClick={() => setIsSidebarOpen(true)} 
+                 className="p-2 glass-button rounded-lg text-gray-400 hover:text-white"
+                 aria-label="Ouvrir la navigation"
+               >
                  <Menu size={24} />
                </button>
              )}
@@ -363,7 +373,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg backdrop-blur-xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-gray-700/30 z-30 pb-safe animate-slide-up shadow-lg backdrop-blur-xl" aria-label="Navigation mobile">
         <div className="flex justify-around items-center px-3 py-2.5">
           <MobileNavButton 
             active={location.pathname === '/'} 
@@ -381,6 +391,7 @@ const App: React.FC = () => {
             <button 
               onClick={() => openNewMissionModal()}
               className="bg-primary-500 hover:bg-primary-600 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform"
+              aria-label="Ajouter une mission"
             >
               <Plus size={24} strokeWidth={2.5} />
             </button>
@@ -400,6 +411,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
+      {/* Modale de mission */}
       <Suspense fallback={null}>
         <MissionForm 
           isOpen={isModalOpen} 
@@ -412,12 +424,16 @@ const App: React.FC = () => {
         />
       </Suspense>
       
+      {/* PWA Prompt */}
       <PWAInstallPrompt />
+
+      {/* Modale de confirmation / autres overlays */}
       {confirmDialog}
       
+      {/* Snackbar de sauvegarde */}
       {isSaving && (
         <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
-          <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden />
           <span>Sauvegarde...</span>
         </div>
       )}
