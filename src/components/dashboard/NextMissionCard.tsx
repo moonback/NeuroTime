@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Calendar, MapPin, Clock, Moon, Sun, Briefcase, Euro, Edit, CheckCircle, Navigation } from 'lucide-react';
 import { format, differenceInHours, differenceInMinutes, isToday, isTomorrow, differenceInCalendarDays } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -58,14 +58,159 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
     else timeText = `Dans ${daysUntil}j`;
   }
 
+  // Swipe logic pour mobile
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiped, setIsSwiped] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const SWIPE_THRESHOLD = 80;
+  const MAX_SWIPE = 200;
+  const SWIPE_ANGLE_THRESHOLD = 0.5;
+
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    isSwiping.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+
+    const isHorizontalSwipe = absDeltaX > absDeltaY * SWIPE_ANGLE_THRESHOLD;
+
+    if (isHorizontalSwipe && absDeltaX > 10) {
+      if (!isSwiping.current) {
+        isSwiping.current = true;
+      }
+      e.preventDefault();
+
+      if (deltaX < 0) {
+        const offset = Math.max(-MAX_SWIPE, deltaX);
+        setSwipeOffset(offset);
+      } else if (deltaX > 0 && isSwiped) {
+        const offset = Math.min(0, deltaX);
+        setSwipeOffset(offset);
+      }
+    }
+  }, [isSwiped]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null) return;
+
+    if (swipeOffset < -SWIPE_THRESHOLD) {
+      setSwipeOffset(-MAX_SWIPE);
+      setIsSwiped(true);
+    } else {
+      setSwipeOffset(0);
+      setIsSwiped(false);
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwiping.current = false;
+  }, [swipeOffset]);
+
+  // Ajouter les écouteurs avec passive: false pour permettre preventDefault
+  useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+  const handleActionClick = useCallback((action: () => void) => {
+    action();
+    setSwipeOffset(0);
+    setIsSwiped(false);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isSwiped && cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setSwipeOffset(0);
+        setIsSwiped(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (isSwiped) {
+        setSwipeOffset(0);
+        setIsSwiped(false);
+      }
+    };
+
+    if (isSwiped) {
+      document.addEventListener('click', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [isSwiped]);
+
   return (
-    <div 
-      onClick={() => onEdit(nextMission)}
-      className="glass-card rounded-2xl p-4 md:p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/15 via-orange-500/10 to-orange-400/5 hover:from-orange-600/20 hover:via-orange-500/15 transition-all cursor-pointer group relative overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-      
-      <div className="relative z-10 flex flex-col md:flex-row gap-4 items-start md:items-center">
+    <div className="relative overflow-hidden rounded-2xl md:rounded-2xl">
+      {/* Actions rapides révélées par le swipe */}
+      <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-gradient-to-l from-primary-500/40 via-primary-500/30 to-transparent pointer-events-none md:hidden">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <button
+            onClick={() => handleActionClick(() => onValidate(nextMission))}
+            className="p-3 rounded-xl bg-green-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-green-600"
+            aria-label="Valider"
+          >
+            <CheckCircle size={18} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={() => handleActionClick(() => onEdit(nextMission))}
+            className="p-3 rounded-xl bg-primary-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-primary-600"
+            aria-label="Modifier"
+          >
+            <Edit size={18} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+
+      {/* Carte principale */}
+      <div 
+        ref={cardRef}
+        onClick={() => onEdit(nextMission)}
+        className="glass-card rounded-2xl p-4 md:p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/15 via-orange-500/10 to-orange-400/5 hover:from-orange-600/20 hover:via-orange-500/15 transition-all cursor-pointer group relative overflow-hidden md:overflow-visible"
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+          transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none',
+        }}
+      >
+        {/* Indicateur de swipe (mobile uniquement) */}
+        {!isSwiped && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none animate-pulse md:hidden">
+            <div className="flex items-center gap-1 text-primary-400">
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+            </div>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row gap-4 items-start md:items-center">
         
         {/* Date & Time Block - Compact */}
         <div className="flex-shrink-0 flex md:flex-col items-center gap-2 md:gap-1 bg-orange-500/10 border border-orange-500/20 rounded-xl p-2 md:p-3 min-w-[80px] md:min-w-[90px] text-center">
@@ -129,22 +274,23 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
            </div>
         </div>
 
-        {/* Actions Rapides - Compact */}
-        <div className="flex md:flex-col gap-2 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-white/5 md:pl-4">
+        {/* Actions Rapides - Compact (desktop uniquement) */}
+        <div className="hidden md:flex md:flex-col gap-2 w-auto mt-0 pt-0 border-t-0 border-l border-white/5 pl-4">
            <button
              onClick={(e) => { e.stopPropagation(); onValidate(nextMission); }}
-             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 transition-all text-xs font-bold"
+             className="flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 transition-all text-xs font-bold"
            >
              <CheckCircle size={14} strokeWidth={2.5} />
-             <span className="md:hidden lg:inline">Valider</span>
+             <span className="lg:inline">Valider</span>
            </button>
            <button
              onClick={(e) => { e.stopPropagation(); onEdit(nextMission); }}
-             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass-light hover:bg-white/10 text-gray-300 border border-white/10 transition-all text-xs font-bold"
+             className="flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass-light hover:bg-white/10 text-gray-300 border border-white/10 transition-all text-xs font-bold"
            >
              <Edit size={14} strokeWidth={2.5} />
-             <span className="md:hidden lg:inline">Modifier</span>
+             <span className="lg:inline">Modifier</span>
            </button>
+        </div>
         </div>
       </div>
     </div>

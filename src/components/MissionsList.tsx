@@ -48,7 +48,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   const MAX_SWIPE = 200; // Distance maximale de swipe
   const SWIPE_ANGLE_THRESHOLD = 0.5; // Ratio pour déterminer si c'est un swipe horizontal
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     // Ne pas permettre le swipe si la mission est payée
     if (mission.isPaid) return;
     
@@ -58,7 +58,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
     isSwiping.current = false;
   }, [mission.isPaid]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (touchStartX.current === null || touchStartY.current === null) return;
 
     const touch = e.touches[0];
@@ -107,6 +107,22 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
     touchStartY.current = null;
     isSwiping.current = false;
   }, [swipeOffset, mission.id, onSwipeChange]);
+
+  // Ajouter les écouteurs avec passive: false pour permettre preventDefault
+  React.useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   const handleActionClick = useCallback((action: () => void) => {
     action();
@@ -197,9 +213,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         style={{
           transform: `translateX(${swipeOffset}px)`,
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         {/* Indicateur de swipe (visible uniquement si pas swipé et si actions disponibles) */}
         {!isSwiped && hasSwipeActions && (
