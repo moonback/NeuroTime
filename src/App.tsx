@@ -1,6 +1,6 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -14,6 +14,7 @@ const Dashboard = lazy(() => import('./components/Dashboard'));
 const MissionsList = lazy(() => import('./components/MissionsList'));
 const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
+const StatsView = lazy(() => import('./components/StatsView'));
 
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -245,6 +246,12 @@ const App: React.FC = () => {
             icon={<Euro size={19} />} 
             label="Paiements" 
           />
+          <NavButton 
+            active={location.pathname === '/stats'} 
+            onClick={() => { navigate('/stats'); setIsSidebarOpen(false); }} 
+            icon={<BarChart3 size={19} />} 
+            label="Statistiques" 
+          />
         </nav>
 
         <div className="p-4 space-y-3 border-t border-gray-700/30">
@@ -325,6 +332,12 @@ const App: React.FC = () => {
                   hidePrices={hidePrices}
                 />
               } />
+              <Route path="/stats" element={
+                <StatsView 
+                  missions={missions}
+                  hidePrices={hidePrices}
+                />
+              } />
               <Route path="/missions" element={
                 <MissionsList 
                   missions={missions} 
@@ -377,6 +390,12 @@ const App: React.FC = () => {
             onClick={() => navigate('/payments')} 
             icon={<Euro size={22} />} 
             label="Paiements"
+          />
+          <MobileNavButton 
+            active={location.pathname === '/stats'} 
+            onClick={() => navigate('/stats')} 
+            icon={<BarChart3 size={22} />} 
+            label="Stats"
           />
         </div>
       </nav>
