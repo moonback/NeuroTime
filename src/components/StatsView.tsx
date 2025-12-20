@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Mission } from '../types';
 import { format, subMonths, startOfMonth } from 'date-fns';
-import fr from 'date-fns/locale/fr';
-import { 
+import { fr } from 'date-fns/locale/fr';
+import {
   BarChart3,
   TrendingUp,
   Clock,
@@ -212,9 +212,8 @@ const StatsView: React.FC<StatsViewProps> = ({ missions, hidePrices = false }) =
           </div>
           <p className="text-xs text-gray-300 font-medium mb-1">Évolution vs mois précédent</p>
           <p
-            className={`text-3xl md:text-4xl font-black tracking-tight ${
-              monthlyComparison.isPositive ? 'text-emerald-200' : 'text-rose-300'
-            }`}
+            className={`text-3xl md:text-4xl font-black tracking-tight ${monthlyComparison.isPositive ? 'text-emerald-200' : 'text-rose-300'
+              }`}
           >
             {monthlyComparison.percentage > 0 ? '+' : ''}
             {monthlyComparison.percentage.toFixed(1)}%
@@ -266,11 +265,11 @@ const StatsView: React.FC<StatsViewProps> = ({ missions, hidePrices = false }) =
                     hidePrices
                       ? ['***', 'CA']
                       : [
-                          `${value.toLocaleString('fr-FR', {
-                            maximumFractionDigits: 0,
-                          })} €`,
-                          'CA',
-                        ]
+                        `${value.toLocaleString('fr-FR', {
+                          maximumFractionDigits: 0,
+                        })} €`,
+                        'CA',
+                      ]
                   }
                   labelFormatter={(label: string) => `Mois : ${label}`}
                 />
@@ -341,11 +340,11 @@ const StatsView: React.FC<StatsViewProps> = ({ missions, hidePrices = false }) =
                         hidePrices
                           ? ['***', 'CA']
                           : [
-                              `${value.toLocaleString('fr-FR', {
-                                maximumFractionDigits: 0,
-                              })} €`,
-                              'CA',
-                            ]
+                            `${value.toLocaleString('fr-FR', {
+                              maximumFractionDigits: 0,
+                            })} €`,
+                            'CA',
+                          ]
                       }
                     />
                   </PieChart>
@@ -374,8 +373,8 @@ const StatsView: React.FC<StatsViewProps> = ({ missions, hidePrices = false }) =
                         {hidePrices
                           ? '***'
                           : `${client.value.toLocaleString('fr-FR', {
-                              maximumFractionDigits: 0,
-                            })} €`}
+                            maximumFractionDigits: 0,
+                          })} €`}
                       </p>
                     </div>
                   </div>

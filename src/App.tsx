@@ -25,11 +25,11 @@ import { Mission } from './types';
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { missions, isLoading, isSaving, addMission, updateMission, deleteMission, importMissions } = useMissions();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
@@ -142,7 +142,7 @@ const App: React.FC = () => {
   // Splash screen
   if (showSplash) {
     return (
-      <SplashScreen 
+      <SplashScreen
         onFinish={() => setShowSplash(false)}
         minDisplayTime={1500}
         ready={!authLoading}
@@ -164,10 +164,10 @@ const App: React.FC = () => {
           <div className="aurora-blob pink" style={{ top: '20%', right: '-10%' }} />
           <div className="aurora-blob teal small" style={{ bottom: '-10%', left: '20%' }} />
         </div>
-        
-        <AuthModal 
+
+        <AuthModal
           isOpen={true} // Always open if not user
-          onClose={() => {}} // Can't close
+          onClose={() => { }} // Can't close
           onSuccess={handleAuthSuccess}
           initialMode="login"
         />
@@ -198,10 +198,9 @@ const App: React.FC = () => {
       )}
 
       {/* Sidebar */}
-      <aside 
-        className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+      <aside
+        className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
         <div className="p-6 border-b border-gray-700/30 flex flex-col gap-3">
@@ -232,29 +231,29 @@ const App: React.FC = () => {
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
-          <NavButton 
-            active={location.pathname === '/'} 
-            onClick={() => { navigate('/'); setIsSidebarOpen(false) }} 
-            icon={<LayoutDashboard size={19} />} 
-            label="Tableau de bord" 
+          <NavButton
+            active={location.pathname === '/'}
+            onClick={() => { navigate('/'); setIsSidebarOpen(false) }}
+            icon={<LayoutDashboard size={19} />}
+            label="Tableau de bord"
           />
-          <NavButton 
-            active={location.pathname === '/missions'} 
-            onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }} 
-            icon={<ListChecks size={19} />} 
-            label="Missions" 
+          <NavButton
+            active={location.pathname === '/missions'}
+            onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }}
+            icon={<ListChecks size={19} />}
+            label="Missions"
           />
-          <NavButton 
-            active={location.pathname === '/payments'} 
-            onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }} 
-            icon={<Euro size={19} />} 
-            label="Paiements" 
+          <NavButton
+            active={location.pathname === '/payments'}
+            onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }}
+            icon={<Euro size={19} />}
+            label="Paiements"
           />
-          <NavButton 
-            active={location.pathname === '/stats'} 
-            onClick={() => { navigate('/stats'); setIsSidebarOpen(false) }} 
-            icon={<BarChart3 size={19} />} 
-            label="Statistiques" 
+          <NavButton
+            active={location.pathname === '/stats'}
+            onClick={() => { navigate('/stats'); setIsSidebarOpen(false) }}
+            icon={<BarChart3 size={19} />}
+            label="Statistiques"
           />
         </nav>
 
@@ -267,7 +266,7 @@ const App: React.FC = () => {
             <Plus size={18} strokeWidth={2.3} />
             <span className="tracking-wide font-medium">Nouvelle mission</span>
           </button>
-          
+
           <div className="pt-2 border-t border-gray-700/30 mt-2">
             <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-gray-700/30">
               <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
@@ -275,7 +274,7 @@ const App: React.FC = () => {
               </div>
               <span className="truncate text-gray-200 font-medium" title={user.email}>{user.email}</span>
             </div>
-            <button 
+            <button
               onClick={toggleHidePrices}
               className="w-full glass-button hover:bg-orange-500/10 text-gray-300 hover:text-orange-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 mb-2 text-sm"
               aria-pressed={hidePrices}
@@ -283,7 +282,7 @@ const App: React.FC = () => {
               {hidePrices ? <EyeOff size={14} /> : <Eye size={14} />}
               <span>{hidePrices ? 'Afficher tarifs' : 'Masquer tarifs'}</span>
             </button>
-            <button 
+            <button
               onClick={handleSignOut}
               className="w-full glass-button hover:bg-red-500/10 text-gray-300 hover:text-red-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm"
             >
@@ -305,7 +304,7 @@ const App: React.FC = () => {
               </span>
             </div>
           </div>
-          <button 
+          <button
             onClick={toggleHidePrices}
             className={`flex items-center justify-center p-2.5 rounded-lg transition-all ${hidePrices ? 'text-orange-400 bg-orange-500/20' : 'text-gray-300 bg-gray-700/30'}`}
             aria-pressed={hidePrices}
@@ -320,39 +319,39 @@ const App: React.FC = () => {
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
           {/* Sidebar Toggle Button (Desktop) */}
           <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
-             {!sidebarOpen && (
-               <button 
-                 onClick={() => setIsSidebarOpen(true)} 
-                 className="p-2 glass-button rounded-lg text-gray-400 hover:text-white"
-                 aria-label="Ouvrir la navigation"
-               >
-                 <Menu size={24} />
-               </button>
-             )}
+            {!sidebarOpen && (
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="p-2 glass-button rounded-lg text-gray-400 hover:text-white"
+                aria-label="Ouvrir la navigation"
+              >
+                <Menu size={24} />
+              </button>
+            )}
           </div>
 
           <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
             <Routes>
               <Route path="/" element={
-                <Dashboard 
-                  missions={missions} 
-                  onEdit={handleEditMission} 
+                <Dashboard
+                  missions={missions}
+                  onEdit={handleEditMission}
                   onValidate={handleValidateMission}
                   onImport={handleImportData}
                   hidePrices={hidePrices}
                 />
               } />
               <Route path="/stats" element={
-                <StatsView 
+                <StatsView
                   missions={missions}
                   hidePrices={hidePrices}
                 />
               } />
               <Route path="/missions" element={
-                <MissionsList 
-                  missions={missions} 
-                  onEdit={handleEditMission} 
-                  onDelete={handleDeleteMission} 
+                <MissionsList
+                  missions={missions}
+                  onEdit={handleEditMission}
+                  onDelete={handleDeleteMission}
                   onNew={() => openNewMissionModal()}
                   onTogglePaid={handleTogglePaid}
                   onComplete={handleCompleteMission}
@@ -360,8 +359,8 @@ const App: React.FC = () => {
                 />
               } />
               <Route path="/payments" element={
-                <PaymentsView 
-                  missions={missions} 
+                <PaymentsView
+                  missions={missions}
                   onTogglePaid={handleTogglePaid}
                   hidePrices={hidePrices}
                 />
@@ -374,63 +373,63 @@ const App: React.FC = () => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe" aria-label="Navigation mobile">
-        {/* Background avec blur et gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-200/95 via-dark-200/90 to-dark-200/85 backdrop-blur-2xl border-t border-primary-500/20 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]" />
-        
-        {/* Effet de lueur en haut */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500/50 to-transparent" />
-        
-        <div className="relative flex justify-around items-center px-2 py-3">
-          <MobileNavButton 
-            active={location.pathname === '/'} 
-            onClick={() => navigate('/')} 
-            icon={<LayoutDashboard size={22} />} 
-            label="Accueil"
+        {/* Background - Ultra premium glassmorphism */}
+        <div className="absolute inset-0 bg-dark-200/90 backdrop-blur-2xl border-t border-white/5 shadow-[0_-8px_32px_-4px_rgba(0,0,0,0.6)]" />
+
+        {/* Laser Glow Line - Animated */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary-500/60 to-transparent opacity-80 shadow-[0_0_12px_rgba(0,140,255,0.8)]" />
+
+        <div className="relative flex justify-around items-end px-1 pb-2 pt-3">
+          <MobileNavButton
+            active={location.pathname === '/'}
+            onClick={() => navigate('/')}
+            icon={<LayoutDashboard size={20} className={location.pathname === '/' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
+            label="ACCUEIL"
           />
-          <MobileNavButton 
-            active={location.pathname === '/missions'} 
-            onClick={() => navigate('/missions')} 
-            icon={<ListChecks size={22} />} 
-            label="Missions"
+          <MobileNavButton
+            active={location.pathname === '/missions'}
+            onClick={() => navigate('/missions')}
+            icon={<ListChecks size={20} className={location.pathname === '/missions' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
+            label="MISSIONS"
           />
-          
-          {/* Floating Action Button amélioré */}
-          <div className="relative -top-10 flex items-center justify-center">
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-primary-500/30 rounded-full blur-xl animate-pulse" />
-            <button 
-              onClick={() => openNewMissionModal()}
-              className="relative bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white p-5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-primary-400/50 hover:border-primary-300"
-              aria-label="Ajouter une mission"
-              style={{
-                boxShadow: '0 8px 32px rgba(0,140,255,0.4), 0 0 0 0 rgba(0,140,255,0.5)',
-                animation: 'fabPulse 2s ease-in-out infinite'
-              }}
-            >
-              <Plus size={26} strokeWidth={3} className="drop-shadow-lg" />
-            </button>
+
+          {/* Advanced Hybrid FAB */}
+          <div className="relative -top-6 flex items-center justify-center pointer-events-none group">
+            <div className="pointer-events-auto relative">
+              {/* External Glow Ring - Ripple effect */}
+              <div className="absolute inset-[-4px] bg-primary-500/20 rounded-full animate-ping opacity-20 duration-[3000ms]" />
+              <div className="absolute inset-[-1px] rounded-full bg-gradient-to-br from-primary-400 to-primary-600 opacity-60 blur-sm" />
+
+              <button
+                onClick={() => openNewMissionModal()}
+                className="relative bg-gradient-to-br from-primary-450 to-primary-600 active:from-primary-500 active:to-primary-700 text-white p-3.5 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_16px_rgba(0,120,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-dark-200"
+                aria-label="Ajouter une mission"
+              >
+                <Plus size={24} strokeWidth={3} className="drop-shadow-lg" />
+              </button>
+            </div>
           </div>
-          
-          <MobileNavButton 
-            active={location.pathname === '/payments'} 
-            onClick={() => navigate('/payments')} 
-            icon={<Euro size={22} />} 
-            label="Paiements"
+
+          <MobileNavButton
+            active={location.pathname === '/payments'}
+            onClick={() => navigate('/payments')}
+            icon={<Euro size={20} className={location.pathname === '/payments' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
+            label="PAIEMENTS"
           />
-          <MobileNavButton 
-            active={location.pathname === '/stats'} 
-            onClick={() => navigate('/stats')} 
-            icon={<BarChart3 size={22} />} 
-            label="Stats"
+          <MobileNavButton
+            active={location.pathname === '/stats'}
+            onClick={() => navigate('/stats')}
+            icon={<BarChart3 size={20} className={location.pathname === '/stats' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
+            label="STATS"
           />
         </div>
       </nav>
 
       {/* Modale de mission */}
       <Suspense fallback={null}>
-        <MissionForm 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+        <MissionForm
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
           onSave={handleSaveMission}
           initialData={editingMission}
           defaultDate={selectedDateForNew}
@@ -438,13 +437,13 @@ const App: React.FC = () => {
           hidePrices={hidePrices}
         />
       </Suspense>
-      
+
       {/* PWA Prompt */}
       <PWAInstallPrompt />
 
       {/* Modale de confirmation / autres overlays */}
       {confirmDialog}
-      
+
       {/* Snackbar de sauvegarde */}
       {isSaving && (
         <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
@@ -459,11 +458,10 @@ const App: React.FC = () => {
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium relative overflow-hidden ${
-      active 
-        ? 'glass-button text-primary-400 font-semibold shadow-md border-primary-500/30 bg-primary-500/10' 
-        : 'text-gray-400 hover:glass-button hover:text-primary-300 hover:shadow-sm'
-    }`}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium relative overflow-hidden ${active
+      ? 'glass-button text-primary-400 font-semibold shadow-md border-primary-500/30 bg-primary-500/10'
+      : 'text-gray-400 hover:glass-button hover:text-primary-300 hover:shadow-sm'
+      }`}
   >
     <span className="flex items-center gap-3">
       <span className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
@@ -480,47 +478,36 @@ const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick:
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 min-w-[64px] relative group ${
-      active 
-        ? 'text-primary-300' 
-        : 'text-gray-400 active:text-primary-400'
-    }`}
+    className={`flex flex-col items-center justify-end py-1 px-1 rounded-xl transition-all duration-300 min-w-[56px] h-[48px] relative group overflow-hidden ${active
+        ? 'text-primary-300'
+        : 'text-gray-500 active:text-primary-400'
+      }`}
   >
-    {/* Background actif avec animation */}
+    {/* Spotlight Effect */}
     {active && (
       <>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-primary-500/10 rounded-xl border border-primary-500/30 shadow-lg shadow-primary-500/20" />
-        <div className="absolute inset-0 bg-primary-500/5 rounded-xl animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.15)_0%,transparent_70%)] animate-fade-in" />
+        <div className="absolute top-0 inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-primary-400/50 to-transparent opacity-80" />
       </>
     )}
-    
+
     {/* Icône avec effet */}
-    <span className={`relative z-10 transition-all duration-300 ${
-      active 
-        ? 'scale-110 drop-shadow-[0_0_12px_rgba(0,140,255,0.6)]' 
-        : 'group-active:scale-105'
-    }`}>
+    <span className={`relative z-10 transition-all duration-300 transform origin-center ${active
+        ? '-translate-y-1.5'
+        : 'translate-y-1 group-active:scale-90'
+      }`}>
       {icon}
     </span>
-    
+
     {/* Label */}
     {label && (
-      <span className={`relative z-10 text-[9px] mt-1 font-bold leading-tight tracking-wide transition-all duration-300 ${
-        active 
-          ? 'text-primary-300' 
-          : 'text-gray-500 group-active:text-primary-400'
-      }`}>
+      <span className={`relative z-10 text-[8px] font-bold tracking-wider transition-all duration-300 uppercase ${active
+          ? 'opacity-100 transform translate-y-0 text-primary-200 text-shadow-sm'
+          : 'opacity-0 transform translate-y-2 h-0 overflow-hidden'
+        }`}>
         {label}
       </span>
     )}
-    
-    {/* Indicateur actif en haut */}
-    {active && (
-      <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-transparent via-primary-400 to-transparent rounded-full shadow-[0_0_8px_rgba(0,140,255,0.8)]" />
-    )}
-    
-    {/* Effet de hover */}
-    <div className="absolute inset-0 rounded-xl bg-primary-500/0 group-active:bg-primary-500/10 transition-all duration-200" />
   </button>
 );
 
