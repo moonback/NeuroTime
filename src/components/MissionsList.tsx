@@ -2,8 +2,9 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Mission } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays } from 'lucide-react';
+import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays, Download } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
+import { exportMissionsToCSV } from '../utils/export';
 
 interface MissionsListProps {
   missions: Mission[];
@@ -51,7 +52,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   const handleTouchStart = useCallback((e: TouchEvent) => {
     // Ne pas permettre le swipe si la mission est payée
     if (mission.isPaid) return;
-    
+
     const touch = e.touches[0];
     touchStartX.current = touch.clientX;
     touchStartY.current = touch.clientY;
@@ -69,7 +70,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
     // Détecter si c'est un mouvement horizontal ou vertical
     const isHorizontalSwipe = absDeltaX > absDeltaY * SWIPE_ANGLE_THRESHOLD;
-    
+
     // Si le mouvement est principalement horizontal, activer le swipe
     if (isHorizontalSwipe && absDeltaX > 10) {
       if (!isSwiping.current) {
@@ -232,9 +233,9 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
                 {format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}
               </span>
               <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold border
-                ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' : 
-                  mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' : 
-                  'bg-red-500/25 text-red-200 border-red-500/40'}`}>
+                ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' :
+                  mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' :
+                    'bg-red-500/25 text-red-200 border-red-500/40'}`}>
                 {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
               </span>
             </div>
@@ -268,11 +269,10 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           <div className="pt-2 border-t border-primary-500/10">
             <button
               onClick={onTogglePaid}
-              className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border shadow-sm transition-all ${
-                mission.isPaid 
-                  ? 'bg-emerald-500/25 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/35' 
-                  : 'bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25 hover:text-gray-300'
-              }`}
+              className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border shadow-sm transition-all ${mission.isPaid
+                ? 'bg-emerald-500/25 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/35'
+                : 'bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25 hover:text-gray-300'
+                }`}
             >
               {mission.isPaid ? (
                 <>
@@ -324,19 +324,19 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   const filteredMissions = useMemo(() => {
     return missions
       .filter(m => {
-        const matchesSearch = 
+        const matchesSearch =
           m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           m.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
           m.location.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         const matchesStatus = statusFilter === 'all' || m.status === statusFilter;
-        
-        const matchesPaid = paidFilter === 'all' || 
+
+        const matchesPaid = paidFilter === 'all' ||
           (paidFilter === 'paid' && m.isPaid === true) ||
           (paidFilter === 'unpaid' && (m.isPaid === false || m.isPaid === undefined));
-          
+
         const matchesClient = clientFilter === 'all' || m.client === clientFilter;
-        
+
         return matchesSearch && matchesStatus && matchesPaid && matchesClient;
       })
       .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
@@ -370,7 +370,14 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           <p className="text-gray-300 text-sm md:text-base font-medium">Historique complet de vos interventions</p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          <button 
+          <button
+            onClick={() => exportMissionsToCSV(filteredMissions)}
+            className="w-full md:w-auto glass-button hover:bg-primary-500/10 text-primary-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base border border-primary-500/20 shadow-sm"
+          >
+            <Download size={18} strokeWidth={2.5} />
+            <span className="tracking-wide">Exporter CSV</span>
+          </button>
+          <button
             onClick={onNew}
             className="w-full md:w-auto bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base shadow-md hover:shadow-lg"
           >
@@ -395,8 +402,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           </div>
 
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-             {/* Client Filter */}
-             {uniqueClients.length > 0 && (
+            {/* Client Filter */}
+            {uniqueClients.length > 0 && (
               <div className="relative w-full md:w-auto">
                 <select
                   value={clientFilter}
@@ -422,11 +429,10 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${
-                  statusFilter === s 
-                    ? 'bg-primary-500 text-white shadow-md' 
-                    : 'glass-button text-gray-400 hover:text-primary-300 hover:shadow-sm'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${statusFilter === s
+                  ? 'bg-primary-500 text-white shadow-md'
+                  : 'glass-button text-gray-400 hover:text-primary-300 hover:shadow-sm'
+                  }`}
               >
                 {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
               </button>
@@ -437,11 +443,10 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
               <button
                 key={p}
                 onClick={() => setPaidFilter(p)}
-                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${
-                  paidFilter === p 
-                    ? 'bg-emerald-500 text-dark-300 shadow-md' 
-                    : 'glass-button text-gray-400 hover:text-emerald-200 hover:shadow-sm'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${paidFilter === p
+                  ? 'bg-emerald-500 text-dark-300 shadow-md'
+                  : 'glass-button text-gray-400 hover:text-emerald-200 hover:shadow-sm'
+                  }`}
               >
                 {p === 'all' ? 'Tous' : p === 'paid' ? 'Payé' : 'Non payé'}
               </button>
@@ -499,33 +504,33 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
             const missionsInMonth = groupedMissions[monthKey];
             const [year, month] = monthKey.split('-');
             const monthDate = new Date(parseInt(year), parseInt(month) - 1);
-            
+
             return (
               <div key={monthKey} className="space-y-3">
-                 <div className="sticky top-0 z-10 glass-strong backdrop-blur-md py-2 px-3 -mx-2 mb-2 border-b border-primary-500/20 flex items-center gap-2">
-                    <CalendarDays size={16} className="text-primary-400" />
-                    <h3 className="text-sm font-bold text-gray-100 capitalize">
-                      {format(monthDate, 'MMMM yyyy', { locale: fr })}
-                    </h3>
-                    <span className="text-xs text-gray-500 font-medium ml-auto">
-                      {missionsInMonth.length} missions
-                    </span>
-                 </div>
-                 
-                 {missionsInMonth.map((mission) => (
-                    <SwipeableCard
-                      key={mission.id}
-                      mission={mission}
-                      onEdit={() => onEdit(mission)}
-                      onDelete={() => onDelete(mission.id)}
-                      onTogglePaid={() => onTogglePaid(mission)}
-                      onComplete={() => onComplete(mission)}
-                      hidePrices={hidePrices}
-                      formatPrice={formatPrice}
-                      swipedMissionId={swipedMissionId}
-                      onSwipeChange={setSwipedMissionId}
-                    />
-                 ))}
+                <div className="sticky top-0 z-10 glass-strong backdrop-blur-md py-2 px-3 -mx-2 mb-2 border-b border-primary-500/20 flex items-center gap-2">
+                  <CalendarDays size={16} className="text-primary-400" />
+                  <h3 className="text-sm font-bold text-gray-100 capitalize">
+                    {format(monthDate, 'MMMM yyyy', { locale: fr })}
+                  </h3>
+                  <span className="text-xs text-gray-500 font-medium ml-auto">
+                    {missionsInMonth.length} missions
+                  </span>
+                </div>
+
+                {missionsInMonth.map((mission) => (
+                  <SwipeableCard
+                    key={mission.id}
+                    mission={mission}
+                    onEdit={() => onEdit(mission)}
+                    onDelete={() => onDelete(mission.id)}
+                    onTogglePaid={() => onTogglePaid(mission)}
+                    onComplete={() => onComplete(mission)}
+                    hidePrices={hidePrices}
+                    formatPrice={formatPrice}
+                    swipedMissionId={swipedMissionId}
+                    onSwipeChange={setSwipedMissionId}
+                  />
+                ))}
               </div>
             );
           })
@@ -561,17 +566,17 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                   const missionsInMonth = groupedMissions[monthKey];
                   const [year, month] = monthKey.split('-');
                   const monthDate = new Date(parseInt(year), parseInt(month) - 1);
-                  
+
                   return (
                     <React.Fragment key={monthKey}>
                       {/* Month Header Row */}
                       <tr className="bg-dark-200/50">
                         <td colSpan={7} className="px-6 py-3 text-sm font-bold text-primary-300 border-y border-primary-500/10 sticky top-0 backdrop-blur-sm">
-                           <div className="flex items-center gap-2">
-                             <CalendarDays size={16} />
-                             <span className="capitalize">{format(monthDate, 'MMMM yyyy', { locale: fr })}</span>
-                             <span className="text-xs font-medium text-gray-500 ml-2">({missionsInMonth.length})</span>
-                           </div>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays size={16} />
+                            <span className="capitalize">{format(monthDate, 'MMMM yyyy', { locale: fr })}</span>
+                            <span className="text-xs font-medium text-gray-500 ml-2">({missionsInMonth.length})</span>
+                          </div>
                         </td>
                       </tr>
                       {missionsInMonth.map((mission) => (
@@ -595,8 +600,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-300">
                             <div className="flex items-center gap-2">
-                               <MapPin size={14} className="text-gray-400" strokeWidth={2} />
-                               <span className="truncate max-w-[150px] font-medium">{mission.location}</span>
+                              <MapPin size={14} className="text-gray-400" strokeWidth={2} />
+                              <span className="truncate max-w-[150px] font-medium">{mission.location}</span>
                             </div>
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap">
@@ -606,9 +611,9 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap">
                             <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm
-                              ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' : 
-                                mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' : 
-                                'bg-red-500/25 text-red-200 border-red-500/40'}`}>
+                              ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' :
+                                mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' :
+                                  'bg-red-500/25 text-red-200 border-red-500/40'}`}>
                               {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
                             </span>
                           </td>
@@ -616,11 +621,10 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                             {mission.status === 'completed' ? (
                               <button
                                 onClick={() => onTogglePaid(mission)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all hover:scale-105 ${
-                                  mission.isPaid 
-                                    ? 'bg-emerald-500/30 text-emerald-200 border-emerald-500/50 hover:bg-emerald-500/40' 
-                                    : 'bg-gray-500/20 text-gray-400 border-gray-500/30 hover:bg-gray-500/30 hover:text-gray-300'
-                                }`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all hover:scale-105 ${mission.isPaid
+                                  ? 'bg-emerald-500/30 text-emerald-200 border-emerald-500/50 hover:bg-emerald-500/40'
+                                  : 'bg-gray-500/20 text-gray-400 border-gray-500/30 hover:bg-gray-500/30 hover:text-gray-300'
+                                  }`}
                                 title={mission.isPaid ? 'Marquer comme non payé' : 'Marquer comme payé'}
                               >
                                 {mission.isPaid ? (
@@ -642,7 +646,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                           <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               {mission.status === 'planned' && !mission.isPaid && (
-                                <button 
+                                <button
                                   onClick={() => onComplete(mission)}
                                   className="text-emerald-300 hover:text-emerald-200 bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-500/30 hover:border-emerald-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
                                   title="Marquer comme terminée"
@@ -652,14 +656,14 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                               )}
                               {!mission.isPaid ? (
                                 <>
-                                  <button 
+                                  <button
                                     onClick={() => onEdit(mission)}
                                     className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
                                     title="Modifier"
                                   >
                                     <Edit size={16} strokeWidth={2} />
                                   </button>
-                                  <button 
+                                  <button
                                     onClick={() => onDelete(mission.id)}
                                     className="text-red-300 hover:text-red-200 bg-red-500/25 hover:bg-red-500/35 border border-red-500/30 hover:border-red-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
                                     title="Supprimer"

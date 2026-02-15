@@ -29,7 +29,7 @@ This roadmap outlines the evolution of NeuroTime from a simple mission tracker t
 - [ ] **Invoice Generation**: Generate PDF invoices directly from completed missions.
 - [ ] **Expense Tracking**: Add business-related expenses (travel, equipment).
 - [ ] **Tax Estimation**: Calculate estimated social contributions based on status (Auto-entrepreneur FR).
-- [ ] **Data Export**: Export mission history as CSV/Excel for accounting.
+- [x] **Data Export**: Export mission history as CSV/Excel for accounting.
 - [ ] **Dark/Light Mode**: Full theme customizer.
 - [ ] **Multi-currency Support**: Switch between EUR, USD, etc.
 

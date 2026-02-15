@@ -3,7 +3,7 @@
 ## 📜 Project Context
 **NeuroTime** is a premium mission management platform for event industry freelancers. It tracks time, calculates earnings (day/night rates), and manages goals.
 - **Goal**: Provide a native-like, premium experience (PWA) with high visual standards.
-- **Key Features**: Missions CRUD, Automated Earnings, Goal System, Stats, AI description Enhancer.
+- **Key Features**: Missions CRUD, Automated Earnings, Goal System, Stats, AI description Enhancer, Data Export.
 
 ## 💻 Tech Stack
 - **Frontend**: React 19, Vite, TypeScript, Tailwind CSS 4.
