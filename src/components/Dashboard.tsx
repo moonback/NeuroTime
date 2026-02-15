@@ -57,8 +57,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       />
 
       {/* Vue d'ensemble rapide - Prochaine mission améliorée */}
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-5 animate-slide-in-up mb-6">
-        <NextMissionCard 
+      <div className="animate-slide-in-up">
+        <NextMissionCard
           nextMission={nextMission}
           onEdit={onEdit}
           onValidate={onValidate}
@@ -68,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
 
 
       {/* KPI Stats Grid */}
-      <DashboardKPIs 
+      <DashboardKPIs
         selectedMonthDate={selectedMonthDate}
         totalEarnings={totalEarnings}
         totalEarningsCompleted={totalEarningsCompleted}
@@ -89,7 +89,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <UpcomingMissionsList 
+      <UpcomingMissionsList
         upcomingMissions={upcomingMissions}
         onEdit={onEdit}
         onValidate={onValidate}
@@ -97,11 +97,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       />
 
 
-       {/* Data Persistence Section */}
-       <DataPersistence 
-         onImport={onImport}
-         onBackup={backupData}
-       />
+      {/* Data Persistence Section */}
+      <DataPersistence
+        onImport={onImport}
+        onBackup={backupData}
+      />
     </div>
   );
 };

@@ -13,7 +13,7 @@ interface NextMissionCardProps {
 }
 
 const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, onValidate, hidePrices = false }) => {
-  
+
   const formatPrice = (value: number | null | undefined): string => {
     if (hidePrices) return '***';
     if (value === null || value === undefined) return '0';
@@ -23,15 +23,15 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
   if (!nextMission) {
     return (
       <div className="glass-card rounded-2xl p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/10 via-orange-500/5 to-orange-400/5 flex items-center justify-between">
-         <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200">
-               <Calendar size={18} strokeWidth={2.5} />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-orange-100">Aucune mission planifiée</p>
-              <p className="text-xs text-gray-500 font-medium">Ajoutez une mission pour commencer</p>
-            </div>
-         </div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200">
+            <Calendar size={18} strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-orange-100">Aucune mission planifiée</p>
+            <p className="text-xs text-gray-500 font-medium">Ajoutez une mission pour commencer</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -189,108 +189,109 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
       </div>
 
       {/* Carte principale */}
-      <div 
+      <div
         ref={cardRef}
         onClick={() => onEdit(nextMission)}
-        className="glass-card rounded-2xl p-4 md:p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/15 via-orange-500/10 to-orange-400/5 hover:from-orange-600/20 hover:via-orange-500/15 transition-all cursor-pointer group relative overflow-hidden md:overflow-visible"
+        className="group relative overflow-hidden rounded-3xl p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/20 active:scale-[0.99] cursor-pointer"
         style={{
           transform: `translateX(${swipeOffset}px)`,
-          transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none',
+          transition: swipeOffset === 0 ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
         }}
       >
-        {/* Indicateur de swipe (mobile uniquement) */}
-        {!isSwiped && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none animate-pulse md:hidden">
-            <div className="flex items-center gap-1 text-primary-400">
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-[#0f141f]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 border border-orange-500/20 group-hover:border-orange-500/40 rounded-3xl transition-colors duration-500" />
+
+        {/* Glow effect */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full group-hover:bg-orange-600/20 transition-all duration-500" />
+
+        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
+          {/* Date Block */}
+          <div className="flex-shrink-0 flex md:flex-col items-center justify-center gap-1 bg-gradient-to-b from-orange-400 to-orange-600 p-[1px] rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-500">
+            <div className="bg-[#0f141f] rounded-[15px] px-4 py-3 md:min-w-[85px] text-center">
+              <span className="block text-[10px] uppercase font-black text-orange-400 tracking-[0.2em] mb-1">
+                {format(missionStart, 'MMM', { locale: fr })}
+              </span>
+              <span className="block text-3xl font-black text-white leading-none tracking-tighter">
+                {format(missionStart, 'dd')}
+              </span>
+              <span className="block text-[11px] font-bold text-gray-400 mt-2">
+                {format(missionStart, 'HH:mm')}
+              </span>
             </div>
           </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row gap-4 items-start md:items-center">
-        
-        {/* Date & Time Block - Compact */}
-        <div className="flex-shrink-0 flex md:flex-col items-center gap-2 md:gap-1 bg-orange-500/10 border border-orange-500/20 rounded-xl p-2 md:p-3 min-w-[80px] md:min-w-[90px] text-center">
-           <span className="text-[10px] uppercase font-bold text-orange-200 tracking-wider">
-             {format(missionStart, 'MMM', { locale: fr })}
-           </span>
-           <span className="text-xl md:text-2xl font-black text-orange-50 leading-none">
-             {format(missionStart, 'dd')}
-           </span>
-           <span className="text-xs font-bold text-orange-200 bg-orange-500/20 px-1.5 py-0.5 rounded-md mt-0.5">
-             {format(missionStart, 'HH:mm')}
-           </span>
-        </div>
 
-        {/* Main Info */}
-        <div className="flex-1 min-w-0 w-full">
-           <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${isOngoing ? 'bg-orange-500 text-dark-300 border-orange-400 animate-pulse' : 'bg-orange-500/10 text-orange-200 border-orange-500/20'}`}>
-                {isOngoing ? 'En cours' : timeText}
+          {/* Info Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${isOngoing
+                  ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse'
+                  : 'bg-white/5 text-orange-300 border-white/10'
+                }`}>
+                {isOngoing ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                    En cours
+                  </>
+                ) : timeText}
               </span>
+
               <div className="flex items-center gap-2">
-                 {/* Badges Type */}
-                 <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                    nextMission.rateType === 'night' 
-                      ? 'bg-purple-500/10 text-purple-300 border-purple-500/20' 
-                      : nextMission.rateType === 'mixed'
-                      ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
-                      : 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
-                 }`}>
-                    {nextMission.rateType === 'night' ? <Moon size={10} /> : nextMission.rateType === 'mixed' ? <Clock size={10} /> : <Sun size={10} />}
-                    <span className="hidden sm:inline">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
-                 </span>
-                 
-                 {!hidePrices && (
-                    <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                      {formatPrice(nextMission.totalEarnings)}€
-                    </span>
-                 )}
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-gray-400">
+                  {nextMission.rateType === 'night' ? <Moon size={12} className="text-purple-400" /> : nextMission.rateType === 'mixed' ? <Clock size={12} className="text-indigo-400" /> : <Sun size={12} className="text-yellow-400" />}
+                  <span className="text-[10px] font-bold uppercase">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
+                </div>
+                {!hidePrices && (
+                  <div className="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-xs">
+                    {formatPrice(nextMission.totalEarnings)}€
+                  </div>
+                )}
               </div>
-           </div>
+            </div>
 
-           <h3 className="text-lg md:text-xl font-black text-gray-50 truncate mb-1.5 leading-tight group-hover:text-orange-100 transition-colors">
-             {nextMission.title}
-           </h3>
+            <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tighter transition-colors group-hover:text-orange-50 filter drop-shadow-sm">
+              {nextMission.title}
+            </h3>
 
-           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 font-medium">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
               {nextMission.client && (
-                 <div className="flex items-center gap-1.5 text-orange-200/80">
-                    <Briefcase size={12} strokeWidth={2.5} />
-                    <span>{nextMission.client}</span>
-                 </div>
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/5 text-orange-200/90 text-xs font-bold">
+                  <Briefcase size={14} className="text-orange-400" />
+                  <span>{nextMission.client}</span>
+                </div>
               )}
-              <div className="flex items-center gap-1.5">
-                 <Clock size={12} />
-                 <span>{formatTimeSlots(nextMission)}</span>
+              <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
+                <Clock size={14} className="text-gray-500" />
+                <span>{formatTimeSlots(nextMission)}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                 <MapPin size={12} />
-                 <span className="truncate max-w-[150px]">{nextMission.location}</span>
+              <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
+                <MapPin size={14} className="text-gray-500" />
+                <span className="truncate max-w-[200px]">{nextMission.location}</span>
               </div>
-           </div>
-        </div>
+            </div>
+          </div>
 
-        {/* Actions Rapides - Compact (desktop uniquement) */}
-        <div className="hidden md:flex md:flex-col gap-2 w-auto mt-0 pt-0 border-t-0 border-l border-white/5 pl-4">
-           <button
-             onClick={(e) => { e.stopPropagation(); onValidate(nextMission); }}
-             className="flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 transition-all text-xs font-bold"
-           >
-             <CheckCircle size={14} strokeWidth={2.5} />
-             <span className="lg:inline">Valider</span>
-           </button>
-           <button
-             onClick={(e) => { e.stopPropagation(); onEdit(nextMission); }}
-             className="flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass-light hover:bg-white/10 text-gray-300 border border-white/10 transition-all text-xs font-bold"
-           >
-             <Edit size={14} strokeWidth={2.5} />
-             <span className="lg:inline">Modifier</span>
-           </button>
-        </div>
+          {/* Action Row - Desktop */}
+          <div className="hidden md:flex flex-col gap-3 pl-6 border-l border-white/10">
+            <button
+              onClick={(e) => { e.stopPropagation(); onValidate(nextMission); }}
+              className="group/btn relative px-6 py-3 rounded-2xl overflow-hidden font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+            >
+              <div className="absolute inset-0 bg-emerald-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+              <div className="relative z-10 flex items-center justify-center gap-2 text-white">
+                <CheckCircle size={16} strokeWidth={3} />
+                <span>Terminer</span>
+              </div>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(nextMission); }}
+              className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-gray-300 font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+            >
+              Modifier
+            </button>
+          </div>
         </div>
       </div>
     </div>
