@@ -54,12 +54,12 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         <div className="md:col-span-12 lg:col-span-6">
           <StatCard
-            icon={<Euro className="w-8 h-8 text-emerald-400" />}
-            label={`Chiffre d'Affaires ${format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}`}
+            icon={<Euro className="w-5 h-5 text-emerald-400" />}
+            label="Chiffre d'Affaires"
             value={formatPriceWithSymbol(totalEarnings)}
-            subtext={hidePrices ? '***' : `Déjà réalisé: ${formatPrice(totalEarningsCompleted)}€ • En attente: ${formatPrice(totalEarningsPlanned)}€`}
+            subtext={hidePrices ? '***' : `Réalisé: ${formatPrice(totalEarningsCompleted)}€ • Prévu: ${formatPrice(totalEarningsPlanned)}€`}
             color="bg-emerald-500/5 border-emerald-500/20"
-            textColor="text-emerald-400 text-glow-emerald"
+            textColor="text-emerald-400"
             trend={monthlyComparison.percentage !== 0 ? {
               value: Math.abs(monthlyComparison.percentage),
               isPositive: monthlyComparison.isPositive,
@@ -69,21 +69,21 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
 
         <div className="md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<Clock className="w-7 h-7 text-primary-400" />}
+            icon={<Clock className="w-5 h-5 text-primary-400" />}
             label="Volume Horaire"
             value={`${totalHours.toFixed(1)} h`}
-            subtext="Cumulées sur le mois"
+            subtext="Total mensuel"
             color="bg-primary-500/5 border-primary-500/20"
-            textColor="text-primary-400 text-glow-primary"
+            textColor="text-primary-400"
           />
         </div>
 
         <div className="md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<CheckCircle className="w-7 h-7 text-purple-400" />}
+            icon={<CheckCircle className="w-5 h-5 text-purple-400" />}
             label="Missions Clôturées"
             value={completedMissionsCount.toString()}
-            subtext={`${upcomingMissionsCount} missions à venir`}
+            subtext={`${upcomingMissionsCount} à venir`}
             color="bg-purple-500/5 border-purple-500/20"
             textColor="text-purple-400"
           />
@@ -93,24 +93,24 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       {/* Secondary KPIs - Compact Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          icon={<DollarSign className="w-5 h-5 text-blue-400" />}
-          label="Rentabilité"
+          icon={<DollarSign className="w-4 h-4 text-blue-400" />}
+          label="Taux Horaire"
           value={hidePrices ? '***' : `${averageHourlyRate.toFixed(0)} €/h`}
-          subtext="Moyenne horaire"
+          subtext="Rentabilité moyenne"
           color="bg-blue-500/5 border-blue-500/20"
           textColor="text-blue-400"
         />
         <StatCard
-          icon={monthlyComparison.isPositive ? <TrendingUp className="w-5 h-5 text-green-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
-          label="Performance"
+          icon={monthlyComparison.isPositive ? <TrendingUp className="w-4 h-4 text-green-400" /> : <TrendingDown className="w-4 h-4 text-red-400" />}
+          label="Croissance"
           value={`${monthlyComparison.isPositive ? '+' : ''}${monthlyComparison.percentage.toFixed(0)}%`}
           subtext="vs mois précédent"
           color={monthlyComparison.isPositive ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/20"}
           textColor={monthlyComparison.isPositive ? "text-green-400" : "text-red-400"}
         />
         <StatCard
-          icon={<Award className={`w-5 h-5 ${mostProfitableMission ? 'text-yellow-400' : 'text-gray-400'}`} />}
-          label="Performance Max"
+          icon={<Award className={`w-4 h-4 ${mostProfitableMission ? 'text-yellow-400' : 'text-gray-400'}`} />}
+          label="Top Mission"
           value={mostProfitableMission ? formatPriceWithSymbol(mostProfitableMission.totalEarnings) : '—'}
           subtext={mostProfitableMission ? mostProfitableMission.title : 'Aucune mission'}
           color={mostProfitableMission ? "bg-yellow-500/5 border-yellow-500/20" : "bg-white/5 border-white/10"}

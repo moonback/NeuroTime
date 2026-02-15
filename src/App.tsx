@@ -199,96 +199,99 @@ const App: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`hidden md:flex flex-col w-64 glass-strong border-r border-gray-700/30 fixed inset-y-0 z-20 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`hidden md:flex flex-col w-64 border-r border-white/5 fixed inset-y-0 z-20 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] bg-[#0a0f18]/95 backdrop-blur-xl ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
-        <div className="p-6 border-b border-gray-700/30 flex flex-col gap-3">
-          <div className="flex justify-between items-center gap-3">
-            <div className="w-full rounded-2xl shadow-lg backdrop-blur-xl overflow-hidden">
-              <img src="/logo.png" alt="Logo NeuroTime" className="w-full h-20 object-contain" />
+        <div className="p-6 flex flex-col gap-5">
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <img src="/logo.png" alt="Logo NeuroTime" className="h-8 w-auto object-contain object-left mb-1.5" />
+              <span className="text-[9px] text-primary-400 font-black uppercase tracking-[0.2em] leading-none">
+                Freelance Platform
+              </span>
             </div>
-            <div className="flex flex-col items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={toggleSidebarPinned}
-                className={`p-2 glass-button rounded-lg ${sidebarPinned ? 'text-primary-300' : 'text-gray-400 hover:text-gray-100'}`}
-                title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
-                aria-label={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
-              >
-                {sidebarPinned ? <PinOff size={18} /> : <Pin size={18} />}
-              </button>
-              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-white">
-                <ChevronLeft size={24} />
-              </button>
-            </div>
-          </div>
-          <div className="text-center">
-            <span className="text-xs text-gray-400 font-medium">
-              {format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}
-            </span>
+            <button
+              type="button"
+              onClick={toggleSidebarPinned}
+              className={`p-1.5 rounded-lg transition-all ${sidebarPinned ? 'text-primary-400 bg-primary-500/10' : 'text-gray-600 hover:text-white'}`}
+            >
+              {sidebarPinned ? <PinOff size={14} /> : <Pin size={14} />}
+            </button>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
+          <div className="px-3 mb-2">
+            <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Navigation</span>
+          </div>
           <NavButton
             active={location.pathname === '/'}
             onClick={() => { navigate('/'); setIsSidebarOpen(false) }}
-            icon={<LayoutDashboard size={19} />}
+            icon={<LayoutDashboard size={16} />}
             label="Tableau de bord"
           />
           <NavButton
             active={location.pathname === '/missions'}
             onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }}
-            icon={<ListChecks size={19} />}
+            icon={<ListChecks size={16} />}
             label="Missions"
           />
           <NavButton
             active={location.pathname === '/payments'}
             onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }}
-            icon={<Euro size={19} />}
+            icon={<Euro size={16} />}
             label="Paiements"
           />
           <NavButton
             active={location.pathname === '/stats'}
             onClick={() => { navigate('/stats'); setIsSidebarOpen(false) }}
-            icon={<BarChart3 size={19} />}
-            label="Statistiques"
+            icon={<BarChart3 size={16} />}
+            label="Analyses"
           />
         </nav>
 
-        <div className="p-4 space-y-3 border-t border-gray-700/30">
+        <div className="p-3 space-y-3">
           <button
             onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
-            className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-md"
-            aria-label="Ajouter une nouvelle mission"
+            className="w-full bg-white text-black font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 transition-all shadow-[0_4px_12px_rgba(255,255,255,0.1)] active:scale-95"
           >
-            <Plus size={18} strokeWidth={2.3} />
-            <span className="tracking-wide font-medium">Nouvelle mission</span>
+            <Plus size={16} strokeWidth={3} />
+            <span className="text-[10px] uppercase tracking-wider font-extrabold">Nouvelle mission</span>
           </button>
 
-          <div className="pt-2 border-t border-gray-700/30 mt-2">
-            <div className="flex items-center gap-2.5 px-3 py-2.5 mb-3 text-xs glass-light rounded-lg border border-gray-700/30">
-              <div className="p-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30">
-                <User size={12} className="text-primary-400" />
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-[10px] font-black text-white">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#0a0f18] rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
               </div>
-              <span className="truncate text-gray-200 font-medium" title={user.email}>{user.email}</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-black text-white truncate leading-none mb-1">{user.email?.split('@')[0]}</span>
+                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter">Session Active</span>
+              </div>
             </div>
-            <button
-              onClick={toggleHidePrices}
-              className="w-full glass-button hover:bg-orange-500/10 text-gray-300 hover:text-orange-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 mb-2 text-sm"
-              aria-pressed={hidePrices}
-            >
-              {hidePrices ? <EyeOff size={14} /> : <Eye size={14} />}
-              <span>{hidePrices ? 'Afficher tarifs' : 'Masquer tarifs'}</span>
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="w-full glass-button hover:bg-red-500/10 text-gray-300 hover:text-red-400 font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm"
-            >
-              <LogOut size={14} />
-              <span>Déconnexion</span>
-            </button>
+
+            <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+              <button
+                onClick={toggleHidePrices}
+                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-lg border transition-all ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-white/5 border-white/5 text-gray-500 hover:text-white'}`}
+              >
+                {hidePrices ? <EyeOff size={12} /> : <Eye size={12} />}
+                <span className="text-[7px] font-black uppercase">Tarifs</span>
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-lg bg-white/5 border border-white/5 text-gray-500 hover:text-red-400 transition-all"
+              >
+                <LogOut size={12} />
+                <span className="text-[7px] font-black uppercase">Quitter</span>
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -315,7 +318,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
+      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
           {/* Sidebar Toggle Button (Desktop) */}
           <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
@@ -458,52 +461,43 @@ const App: React.FC = () => {
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium relative overflow-hidden ${active
-      ? 'glass-button text-primary-400 font-semibold shadow-md border-primary-500/30 bg-primary-500/10'
-      : 'text-gray-400 hover:glass-button hover:text-primary-300 hover:shadow-sm'
+    className={`w-full group flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 relative ${active
+      ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20 shadow-[0_0_20px_-5px_rgba(14,165,233,0.3)]'
+      : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.03]'
       }`}
   >
-    <span className="flex items-center gap-3">
-      <span className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
-        {icon}
-      </span>
-      <span className="tracking-wide">{label}</span>
+    <span className={`transition-all duration-200 ${active ? 'scale-110' : 'group-hover:translate-x-0.5'}`}>
+      {icon}
     </span>
-    {active && (
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary-500"></span>
-    )}
+    <span className={`text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-200 ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
   </button>
 );
 
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-end py-1 px-1 rounded-xl transition-all duration-300 min-w-[56px] h-[48px] relative group overflow-hidden ${active
-        ? 'text-primary-300'
-        : 'text-gray-500 active:text-primary-400'
+    className={`flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-300 min-w-[64px] relative group ${active
+      ? 'text-white'
+      : 'text-gray-500 active:text-primary-400'
       }`}
   >
-    {/* Spotlight Effect */}
     {active && (
-      <>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.15)_0%,transparent_70%)] animate-fade-in" />
-        <div className="absolute top-0 inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-primary-400/50 to-transparent opacity-80" />
-      </>
+      <div className="absolute inset-0 bg-white/10 rounded-2xl blur-sm animate-pulse" />
     )}
 
-    {/* Icône avec effet */}
-    <span className={`relative z-10 transition-all duration-300 transform origin-center ${active
-        ? '-translate-y-1.5'
-        : 'translate-y-1 group-active:scale-90'
+    {/* Icône */}
+    <span className={`relative z-10 transition-all duration-300 transform ${active
+      ? '-translate-y-1 text-primary-400'
+      : 'translate-y-0 group-active:scale-90'
       }`}>
       {icon}
     </span>
 
     {/* Label */}
     {label && (
-      <span className={`relative z-10 text-[8px] font-bold tracking-wider transition-all duration-300 uppercase ${active
-          ? 'opacity-100 transform translate-y-0 text-primary-200 text-shadow-sm'
-          : 'opacity-0 transform translate-y-2 h-0 overflow-hidden'
+      <span className={`relative z-10 text-[9px] font-black tracking-[0.15em] transition-all duration-300 uppercase mt-1 ${active
+        ? 'opacity-100 transform translate-y-0 text-white'
+        : 'opacity-0 transform translate-y-2 h-0 overflow-hidden'
         }`}>
         {label}
       </span>

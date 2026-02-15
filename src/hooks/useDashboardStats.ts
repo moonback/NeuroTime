@@ -1,40 +1,41 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, subMonths, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale/fr';
 import { Mission } from '../types';
 
 export const useDashboardStats = (missions: Mission[]) => {
   const now = new Date();
-  
+
   // Sélecteur de mois - format YYYY-MM (défaut: mois en cours)
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     return format(now, 'yyyy-MM');
   });
-  
+
   // Date du mois sélectionné
   const selectedMonthDate = useMemo(() => {
     return parseISO(`${selectedMonth}-01`);
   }, [selectedMonth]);
-  
+
   const selectedMonthStart = useMemo(() => startOfMonth(selectedMonthDate), [selectedMonthDate]);
   const selectedMonthEnd = useMemo(() => endOfMonth(selectedMonthDate), [selectedMonthDate]);
-  
+
   // Calculate Stats - Toutes les missions terminées (completed) sont comptabilisées
-  const allCompletedMissions = useMemo(() => 
+  const allCompletedMissions = useMemo(() =>
     missions.filter(m => m.status === 'completed'),
     [missions]
   );
-  
+
   // Missions du mois sélectionné
   const selectedMonthStartTime = useMemo(() => selectedMonthStart.getTime(), [selectedMonthStart]);
   const selectedMonthEndTime = useMemo(() => selectedMonthEnd.getTime(), [selectedMonthEnd]);
-  
+
   const selectedMonthCompletedMissions = useMemo(() => {
     return allCompletedMissions.filter(m => {
       const missionEndTime = new Date(m.endTime).getTime();
       return missionEndTime >= selectedMonthStartTime && missionEndTime <= selectedMonthEndTime;
     });
   }, [allCompletedMissions, selectedMonthStartTime, selectedMonthEndTime]);
-  
+
   const selectedMonthPlannedMissions = useMemo(() => {
     return missions.filter(m => {
       if (m.status !== 'planned') return false;
@@ -42,7 +43,7 @@ export const useDashboardStats = (missions: Mission[]) => {
       return missionStartTime >= selectedMonthStartTime && missionStartTime <= selectedMonthEndTime;
     });
   }, [missions, selectedMonthStartTime, selectedMonthEndTime]);
-  
+
   // Heures et gains des missions terminées du mois sélectionné
   const totalHours = useMemo(() => {
     let hours = 0;
@@ -62,7 +63,7 @@ export const useDashboardStats = (missions: Mission[]) => {
     }
     return Math.round(earnings * 100) / 100;
   }, [selectedMonthCompletedMissions]);
-  
+
   // Gains prévisionnels des missions planifiées du mois sélectionné
   const totalEarningsPlanned = useMemo(() => {
     let earnings = 0;
@@ -71,9 +72,9 @@ export const useDashboardStats = (missions: Mission[]) => {
     }
     return Math.round(earnings * 100) / 100;
   }, [selectedMonthPlannedMissions]);
-  
+
   // Total = Réalisé + Prévisionnel
-  const totalEarnings = useMemo(() => 
+  const totalEarnings = useMemo(() =>
     totalEarningsCompleted + totalEarningsPlanned,
     [totalEarningsCompleted, totalEarningsPlanned]
   );
@@ -94,7 +95,7 @@ export const useDashboardStats = (missions: Mission[]) => {
   }, [missions]);
 
   // Recent completed missions
-  const recentCompletedMissions = useMemo(() => 
+  const recentCompletedMissions = useMemo(() =>
     allCompletedMissions
       .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
       .slice(0, 5),
@@ -129,8 +130,8 @@ export const useDashboardStats = (missions: Mission[]) => {
     lastMonthRevenue = Math.round(lastMonthRevenue * 100) / 100;
 
     const difference = thisMonthRevenue - lastMonthRevenue;
-    const percentage = lastMonthRevenue > 0 
-      ? Math.round((difference / lastMonthRevenue) * 100 * 10) / 10 
+    const percentage = lastMonthRevenue > 0
+      ? Math.round((difference / lastMonthRevenue) * 100 * 10) / 10
       : 0;
 
     return {
@@ -145,10 +146,42 @@ export const useDashboardStats = (missions: Mission[]) => {
   // Mission la plus rentable
   const mostProfitableMission = useMemo(() => {
     if (selectedMonthCompletedMissions.length === 0) return null;
-    return selectedMonthCompletedMissions.reduce((max, m) => 
+    return selectedMonthCompletedMissions.reduce((max, m) =>
       (m.totalEarnings || 0) > (max.totalEarnings || 0) ? m : max
     );
   }, [selectedMonthCompletedMissions]);
+
+  // Statistiques des 3 derniers mois
+  const lastThreeMonths = useMemo(() => {
+    return Array.from({ length: 3 }).map((_, i) => {
+      const monthDate = subMonths(selectedMonthDate, i);
+      const start = startOfMonth(monthDate);
+      const end = endOfMonth(monthDate);
+      const startTime = start.getTime();
+      const endTime = end.getTime();
+
+      const monthMissions = allCompletedMissions.filter(m => {
+        const missionEndTime = new Date(m.endTime).getTime();
+        return missionEndTime >= startTime && missionEndTime <= endTime;
+      });
+
+      const earnings = monthMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
+      let hours = 0;
+      for (const m of monthMissions) {
+        const s = new Date(m.startTime).getTime();
+        const e = new Date(m.endTime).getTime();
+        hours += (e - s) / (1000 * 60 * 60);
+      }
+
+      return {
+        label: format(monthDate, 'MMMM', { locale: fr }),
+        year: format(monthDate, 'yyyy'),
+        earnings: Math.round(earnings * 100) / 100,
+        hours: Math.round(hours * 10) / 10,
+        count: monthMissions.length
+      };
+    }).reverse();
+  }, [allCompletedMissions, selectedMonthDate]);
 
   return {
     selectedMonth,
@@ -165,7 +198,8 @@ export const useDashboardStats = (missions: Mission[]) => {
     nextMission,
     averageHourlyRate,
     monthlyComparison,
-    mostProfitableMission
+    mostProfitableMission,
+    lastThreeMonths
   };
 };
 

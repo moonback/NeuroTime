@@ -22,9 +22,9 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
   return (
     <div
       className={[
-        'group relative overflow-hidden rounded-3xl p-5 glass-card',
+        'group relative overflow-hidden rounded-2xl p-4 glass-card',
         'transition-all duration-500 animate-slide-in-up',
-        'hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/40',
+        'hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20',
         'border border-white/5',
         color,
       ].join(' ')}
@@ -35,9 +35,9 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
         <div className="flex items-start justify-between mb-4">
           <div
             className={[
-              'shrink-0 p-3 rounded-2xl',
+              'shrink-0 p-2.5 rounded-xl',
               'bg-white/5 border border-white/10 shadow-inner',
-              'transition-all duration-500 group-hover:scale-110 group-hover:rotate-3',
+              'transition-all duration-500 group-hover:scale-105',
               textColor,
             ].join(' ')}
           >
@@ -61,15 +61,15 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-400 group-hover:text-gray-300 transition-colors">
+          <p className="text-[9px] uppercase font-bold tracking-[0.15em] text-gray-500 group-hover:text-gray-400 transition-colors">
             {label}
           </p>
           <div className="flex flex-col">
-            <p className={`text-2xl sm:text-3xl font-black tracking-tighter transition-all duration-300 ${textColor} group-hover:scale-[1.02] origin-left truncate`}>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight transition-all duration-300 ${textColor} origin-left truncate`}>
               {value}
             </p>
             {subtext && (
-              <p className="text-[10px] text-gray-500 font-medium group-hover:text-gray-400 transition-colors truncate mt-1">
+              <p className="text-[9px] text-gray-500 font-medium group-hover:text-gray-400 transition-colors truncate mt-0.5">
                 {subtext}
               </p>
             )}

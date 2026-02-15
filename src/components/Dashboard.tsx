@@ -10,6 +10,8 @@ import DashboardKPIs from './dashboard/DashboardKPIs';
 import UpcomingMissionsList from './dashboard/UpcomingMissionsList';
 import DataPersistence from './dashboard/DataPersistence';
 
+import RecentHistory from './dashboard/RecentHistory';
+
 interface DashboardProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
@@ -34,7 +36,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     nextMission,
     averageHourlyRate,
     monthlyComparison,
-    mostProfitableMission
+    mostProfitableMission,
+    lastThreeMonths
   } = useDashboardStats(missions);
 
   const {
@@ -81,6 +84,9 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         mostProfitableMission={mostProfitableMission}
         hidePrices={hidePrices}
       />
+
+      {/* Détail des 3 derniers mois */}
+      <RecentHistory data={lastThreeMonths} hidePrices={hidePrices} />
 
       {/* Statistiques avancées et Objectifs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -26,23 +26,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <header className="space-y-6 animate-slide-in-up">
       {/* Top Bar: Title & Primary Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+        <div className="flex flex-col">
+          <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
             Tableau de bord
           </h1>
-          <p className="text-gray-400 text-xs md:text-sm font-medium flex items-center gap-2 mt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            Suivi de votre activité en temps réel
+          <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mt-1">
+            <span className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            Live Activity Monitor
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="group relative flex items-center justify-center gap-2.5 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl font-bold transition-all text-xs border border-white/10 hover:border-white/20 whitespace-nowrap"
+            className="group relative flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl font-black transition-all text-[10px] uppercase tracking-wider border border-white/5 hover:border-white/20 whitespace-nowrap"
           >
-            <Share2 size={16} strokeWidth={2.5} className="text-primary-400 group-hover:rotate-12 transition-transform" />
-            <span>Exporter le rapport</span>
+            <Share2 size={14} strokeWidth={3} className="text-primary-400" />
+            <span>Exporter</span>
           </button>
         </div>
       </div>

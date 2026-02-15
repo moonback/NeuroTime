@@ -192,7 +192,7 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
       <div
         ref={cardRef}
         onClick={() => onEdit(nextMission)}
-        className="group relative overflow-hidden rounded-3xl p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/20 active:scale-[0.99] cursor-pointer"
+        className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 hover:shadow-xl active:scale-[0.99] cursor-pointer"
         style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: swipeOffset === 0 ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
@@ -200,23 +200,23 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
       >
         {/* Animated Background */}
         <div className="absolute inset-0 bg-[#0f141f]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute inset-0 border border-orange-500/20 group-hover:border-orange-500/40 rounded-3xl transition-colors duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 border border-white/5 group-hover:border-primary-500/20 rounded-2xl transition-colors duration-500" />
 
         {/* Glow effect */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full group-hover:bg-orange-600/20 transition-all duration-500" />
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-600/5 blur-[80px] rounded-full group-hover:bg-primary-600/10 transition-all duration-500" />
 
         <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
           {/* Date Block */}
-          <div className="flex-shrink-0 flex md:flex-col items-center justify-center gap-1 bg-gradient-to-b from-orange-400 to-orange-600 p-[1px] rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-500">
-            <div className="bg-[#0f141f] rounded-[15px] px-4 py-3 md:min-w-[85px] text-center">
-              <span className="block text-[10px] uppercase font-black text-orange-400 tracking-[0.2em] mb-1">
+          <div className="flex-shrink-0 flex md:flex-col items-center justify-center gap-1 bg-white/5 p-[1px] rounded-xl border border-white/10 group-hover:border-primary-500/30 transition-all duration-500">
+            <div className="bg-[#0f141f] rounded-[11px] px-3 py-2 md:min-w-[70px] text-center">
+              <span className="block text-[9px] uppercase font-black text-primary-400 tracking-wider mb-0.5">
                 {format(missionStart, 'MMM', { locale: fr })}
               </span>
-              <span className="block text-3xl font-black text-white leading-none tracking-tighter">
+              <span className="block text-xl font-black text-white leading-none tracking-tight">
                 {format(missionStart, 'dd')}
               </span>
-              <span className="block text-[11px] font-bold text-gray-400 mt-2">
+              <span className="block text-[9px] font-bold text-gray-500 mt-1.5 opacity-60">
                 {format(missionStart, 'HH:mm')}
               </span>
             </div>
@@ -226,8 +226,8 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3 mb-3">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${isOngoing
-                  ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse'
-                  : 'bg-white/5 text-orange-300 border-white/10'
+                ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse'
+                : 'bg-white/5 text-orange-300 border-white/10'
                 }`}>
                 {isOngoing ? (
                   <>
@@ -250,7 +250,7 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
               </div>
             </div>
 
-            <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tighter transition-colors group-hover:text-orange-50 filter drop-shadow-sm">
+            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight transition-colors group-hover:text-primary-400 filter drop-shadow-sm">
               {nextMission.title}
             </h3>
 
