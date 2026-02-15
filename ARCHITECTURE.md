@@ -1,58 +1,80 @@
-## Architecture
+# 🏗️ System Architecture - NeuroTime
 
-### Vue d’ensemble
-```mermaid
-flowchart TD
-  UI[React + TS + Tailwind\n(PWA)] -->|Supabase JS| Auth[Supabase Auth]
-  UI -->|Supabase JS| DB[(PostgreSQL Supabase)]
-  UI -->|Gemini API\n(process.env.API_KEY)| AI[Google Gemini]
-  UI --> Local[localStorage\nfallback offline]
-  subgraph Supabase
-    Auth --> DB
-  end
-```
+This document describes the technical architecture and design patterns used in the NeuroTime application.
 
-- **Frontend** : React 19 + TypeScript, Vite, Tailwind 4, composants métier (Dashboard, Missions, Agenda, PWA prompt).
-- **Backend-as-a-service** : Supabase (PostgreSQL + Auth). Aucune API serveur custom ; toutes les opérations passent par Supabase JS avec RLS par utilisateur.
-- **Stockage** : lecture/écriture Supabase, fallback localStorage (missions, clients) pour résilience offline/PWA.
-- **AI** : Gemini (gemini-2.5-flash) pour résumé métier et amélioration de description, clé exposée en build via `process.env.API_KEY` (définie à partir de `GEMINI_API_KEY` dans Vite).
-- **PWA** : vite-plugin-pwa (cache First pour assets/polices, Network First pour APIs Supabase et Nominatim, prompt d’installation, manifest complet).
+## 📍 Overview
 
-### Découpage applicatif
-- **Entrée** : `index.tsx` monte `App` sous StrictMode.
-- **Shell & navigation** : `App.tsx` gère les vues (`dashboard`, `missions`, `calendar`), l’auth Supabase, le lazy loading et le modal d’édition de mission.
-- **Services** :
-  - `authService.ts` : création du client Supabase, signUp/signIn/signOut, écoute d’état de session.
-  - `supabaseService.ts` : CRUD missions + clients (mapping camelCase/snake_case, RLS, upsert + suppression des orphelins).
-  - `storageService.ts` : orchestrateur persistance (localStorage puis Supabase).
-  - `goalsService.ts` : CRUD objectifs (CA, missions, heures).
-  - `clientService.ts` : synchronisation clients (Supabase + fallback local, dédoublonnage).
-  - `geminiService.ts` : appels AI (amélioration description, résumé).
-- **UI clés** :
-  - Missions : `MissionForm`, `MissionsList`, `CalendarView` (filtre, heatmap CA).
-  - Dashboard : `Dashboard` (+ Stats, Activity, Goals, Charts), export CSV/JSON, backup/restore.
-  - PWA : `PWAInstallPrompt`, `SplashScreen`, `LoadingSpinner`.
-- **Utilitaires** :
-  - `calculations.ts` : calcul jour/nuit minute-près (20€/h, 25€/h, créneaux multiples).
-  - `timeSlots.ts` : compatibilité anciens modèles + formatage créneaux.
+NeuroTime is a Single Page Application (SPA) built with a modern decoupled architecture. It uses a **Serverless-first** approach, leveraging Supabase for backend services and Google Gemini for AI capabilities.
 
-### Flux de données (exemple mission)
-1. L’utilisateur s’authentifie (Supabase Auth) → session stockée par Supabase JS.
-2. Au montage d’`App`, les missions sont chargées depuis localStorage, puis synchronisées depuis Supabase (si connecté) via `storageService`.
-3. Création/édition de mission dans `MissionForm` → validation → calcul auto ou montant manuel → sauvegarde locale immédiate → upsert Supabase asynchrone.
-4. Dashboard/Calendar lisent le state en mémoire ; export CSV/JSON exploite le même state.
+## 🛠️ Technology Stack
 
-### Sécurité
-- RLS activé sur toutes les tables (missions, clients, goals). Filtre par `auth.uid() = user_id` sur SELECT/INSERT/UPDATE/DELETE.
-- Utiliser uniquement la clé `anon` côté front. Ne jamais exposer `service_role`.
-- Données sensibles (.env) exclues du VCS.
+### Frontend
+- **Framework**: React 19 (Functional Components, Hooks)
+- **Build Tool**: Vite (Ultra-fast development and bundling)
+- **Styling**: Tailwind CSS 4 (Utility-first, high performance)
+- **UI Components**: Custom-built glassmorphism components
+- **Routing**: React Router 7
+- **Charts**: Recharts (SVG-based responsive charts)
 
-### Performances & offline
-- Lazy loading des vues lourdes (Dashboard, Calendar).
-- Caching PWA (assets, polices). Network First pour les appels Supabase afin de rester cohérent tout en tolérant l’offline.
-- Fallback localStorage pour missions/clients (écriture locale d’abord, synchro Supabase ensuite).
+### Backend (BaaS)
+- **Supabase**: 
+  - **PostgreSQL**: Relational database for missions, goals, and clients.
+  - **Auth**: GoTrue for secure user authentication (Email/Password).
+  - **RLS (Row Level Security)**: Database-level security ensuring users only access their own data.
 
-### Observabilité & erreurs
-- Logs console pour échecs réseau Supabase et AI.
-- Aucun système de traçage distant intégré ; ajouter Sentry/LogRocket si besoin.
+### AI Layer
+- **Google Gemini API**: Used for NLP tasks like professionalizing mission descriptions.
 
+---
+
+## 🏛️ Frontend Architecture
+
+The frontend follows a modular structure focused on separation of concerns:
+
+### 1. Layers
+- **Services (`src/services/`)**: The bridge between the app and external APIs. Each service (Supabase, Gemini, Auth) is isolated.
+- **Contexts (`src/context/`)**: Global state management using React Context.
+  - `AuthContext`: Manages session state and authentication flows.
+  - `MissionContext`: Centralized store for missions, providing CRUD operations.
+- **Hooks (`src/hooks/`)**: Reusable logic for UI behavior (e.g., `usePreferences`, `useConfirmDialog`).
+- **Components (`src/components/`)**:
+  - **Feature Components**: Self-contained UI parts like `CalendarView`, `StatsView`, `Dashboard`.
+  - **Base Components**: Reusable UI primitives (Modals, Spinners, Tooltips).
+- **Types (`src/types/`)**: Centralized TypeScript definitions to ensure type safety across the stack.
+
+### 2. State Management Flow
+1. **Trigger**: User interacts with a component (e.g., clicks "Save Mission").
+2. **Hook/Context**: The component calls a function from `MissionContext`.
+3. **Service**: `MissionContext` calls `supabaseService`.
+4. **Network**: The service performs an async request to Supabase.
+5. **Update**: On success, the local state in `MissionContext` is updated, triggering a re-render of dependent components.
+
+---
+
+## 💾 Database Design
+
+The database is built on PostgreSQL with a focus on auditability and security.
+
+- **Primary Entities**: `missions`, `goals`, `clients`.
+- **Relational Integrity**: Each entity is linked to `auth.users` via a `user_id` foreign key.
+- **Security**: 
+  - `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`
+  - Policies ensure that `auth.uid() = user_id` for all CRUD operations.
+
+---
+
+## 🔄 AI Workflow
+
+The AI integration follows a simple request-response pattern:
+1. User provides raw text in the `MissionForm`.
+2. App sends text + mission context (title, client) to `geminiService`.
+3. Gemini processes the text using a tailored prompt for the event industry.
+4. The enhanced description is returned and populated in the form.
+
+---
+
+## 📦 Build & Deployment
+
+- **Optimized Bundling**: uses Vite's code-splitting (lazy loading) for heavy components like `Dashboard` and `StatsView`.
+- **PWA Integration**: `vite-plugin-pwa` generates the service worker and manifest for offline support and installability.
+- **Standard**: Deployment is compatible with any static hosting (Vercel, Netlify, Github Pages) with a Supabase backend.

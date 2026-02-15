@@ -1,42 +1,60 @@
-## Contribuer à NeuroTime
+# 🤝 Contributing to NeuroTime
 
-### Préparer l’environnement
-1) Node 18+, npm install.  
-2) Copier `.env.local` depuis l’exemple et renseigner `GEMINI_API_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.  
-3) Appliquer les scripts SQL Supabase nécessaires (`supabase_setup.sql`, migrations clients/goals) si vous utilisez une base vierge.
+Thank you for your interest in contributing to NeuroTime! We want to make contributing as easy and transparent as possible.
 
-### Branches & commits
-- Branche de feature : `feature/<sujet>` ; correctif : `fix/<sujet>`.
-- Convention de commit : `type(scope): message` (ex. `feat(auth): improve session handling`).
-- Un commit par changement cohérent (UI, service, migration…).
+## ⚖️ Code of Conduct
+We are committed to providing a friendly, safe, and welcoming environment for all. Please be respectful of others in all interactions.
 
-### Style de code
-- TypeScript, composants fonctionnels React, hooks idiomatiques (`useState`, `useEffect`, `useMemo`, `useCallback`).
-- Styling via Tailwind utilitaire existant ; réutiliser les classes “glass” et variantes pour cohérence visuelle.
-- Logique métier dans `services/`, pas dans les composants. Synchronisation Supabase + fallback localStorage conservée.
-- Conversions camelCase ↔ snake_case centralisées dans `supabaseService.ts` / `goalsService.ts`.
+## 🛠️ Development Environment
 
-### Tests et vérifications manuelles
-- Lancer l’app : `npm run dev`; build : `npm run build`; preview : `npm run preview`.
-- Parcours manuel minimal avant PR :  
-  - Auth (sign in/out).  
-  - Créer/éditer une mission avec multi-créneaux, vérifier calcul auto.  
-  - Export CSV/JSON sur le dashboard; basculer offline (désactiver réseau) puis revenir online, vérifier la synchro.  
-  - Tester le prompt PWA (desktop ou mobile).
+### Prerequisites
+- Node.js >= 18.x
+- npm or yarn
+- Git
 
-### Ouverture de PR
-- Décrire le problème, la solution et l’impact (UI, DB, perf, sécurité).
-- Mentionner les migrations SQL à appliquer.
-- Joindre des captures si l’UI change.
+### Initial Setup
+1. Clone the repo.
+2. Run `npm install`.
+3. Create `.env.local` based on `.env.example` (or the README instructions).
+4. Run `npm run dev` to start the development server.
 
-### Sécurité & données
-- Ne jamais commiter `.env.local` ni de clés privées. Utiliser uniquement la clé Supabase `anon`.
-- Respecter le RLS : requêtes toujours filtrées par utilisateur (déjà géré par les services).
-- Nettoyer les erreurs utilisateurs (messages clairs) et logguer les erreurs techniques en console.
+## 🌿 Branching Strategy
+- `main`: Production-ready code only.
+- `develop`: Main development branch.
+- `feature/*`: New features or enhancements.
+- `fix/*`: Bug fixes.
 
-### Où contribuer en priorité
-- Robustesse offline/online (retries, file d’attente).
-- Accessibilité et UX (focus, clavier, feedback).
-- Couverture tests (E2E préférés).
-- Observabilité (Sentry/LogRocket) et validation métier (cohérence heures/CA).
+## 📝 Coding Standards
 
+### TypeScript
+- All new code must be type-safe. Avoid `any` at all costs.
+- Prefer interfaces over types for public-facing object definitions.
+
+### React
+- Use Functional Components with Hooks.
+- Keep components small and focused on a single responsibility.
+- Use `lazy` and `Suspense` for page-level components to improve initial load speed.
+
+### Styling
+- Use **Tailwind CSS 4** classes for styling.
+- Follow the project's glassmorphism design system (see `index.css` for utility classes like `glass-card`, `neo-aurora`).
+
+### Naming Conventions
+- **Components**: PascalCase (e.g., `MissionForm.tsx`).
+- **Hooks**: camelCase starting with `use` (e.g., `useMissions.ts`).
+- **Services/Utils**: camelCase (e.g., `authService.ts`).
+- **CSS Variables**: kebab-case.
+
+## 🧪 Testing
+- Write tests for core logic and complex components using **Vitest** and **React Testing Library**.
+- Run tests before submitting a PR: `npm run test`.
+
+## 📤 Submission Process
+1. Update the documentation if you've added new features.
+2. Ensure all tests pass.
+3. Open a Pull Request with a clear description of the changes.
+4. Reference any related issues in the PR description.
+
+---
+
+Questions? Feel free to reach out to the project maintainers!

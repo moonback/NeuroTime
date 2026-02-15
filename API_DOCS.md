@@ -1,44 +1,91 @@
-## API / Intégrations (Supabase + Services)
+# 📖 API Documentation - NeuroTime
 
-L’application n’a pas de backend custom : toutes les opérations passent par Supabase JS et les services front. Les routes ci-dessous décrivent les actions côté client/Supabase.
+NeuroTime uses **Supabase** as its primary backend and **Google Gemini** for AI features. While the application communicates directly with Supabase via the client SDK, the logical interactions are encapsulated in **Services**.
 
-### Authentification (Supabase Auth)
-- `signUp(email, password)` → crée un utilisateur.
-- `signIn(email, password)` → ouvre une session.
-- `signOut()` → ferme la session.
-- `getCurrentUser()` / `onAuthStateChange(cb)` → récupère/écoute la session.
+## 🔑 Authentication
 
-### Missions (`missions` table)
-- Colonnes principales : `id`, `user_id`, `title`, `client`, `location`, `description`, `start_time`, `end_time`, `status`, `rate_type`, `hourly_rate`, `total_earnings`, `details`, `logistics`, `time_slots`, `created_at`, `updated_at`.
-- Opérations :
-  - `loadMissionsFromSupabase()` → SELECT filtré par `user_id`.
-  - `saveMissionsToSupabase(missions[])` → upsert + suppression des lignes absentes (sync complète).
-  - `addMissionToSupabase(mission)` → INSERT.
-  - `updateMissionInSupabase(mission)` → UPDATE par `id` + `user_id`.
-  - `deleteMissionFromSupabase(id)` → DELETE par `id` + `user_id`.
-- RLS : `auth.uid() = user_id` sur SELECT/INSERT/UPDATE/DELETE.
+Managed via `authService.ts`.
 
-### Clients (`clients` table)
-- Colonnes : `id`, `user_id`, `name`, `created_at`, `updated_at`.
-- Opérations :
-  - `loadClientsFromSupabase()` → SELECT par `user_id`.
-  - `addClientToSupabase(name)` → INSERT + contrainte unique `(user_id, lower(name))`.
-  - `syncClientsWithMissionsInSupabase(missions[])` → INSERT batch des clients manquants.
-- Fallback : localStorage (`clientService`) avec dédoublonnage.
+### `signUp(email, password)`
+- **Goal**: Create a new user account.
+- **Provider**: Supabase Auth (GoTrue).
 
-### Objectifs (`goals` table)
-- Colonnes : `id`, `user_id`, `type` (`revenue|missions|hours`), `target`, `period` (`month|year`), `created_at`, `updated_at`, unique `(user_id, type, period)`.
-- Opérations : `loadGoalsFromSupabase()`, `saveGoalToSupabase(goal)` (upsert + gestion contrainte unique), `saveGoalsToSupabase(goals[])`, `deleteGoalFromSupabase(id)`.
+### `signIn(email, password)`
+- **Goal**: Authenticate an existing user.
+- **Returns**: User session object.
 
-### AI (Gemini)
-- `enhanceDescription(rawText, { title, location, client })` → réécrit la description (Gemini 2.5 flash).
-- `generateSummary(missions[])` → synthèse courte (CA total, nombre de missions, recommandations).
-- Nécessite `process.env.API_KEY` (exposé via `GEMINI_API_KEY` dans Vite).
+### `signOut()`
+- **Goal**: End the current sessions and clear local state.
 
-### Stockage offline / fallback
-- `storageService.saveMissions(missions)` : écrit toujours dans localStorage, puis tente Supabase.
-- `storageService.loadMissions()` : lit localStorage en premier, puis tente Supabase; écrase le local si des données distantes existent.
+---
 
-### PWA / Service Worker
-- Configuré dans `vite.config.ts` via `vite-plugin-pwa` : cache assets, Google Fonts, APIs Supabase/Nominatim en NetworkFirst. Prompt d’installation via `PWAInstallPrompt`.
+## 📅 Missions Management
 
+Managed via `supabaseService.ts`.
+
+### `getMissions()`
+- **Method**: `SELECT` from `missions` table.
+- **Security**: Filtered by RLS (only user's missions).
+- **Sort**: `start_time DESC`.
+
+### `createMission(missionData)`
+- **Method**: `INSERT` into `missions`.
+- **Fields**: `title`, `client`, `location`, `start_time`, `end_time`, `status`, `rate_type`, `hourly_rate`, etc.
+
+### `updateMission(id, updates)`
+- **Method**: `UPDATE` row by ID.
+- **Constraint**: Cannot update missions marked as `isPaid: true`.
+
+### `deleteMission(id)`
+- **Method**: `DELETE` row by ID.
+
+---
+
+## 🎯 Goals Tracking
+
+Managed via `goalsService.ts`.
+
+### `getGoals()`
+- **Method**: `SELECT` from `goals`.
+- **Types**: `revenue`, `missions`, `hours`.
+- **Periods**: `month`, `year`.
+
+### `upsertGoal(goalData)`
+- **Method**: `UPSERT` (Insert or Update if exists).
+- **Unique Key**: `(user_id, type, period)`.
+
+---
+
+## 🤖 AI Features (Gemini)
+
+Managed via `geminiService.ts`.
+
+### `enhanceDescription(rawText, context)`
+- **Input**:
+    - `rawText`: The user's informal notes.
+    - `context`: `{ title, client, location }`.
+- **Logic**:
+    - Prompt-engineered for the freelance event industry.
+    - Models used: `gemini-2.5-flash` (or equivalent configured).
+- **Output**: A professionalized description string.
+
+---
+
+## 👥 Client Management
+
+Managed via `clientService.ts`.
+
+### `getClients()`
+- **Goal**: Get unique list of clients from mission history or dedicated `clients` table.
+
+---
+
+## 🛠️ Environment Variables
+
+The frontend expects the following variables for communication:
+
+| Variable | Description |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous public key |
+| `API_KEY` | Google AI Studio API Key |
