@@ -22,15 +22,13 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
 
   if (!nextMission) {
     return (
-      <div className="glass-card rounded-2xl p-5 border border-orange-500/20 bg-gradient-to-br from-orange-600/10 via-orange-500/5 to-orange-400/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200">
-            <Calendar size={18} strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-orange-100">Aucune mission planifiée</p>
-            <p className="text-xs text-gray-500 font-medium">Ajoutez une mission pour commencer</p>
-          </div>
+      <div className="glass-card rounded-xl p-3.5 border border-orange-500/15 bg-gradient-to-br from-orange-600/5 to-transparent flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/15 text-orange-300">
+          <Calendar size={16} strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-orange-100">Aucune mission planifiée</p>
+          <p className="text-[10px] text-gray-500">Ajoutez une mission pour commencer</p>
         </div>
       </div>
     );
@@ -119,7 +117,6 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
     isSwiping.current = false;
   }, [swipeOffset]);
 
-  // Ajouter les écouteurs avec passive: false pour permettre preventDefault
   useEffect(() => {
     const element = cardRef.current;
     if (!element) return;
@@ -167,23 +164,23 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
   }, [isSwiped]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl md:rounded-2xl">
+    <div className="relative overflow-hidden rounded-xl">
       {/* Actions rapides révélées par le swipe */}
-      <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-gradient-to-l from-primary-500/40 via-primary-500/30 to-transparent pointer-events-none md:hidden">
-        <div className="flex items-center gap-2 pointer-events-auto">
+      <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 px-3 bg-gradient-to-l from-indigo-500/30 via-indigo-500/20 to-transparent pointer-events-none md:hidden">
+        <div className="flex items-center gap-1.5 pointer-events-auto">
           <button
             onClick={() => handleActionClick(() => onValidate(nextMission))}
-            className="p-3 rounded-xl bg-green-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-green-600"
+            className="p-2.5 rounded-xl bg-emerald-500 text-white shadow-lg active:scale-95 transition-transform"
             aria-label="Valider"
           >
-            <CheckCircle size={18} strokeWidth={2.5} />
+            <CheckCircle size={16} strokeWidth={2.5} />
           </button>
           <button
             onClick={() => handleActionClick(() => onEdit(nextMission))}
-            className="p-3 rounded-xl bg-primary-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-primary-600"
+            className="p-2.5 rounded-xl bg-indigo-500 text-white shadow-lg active:scale-95 transition-transform"
             aria-label="Modifier"
           >
-            <Edit size={18} strokeWidth={2.5} />
+            <Edit size={16} strokeWidth={2.5} />
           </button>
         </div>
       </div>
@@ -192,31 +189,31 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
       <div
         ref={cardRef}
         onClick={() => onEdit(nextMission)}
-        className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 hover:shadow-xl active:scale-[0.99] cursor-pointer"
+        className="group relative overflow-hidden rounded-xl p-3.5 md:p-4 transition-all duration-300 cursor-pointer active:scale-[0.995]"
         style={{
           transform: `translateX(${swipeOffset}px)`,
-          transition: swipeOffset === 0 ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+          transition: swipeOffset === 0 ? 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
         }}
       >
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-[#0f141f]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute inset-0 border border-white/5 group-hover:border-primary-500/20 rounded-2xl transition-colors duration-500" />
+        {/* Background */}
+        <div className="absolute inset-0 bg-[#0c0f1a]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.04] via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 border border-white/[0.05] group-hover:border-indigo-500/15 rounded-xl transition-colors duration-300" />
 
-        {/* Glow effect */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-600/5 blur-[80px] rounded-full group-hover:bg-primary-600/10 transition-all duration-500" />
+        {/* Subtle glow */}
+        <div className="absolute -top-16 -right-16 w-40 h-40 bg-indigo-500/[0.04] blur-[60px] rounded-full group-hover:bg-indigo-500/[0.08] transition-all duration-500" />
 
-        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* Date Block */}
-          <div className="flex-shrink-0 flex md:flex-col items-center justify-center gap-1 bg-white/5 p-[1px] rounded-xl border border-white/10 group-hover:border-primary-500/30 transition-all duration-500">
-            <div className="bg-[#0f141f] rounded-[11px] px-3 py-2 md:min-w-[70px] text-center">
-              <span className="block text-[9px] uppercase font-black text-primary-400 tracking-wider mb-0.5">
+        <div className="relative z-10 flex flex-col md:flex-row gap-3 md:gap-5 items-start md:items-center">
+          {/* Date Block — COMPACT */}
+          <div className="flex-shrink-0 flex md:flex-col items-center gap-1 bg-white/[0.04] p-px rounded-lg border border-white/[0.06] group-hover:border-indigo-500/20 transition-all">
+            <div className="bg-[#0c0f1a] rounded-[7px] px-2.5 py-1.5 md:min-w-[56px] text-center">
+              <span className="block text-[8px] uppercase font-bold text-indigo-400 tracking-wider mb-0.5">
                 {format(missionStart, 'MMM', { locale: fr })}
               </span>
-              <span className="block text-xl font-black text-white leading-none tracking-tight">
+              <span className="block text-lg font-extrabold text-white leading-none tracking-tight">
                 {format(missionStart, 'dd')}
               </span>
-              <span className="block text-[9px] font-bold text-gray-500 mt-1.5 opacity-60">
+              <span className="block text-[8px] font-semibold text-gray-500 mt-1 opacity-60">
                 {format(missionStart, 'HH:mm')}
               </span>
             </div>
@@ -224,70 +221,70 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
 
           {/* Info Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-3 mb-3">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${isOngoing
-                ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse'
-                : 'bg-white/5 text-orange-300 border-white/10'
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border transition-all ${isOngoing
+                ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.3)] animate-pulse'
+                : 'bg-white/[0.04] text-orange-300 border-white/[0.06]'
                 }`}>
                 {isOngoing ? (
                   <>
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                    <span className="w-1 h-1 rounded-full bg-white animate-ping" />
                     En cours
                   </>
                 ) : timeText}
               </span>
 
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-gray-400">
-                  {nextMission.rateType === 'night' ? <Moon size={12} className="text-purple-400" /> : nextMission.rateType === 'mixed' ? <Clock size={12} className="text-indigo-400" /> : <Sun size={12} className="text-yellow-400" />}
-                  <span className="text-[10px] font-bold uppercase">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.04] text-gray-400">
+                  {nextMission.rateType === 'night' ? <Moon size={10} className="text-purple-400" /> : nextMission.rateType === 'mixed' ? <Clock size={10} className="text-indigo-400" /> : <Sun size={10} className="text-amber-400" />}
+                  <span className="text-[9px] font-semibold">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
                 </div>
                 {!hidePrices && (
-                  <div className="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-xs">
+                  <div className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/15 text-emerald-400 font-bold text-[10px]">
                     {formatPrice(nextMission.totalEarnings)}€
                   </div>
                 )}
               </div>
             </div>
 
-            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight transition-colors group-hover:text-primary-400 filter drop-shadow-sm">
+            <h3 className="text-base md:text-lg font-extrabold text-white mb-1.5 tracking-tight transition-colors group-hover:text-indigo-300 leading-tight">
               {nextMission.title}
             </h3>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               {nextMission.client && (
-                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/5 text-orange-200/90 text-xs font-bold">
-                  <Briefcase size={14} className="text-orange-400" />
+                <div className="flex items-center gap-1 text-orange-200/80 text-[10px] font-semibold">
+                  <Briefcase size={11} className="text-orange-400" />
                   <span>{nextMission.client}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
-                <Clock size={14} className="text-gray-500" />
+              <div className="flex items-center gap-1 text-gray-400 text-[10px] font-medium">
+                <Clock size={11} className="text-gray-500" />
                 <span>{formatTimeSlots(nextMission)}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
-                <MapPin size={14} className="text-gray-500" />
-                <span className="truncate max-w-[200px]">{nextMission.location}</span>
+              <div className="flex items-center gap-1 text-gray-400 text-[10px] font-medium">
+                <MapPin size={11} className="text-gray-500" />
+                <span className="truncate max-w-[150px]">{nextMission.location}</span>
               </div>
             </div>
           </div>
 
           {/* Action Row - Desktop */}
-          <div className="hidden md:flex flex-col gap-3 pl-6 border-l border-white/10">
+          <div className="hidden md:flex flex-col gap-2 pl-4 border-l border-white/[0.06]">
             <button
               onClick={(e) => { e.stopPropagation(); onValidate(nextMission); }}
-              className="group/btn relative px-6 py-3 rounded-2xl overflow-hidden font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+              className="group/btn relative px-4 py-2 rounded-xl overflow-hidden font-bold text-[10px] uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95"
             >
               <div className="absolute inset-0 bg-emerald-500" />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-              <div className="relative z-10 flex items-center justify-center gap-2 text-white">
-                <CheckCircle size={16} strokeWidth={3} />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+              <div className="relative z-10 flex items-center justify-center gap-1.5 text-white">
+                <CheckCircle size={14} strokeWidth={2.5} />
                 <span>Terminer</span>
               </div>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(nextMission); }}
-              className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-gray-300 font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+              className="px-4 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-gray-300 font-semibold text-[10px] uppercase tracking-wider hover:bg-white/[0.08] transition-all active:scale-95"
             >
               Modifier
             </button>
@@ -299,4 +296,3 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
 };
 
 export default NextMissionCard;
-

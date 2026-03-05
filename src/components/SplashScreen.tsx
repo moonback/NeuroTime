@@ -12,10 +12,10 @@ const FADE_OUT_DURATION = 400;
 const CIRCUIT_ANGLE_STEP = 18;
 const CIRCUIT_LENGTH = 38;
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ 
-  onFinish, 
-  minDisplayTime = 1800, 
-  ready = true 
+const SplashScreen: React.FC<SplashScreenProps> = ({
+  onFinish,
+  minDisplayTime = 1800,
+  ready = true
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -82,7 +82,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       const angle = (i * CIRCUIT_ANGLE_STEP) * Math.PI / 180;
       const x2 = 50 + Math.cos(angle) * CIRCUIT_LENGTH;
       const y2 = 50 + Math.sin(angle) * CIRCUIT_LENGTH;
-      
+
       const dots = Array.from({ length: DOTS_PER_LINE }, (_, j) => {
         const progress = (j + 1) / DOTS_PER_LINE;
         const dotX = 50 + Math.cos(angle) * CIRCUIT_LENGTH * progress;
@@ -99,7 +99,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[9999] bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] flex items-center justify-center overflow-hidden"
       role="status"
       aria-label="Chargement de l'application NeuroTime"
@@ -109,35 +109,35 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       }}
     >
       {/* Animated Background Gradients - Multi-layer */}
-      <div 
+      <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(0,140,255,0.15) 0%, rgba(0,140,255,0.05) 40%, transparent 70%)',
+          background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.05) 40%, transparent 70%)',
           animation: 'breathe 6s ease-in-out infinite'
         }}
       />
-      <div 
+      <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 60% 40% at 30% 70%, rgba(0,212,255,0.1) 0%, transparent 50%)',
+          background: 'radial-gradient(ellipse 60% 40% at 30% 70%, rgba(129,140,248,0.1) 0%, transparent 50%)',
           animation: 'breathe 8s ease-in-out infinite 2s'
         }}
       />
-      <div 
+      <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 50% 60% at 70% 30%, rgba(0,102,255,0.08) 0%, transparent 50%)',
+          background: 'radial-gradient(ellipse 50% 60% at 70% 30%, rgba(79,70,229,0.08) 0%, transparent 50%)',
           animation: 'breathe 7s ease-in-out infinite 1s'
         }}
       />
 
       {/* Animated Grid Pattern */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(0,140,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,140,255,0.1) 1px, transparent 1px)
+            linear-gradient(rgba(99,102,241,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99,102,241,0.1) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
           animation: 'gridMove 20s linear infinite'
@@ -145,11 +145,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       />
 
       {/* Circuit Board / Neural Network Background */}
-      <svg 
+      <svg
         className="absolute inset-0 w-full h-full"
         viewBox="0 0 100 100"
-        style={{ 
-          opacity: 0.6, 
+        style={{
+          opacity: 0.6,
           filter: 'blur(0.5px)',
           willChange: 'opacity'
         }}
@@ -158,24 +158,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       >
         <defs>
           <linearGradient id="circuitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#008CFF" stopOpacity="0.8" />
-            <stop offset="50%" stopColor="#76CCFF" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#008CFF" stopOpacity="0.7" />
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="#a5b4fc" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.7" />
           </linearGradient>
           <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00D4FF" stopOpacity="0.9" />
-            <stop offset="50%" stopColor="#008CFF" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#0066FF" stopOpacity="0.9" />
+            <stop offset="0%" stopColor="#818cf8" stopOpacity="0.9" />
+            <stop offset="50%" stopColor="#6366f1" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.9" />
           </linearGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
-        
+
         {/* Circuit lines radiating from center */}
         {circuitElements.map((circuit, i) => (
           <g key={i}>
@@ -200,7 +200,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
                 cx={dot.x}
                 cy={dot.y}
                 r="0.8"
-                fill="#00D4FF"
+                fill="#818cf8"
                 opacity="0"
                 className="circuit-dot"
                 filter="url(#glow)"
@@ -211,7 +211,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
             ))}
           </g>
         ))}
-        
+
         {/* Enhanced curved connecting paths */}
         <path
           d="M 25 25 Q 35 40, 50 50 T 75 25"
@@ -256,24 +256,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         {/* Logo with glow effect */}
         <div className="relative flex-shrink-0">
           {/* Glow behind logo */}
-          <div 
+          <div
             className="absolute inset-0 blur-3xl opacity-30"
             style={{
-              background: 'radial-gradient(circle, rgba(0,140,255,0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%)',
               animation: 'logoGlow 3s ease-in-out infinite',
               transform: 'scale(1.5)'
             }}
           />
-          <div 
+          <div
             className="relative z-10"
             style={{
               animation: 'scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
           >
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              className="h-28 sm:h-32 md:h-40 w-auto object-contain drop-shadow-[0_0_30px_rgba(0,140,255,0.5)]"
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-28 sm:h-32 md:h-40 w-auto object-contain drop-shadow-[0_0_30px_rgba(99,102,241,0.5)]"
               draggable={false}
             />
           </div>
@@ -282,27 +282,27 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
         {/* Text Content with stagger animation */}
         <div className="flex flex-col justify-center items-center text-center">
           {/* Tagline */}
-          <p 
+          <p
             className="text-white/90 text-sm sm:text-base md:text-lg lg:text-xl font-semibold leading-relaxed tracking-wide"
             style={{
               animation: 'slideUp 0.8s ease-out 0.5s backwards',
-              textShadow: '0 0 20px rgba(0,140,255,0.5), 0 2px 10px rgba(0,140,255,0.3)'
+              textShadow: '0 0 20px rgba(99,102,241,0.5), 0 2px 10px rgba(99,102,241,0.3)'
             }}
           >
             Gérez votre temps, maximisez vos gains.
           </p>
 
           {/* Enhanced accent line */}
-          <div 
-            className="mt-5 h-0.5 bg-gradient-to-r from-transparent via-[#008CFF] to-transparent rounded-full relative"
+          <div
+            className="mt-5 h-0.5 bg-gradient-to-r from-transparent via-[#6366f1] to-transparent rounded-full relative"
             style={{
               width: '240px',
               animation: 'expandWidth 1s ease-out 0.7s backwards',
-              boxShadow: '0 0 30px rgba(0,140,255,0.8), 0 0 60px rgba(0,212,255,0.4)'
+              boxShadow: '0 0 30px rgba(99,102,241,0.8), 0 0 60px rgba(129,140,248,0.4)'
             }}
           >
-            <div 
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00D4FF] to-transparent rounded-full"
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-[#818cf8] to-transparent rounded-full"
               style={{
                 animation: 'pulseGlow 2s ease-in-out infinite'
               }}
@@ -312,7 +312,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       </div>
 
       {/* Enhanced Loading Indicator */}
-      <div 
+      <div
         className="absolute bottom-8 sm:bottom-10 md:bottom-14 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-4"
         style={{
           animation: 'slideUp 0.8s ease-out 0.9s backwards'
@@ -320,15 +320,15 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       >
         {/* Progress bar with glassmorphism */}
         <div className="w-56 sm:w-64 md:w-72 h-2 bg-white/5 backdrop-blur-md rounded-full overflow-hidden border border-white/10 shadow-lg">
-          <div 
-            className="h-full bg-gradient-to-r from-[#008CFF] via-[#76CCFF] to-[#00D4FF] rounded-full transition-all duration-300 ease-out relative overflow-hidden"
+          <div
+            className="h-full bg-gradient-to-r from-[#6366f1] via-[#a5b4fc] to-[#818cf8] rounded-full transition-all duration-300 ease-out relative overflow-hidden"
             style={{
               width: `${Math.min(progress, 100)}%`,
-              boxShadow: '0 0 30px rgba(0,140,255,0.9), inset 0 0 20px rgba(255,255,255,0.2)'
+              boxShadow: '0 0 30px rgba(99,102,241,0.9), inset 0 0 20px rgba(255,255,255,0.2)'
             }}
           >
             {/* Shimmer effect */}
-            <div 
+            <div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               style={{
                 animation: 'shimmer 2s ease-in-out infinite',
@@ -345,13 +345,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
           </p>
           <div className="flex gap-2" role="progressbar" aria-label="Chargement">
             {[0, 0.2, 0.4].map((delay, index) => (
-              <div 
+              <div
                 key={index}
-                className="w-2 h-2 bg-[#00D4FF] rounded-full"
+                className="w-2 h-2 bg-[#818cf8] rounded-full"
                 style={{
                   animation: 'dotBounce 1.4s ease-in-out infinite',
                   animationDelay: `${delay}s`,
-                  boxShadow: '0 0 15px rgba(0,212,255,1), 0 0 30px rgba(0,140,255,0.6)'
+                  boxShadow: '0 0 15px rgba(129,140,248,1), 0 0 30px rgba(99,102,241,0.6)'
                 }}
               />
             ))}

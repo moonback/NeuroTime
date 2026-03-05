@@ -9,11 +9,11 @@ interface AuthModalProps {
   initialMode?: 'login' | 'signup';
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ 
-  isOpen, 
-  onClose, 
+const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  onClose,
   onSuccess,
-  initialMode = 'login' 
+  initialMode = 'login'
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
@@ -70,43 +70,42 @@ const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-md overflow-hidden flex flex-col animate-scale-in">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-2xl w-full max-w-sm overflow-hidden flex flex-col animate-scale-in border border-white/[0.08]">
+
         {/* Header */}
-        <div className="flex justify-between items-center p-4 md:p-6 border-b border-primary-500/15 glass-light relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+        <div className="flex justify-between items-center p-4 border-b border-white/[0.06] bg-white/[0.03] relative overflow-hidden">
           <div className="relative z-10">
-            <h2 className="text-lg md:text-xl font-bold text-gray-50">
+            <h2 className="text-base font-bold text-gray-50">
               {mode === 'login' ? 'Connexion' : 'Inscription'}
             </h2>
-            <p className="text-[10px] md:text-xs mt-0.5 text-gray-400">
-              {mode === 'login' 
-                ? 'Connectez-vous pour accéder à vos missions' 
+            <p className="text-[10px] mt-0.5 text-gray-400">
+              {mode === 'login'
+                ? 'Connectez-vous à votre espace'
                 : 'Créez un compte pour commencer'}
             </p>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-1.5 md:p-2 hover:bg-dark-200/50 rounded-full transition-all text-gray-400 hover:text-gray-200 hover:scale-110 relative z-10"
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-white/[0.06] rounded-lg transition-all text-gray-400 hover:text-gray-200 relative z-10"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 space-y-3">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/15 border border-red-500/25 rounded-lg p-3 flex items-center gap-2 text-red-300 text-sm backdrop-blur-sm">
-              <AlertCircle size={16} />
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 flex items-center gap-2 text-red-300 text-[11px]">
+              <AlertCircle size={14} />
               <span>{error}</span>
             </div>
           )}
 
           {/* Email Field */}
-          <div className="space-y-1.5">
-            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
-              <Mail size={12} className="text-gray-400" /> Email
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+              <Mail size={10} className="text-gray-400" /> Email
             </label>
             <input
               type="email"
@@ -114,14 +113,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
             />
           </div>
 
           {/* Password Field */}
-          <div className="space-y-1.5">
-            <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
-              <Lock size={12} className="text-gray-400" /> Mot de passe
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+              <Lock size={10} className="text-gray-400" /> Mot de passe
             </label>
             <input
               type="password"
@@ -129,15 +128,15 @@ const AuthModal: React.FC<AuthModalProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'login' ? '••••••••' : 'Au moins 6 caractères'}
-              className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+              className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
             />
           </div>
 
           {/* Confirm Password (Signup only) */}
           {mode === 'signup' && (
-            <div className="space-y-1.5">
-              <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1.5">
-                <Lock size={12} className="text-gray-400" /> Confirmer le mot de passe
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+                <Lock size={10} className="text-gray-400" /> Confirmer
               </label>
               <input
                 type="password"
@@ -145,7 +144,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 md:px-4 py-2 md:py-2.5 glass-light border-primary-500/15 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
               />
             </div>
           )}
@@ -155,46 +154,29 @@ const AuthModal: React.FC<AuthModalProps> = ({
             type="submit"
             disabled={loading}
             aria-busy={loading}
-            className={`w-full font-semibold py-2.5 md:py-3 px-4 rounded-lg md:rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base shadow-md hover:shadow-lg
+            className={`w-full font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs shadow-md
               ${loading
-                ? 'bg-gray-500/80 cursor-not-allowed text-gray-200'
-                : 'bg-primary-500 hover:bg-primary-600 text-white'}
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2`}
+                ? 'bg-gray-500/60 cursor-not-allowed text-gray-300'
+                : 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_2px_12px_rgba(99,102,241,0.25)]'}
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 active:scale-[0.98]`}
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4 text-primary-200" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"/>
+                <svg className="animate-spin h-3.5 w-3.5 text-indigo-200" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z" />
                 </svg>
-                <span>
-                  {mode === 'login' ? 'Connexion...' : 'Inscription...'}
-                </span>
+                <span>{mode === 'login' ? 'Connexion...' : 'Inscription...'}</span>
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 {mode === 'login'
-                  ? <LogIn size={18} className="text-white" aria-hidden="true" />
-                  : <UserPlus size={18} className="text-white" aria-hidden="true" />}
-                <span>
-                  {mode === 'login' ? 'Se connecter' : 'S\'inscrire'}
-                </span>
+                  ? <LogIn size={15} className="text-white" aria-hidden="true" />
+                  : <UserPlus size={15} className="text-white" aria-hidden="true" />}
+                <span>{mode === 'login' ? 'Se connecter' : 'S\'inscrire'}</span>
               </span>
             )}
           </button>
-
-          {/* Switch Mode */}
-          {/* <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={switchMode}
-              className="text-xs md:text-sm text-gray-400 hover:text-primary-300 transition-colors font-medium"
-            >
-              {mode === 'login' 
-                ? 'Pas encore de compte ? S\'inscrire' 
-                : 'Déjà un compte ? Se connecter'}
-            </button>
-          </div> */}
         </form>
       </div>
     </div>
@@ -202,4 +184,3 @@ const AuthModal: React.FC<AuthModalProps> = ({
 };
 
 export default AuthModal;
-

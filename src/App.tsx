@@ -73,7 +73,7 @@ const App: React.FC = () => {
   const handleCompleteMission = useCallback(async (mission: Mission) => {
     const ok = await confirm({
       title: 'Marquer la mission comme terminée ?',
-      description: `“${mission.title}” passera en statut terminé.`,
+      description: `"${mission.title}" passera en statut terminé.`,
       confirmText: 'Terminer',
       cancelText: 'Annuler',
     });
@@ -104,7 +104,7 @@ const App: React.FC = () => {
 
   const handleImportData = useCallback(async (importedMissions: Mission[]) => {
     const ok = await confirm({
-      title: 'Remplacer vos données par l’import ?',
+      title: 'Remplacer vos données par l\'import ?',
       description: `Vos ${missions.length} missions actuelles seront remplacées par ${importedMissions.length} missions importées.`,
       confirmText: 'Importer',
       cancelText: 'Annuler',
@@ -154,8 +154,8 @@ const App: React.FC = () => {
   // Not logged in
   if (!user) {
     return (
-      <div className="min-h-screen neo-aurora flex items-center justify-center relative overflow-hidden">
-        <Toaster position="top-center" theme="dark" />
+      <div className="min-h-screen min-h-[100dvh] neo-aurora flex items-center justify-center relative overflow-hidden">
+        <Toaster position="top-center" theme="dark" richColors />
         <div className="aurora-layer">
           <div className="aurora-blob primary" style={{ top: '-10%', left: '-10%' }} />
           <div className="aurora-blob pink" style={{ top: '20%', right: '-10%' }} />
@@ -163,8 +163,8 @@ const App: React.FC = () => {
         </div>
 
         <AuthModal
-          isOpen={true} // Always open if not user
-          onClose={() => { }} // Can't close
+          isOpen={true}
+          onClose={() => { }}
           onSuccess={handleAuthSuccess}
           initialMode="login"
         />
@@ -175,163 +175,163 @@ const App: React.FC = () => {
   const currentView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
 
   return (
-    <div className="min-h-screen neo-aurora text-gray-100 font-sans selection:bg-primary-500 selection:text-dark-300 antialiased relative z-10 overflow-y-auto">
+    <div className="min-h-screen min-h-[100dvh] neo-aurora text-gray-100 font-sans antialiased relative z-10 overflow-y-auto">
       {/* Notifications */}
-      <Toaster position="top-right" theme="dark" />
+      <Toaster position="top-right" theme="dark" richColors />
 
       {/* Decorative Aurora Layer */}
       <div className="aurora-layer pointer-events-none select-none">
-        <div className="aurora-blob primary" style={{ top: '-120px', left: '-60px' }} />
-        <div className="aurora-blob pink" style={{ top: '-80px', right: '-100px' }} />
-        <div className="aurora-blob teal small" style={{ bottom: '-120px', left: '20%' }} />
+        <div className="aurora-blob primary" style={{ top: '-100px', left: '-40px' }} />
+        <div className="aurora-blob pink" style={{ top: '-60px', right: '-80px' }} />
+        <div className="aurora-blob teal small" style={{ bottom: '-80px', left: '25%' }} />
       </div>
 
       {/* Desktop Sidebar Opener */}
       {!sidebarPinned && (
         <div
-          className="hidden md:block fixed inset-y-0 left-0 z-20 w-4 h-full group"
+          className="hidden md:block fixed inset-y-0 left-0 z-20 w-3 h-full"
           onMouseEnter={() => setIsSidebarOpen(true)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — COMPACT */}
       <aside
-        className={`hidden md:flex flex-col w-64 border-r border-white/5 fixed inset-y-0 z-20 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] bg-[#0a0f18]/95 backdrop-blur-xl ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`hidden md:flex flex-col w-56 border-r border-white/[0.04] fixed inset-y-0 z-20 transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] bg-[#080b14]/95 backdrop-blur-2xl ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
-        <div className="p-6 flex flex-col gap-5">
+        <div className="p-4 pb-3 flex flex-col gap-3">
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
-              <img src="/logo.png" alt="Logo NeuroTime" className="h-8 w-auto object-contain object-left mb-1.5" />
-              <span className="text-[9px] text-primary-400 font-black uppercase tracking-[0.2em] leading-none">
+              <img src="/logo.png" alt="Logo NeuroTime" className="h-7 w-auto object-contain object-left mb-1" />
+              <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-[0.2em] leading-none opacity-70">
                 Freelance Platform
               </span>
             </div>
             <button
               type="button"
               onClick={toggleSidebarPinned}
-              className={`p-1.5 rounded-lg transition-all ${sidebarPinned ? 'text-primary-400 bg-primary-500/10' : 'text-gray-600 hover:text-white'}`}
+              className={`p-1.5 rounded-lg transition-all ${sidebarPinned ? 'text-indigo-400 bg-indigo-500/10' : 'text-gray-600 hover:text-white'}`}
             >
-              {sidebarPinned ? <PinOff size={14} /> : <Pin size={14} />}
+              {sidebarPinned ? <PinOff size={13} /> : <Pin size={13} />}
             </button>
           </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
-          <div className="px-3 mb-2">
-            <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Navigation</span>
+        <nav className="flex-1 px-2.5 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
+          <div className="px-2 mb-1.5">
+            <span className="text-[8px] text-gray-600 font-bold uppercase tracking-[0.12em]">Navigation</span>
           </div>
           <NavButton
             active={location.pathname === '/'}
             onClick={() => { navigate('/'); setIsSidebarOpen(false) }}
-            icon={<LayoutDashboard size={16} />}
+            icon={<LayoutDashboard size={15} />}
             label="Tableau de bord"
           />
           <NavButton
             active={location.pathname === '/missions'}
             onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }}
-            icon={<ListChecks size={16} />}
+            icon={<ListChecks size={15} />}
             label="Missions"
           />
           <NavButton
             active={location.pathname === '/payments'}
             onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }}
-            icon={<Euro size={16} />}
+            icon={<Euro size={15} />}
             label="Paiements"
           />
           <NavButton
             active={location.pathname === '/stats'}
             onClick={() => { navigate('/stats'); setIsSidebarOpen(false) }}
-            icon={<BarChart3 size={16} />}
+            icon={<BarChart3 size={15} />}
             label="Analyses"
           />
           <NavButton
             active={location.pathname === '/urssaf'}
             onClick={() => { navigate('/urssaf'); setIsSidebarOpen(false) }}
-            icon={<Calculator size={16} />}
+            icon={<Calculator size={15} />}
             label="URSSAF"
           />
         </nav>
 
-        <div className="p-3 space-y-3">
+        <div className="p-2.5 space-y-2.5">
           <button
             onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
-            className="w-full bg-white text-black font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 transition-all shadow-[0_4px_12px_rgba(255,255,255,0.1)] active:scale-95"
+            className="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-[0_2px_12px_rgba(99,102,241,0.25)]"
           >
-            <Plus size={16} strokeWidth={3} />
-            <span className="text-[10px] uppercase tracking-wider font-extrabold">Nouvelle mission</span>
+            <Plus size={15} strokeWidth={2.5} />
+            <span className="text-[10px] uppercase tracking-wider font-bold">Nouvelle mission</span>
           </button>
 
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
-            <div className="flex items-center gap-2.5">
+          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-2.5">
+            <div className="flex items-center gap-2">
               <div className="relative">
-                <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-[10px] font-black text-white">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center text-[10px] font-bold text-white">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#0a0f18] rounded-full flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#080b14] rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 </div>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[10px] font-black text-white truncate leading-none mb-1">{user.email?.split('@')[0]}</span>
-                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter">Session Active</span>
+                <span className="text-[10px] font-bold text-white truncate leading-none mb-0.5">{user.email?.split('@')[0]}</span>
+                <span className="text-[7px] text-gray-500 font-semibold uppercase tracking-wider">En ligne</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+            <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={toggleHidePrices}
-                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-lg border transition-all ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-white/5 border-white/5 text-gray-500 hover:text-white'}`}
+                className={`flex flex-col items-center justify-center gap-0.5 p-1.5 rounded-lg border transition-all text-[7px] font-bold uppercase ${hidePrices ? 'bg-orange-500/10 border-orange-500/15 text-orange-400' : 'bg-white/[0.03] border-white/[0.04] text-gray-500 hover:text-white'}`}
               >
-                {hidePrices ? <EyeOff size={12} /> : <Eye size={12} />}
-                <span className="text-[7px] font-black uppercase">Tarifs</span>
+                {hidePrices ? <EyeOff size={11} /> : <Eye size={11} />}
+                <span>Tarifs</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-lg bg-white/5 border border-white/5 text-gray-500 hover:text-red-400 transition-all"
+                className="flex flex-col items-center justify-center gap-0.5 p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.04] text-gray-500 hover:text-red-400 transition-all text-[7px] font-bold uppercase"
               >
-                <LogOut size={12} />
-                <span className="text-[7px] font-black uppercase">Quitter</span>
+                <LogOut size={11} />
+                <span>Quitter</span>
               </button>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Mobile Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 glass-strong border-b border-gray-700/30 z-30 pb-safe backdrop-blur-xl">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo NeuroTime" className="h-8 object-contain" />
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-400 font-medium">
-                {format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}
+      {/* Mobile Header — COMPACT */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-30 pb-safe">
+        <div className="bg-[#080b14]/90 backdrop-blur-xl border-b border-white/[0.04]">
+          <div className="flex items-center justify-between px-3.5 py-2.5">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="Logo NeuroTime" className="h-6 object-contain" />
+              <span className="text-[10px] text-gray-500 font-medium">
+                {format(new Date(), 'dd MMM yyyy', { locale: fr })}
               </span>
             </div>
+            <button
+              onClick={toggleHidePrices}
+              className={`flex items-center justify-center p-2 rounded-lg transition-all ${hidePrices ? 'text-orange-400 bg-orange-500/15' : 'text-gray-400 bg-white/[0.04]'}`}
+              aria-pressed={hidePrices}
+            >
+              {hidePrices ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
           </div>
-          <button
-            onClick={toggleHidePrices}
-            className={`flex items-center justify-center p-2.5 rounded-lg transition-all ${hidePrices ? 'text-orange-400 bg-orange-500/20' : 'text-gray-300 bg-gray-700/30'}`}
-            aria-pressed={hidePrices}
-          >
-            {hidePrices ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className={`min-h-screen pb-20 md:pb-0 bg-transparent overflow-y-auto relative pt-16 md:pt-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-fade-in relative">
+      <main className={`min-h-screen min-h-[100dvh] pb-16 md:pb-0 bg-transparent overflow-y-auto relative pt-[52px] md:pt-0 transition-all duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'md:ml-56' : 'md:ml-0'}`}>
+        <div className="p-3 md:p-5 lg:p-6 max-w-12xl mx-auto animate-fade-in relative">
           {/* Sidebar Toggle Button (Desktop) */}
-          <div className="hidden md:block absolute top-4 left-4 z-10 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="hidden md:block absolute top-3 left-3 z-10 opacity-40 hover:opacity-100 transition-opacity">
             {!sidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 glass-button rounded-lg text-gray-400 hover:text-white"
+                className="p-1.5 glass-button rounded-lg text-gray-400 hover:text-white"
                 aria-label="Ouvrir la navigation"
               >
-                <Menu size={24} />
+                <Menu size={20} />
               </button>
             )}
           </div>
@@ -383,56 +383,50 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation — COMPACT & PRO */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe" aria-label="Navigation mobile">
-        {/* Background - Ultra premium glassmorphism */}
-        <div className="absolute inset-0 bg-dark-200/90 backdrop-blur-2xl border-t border-white/5 shadow-[0_-8px_32px_-4px_rgba(0,0,0,0.6)]" />
+        {/* Background */}
+        <div className="absolute inset-0 bg-[#080b14]/95 backdrop-blur-2xl border-t border-white/[0.05]" />
 
-        {/* Laser Glow Line - Animated */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary-500/60 to-transparent opacity-80 shadow-[0_0_12px_rgba(0,140,255,0.8)]" />
+        {/* Subtle top glow line */}
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
 
-        <div className="relative flex justify-around items-end px-1 pb-2 pt-3">
+        <div className="relative flex justify-around items-center px-1 py-1.5">
           <MobileNavButton
             active={location.pathname === '/'}
             onClick={() => navigate('/')}
-            icon={<LayoutDashboard size={20} className={location.pathname === '/' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
-            label="ACCUEIL"
+            icon={<LayoutDashboard size={19} />}
+            label="Accueil"
           />
           <MobileNavButton
             active={location.pathname === '/missions'}
             onClick={() => navigate('/missions')}
-            icon={<ListChecks size={20} className={location.pathname === '/missions' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
-            label="MISSIONS"
+            icon={<ListChecks size={19} />}
+            label="Missions"
           />
 
-          {/* Advanced Hybrid FAB */}
-          <div className="relative -top-6 flex items-center justify-center pointer-events-none group">
-            <div className="pointer-events-auto relative">
-              {/* External Glow Ring - Ripple effect */}
-              <div className="absolute inset-[-4px] bg-primary-500/20 rounded-full animate-ping opacity-20 duration-[3000ms]" />
-              <div className="absolute inset-[-1px] rounded-full bg-gradient-to-br from-primary-400 to-primary-600 opacity-60 blur-sm" />
-
-              <button
-                onClick={() => openNewMissionModal()}
-                className="relative bg-gradient-to-br from-primary-450 to-primary-600 active:from-primary-500 active:to-primary-700 text-white p-3.5 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_16px_rgba(0,120,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-dark-200"
-                aria-label="Ajouter une mission"
-              >
-                <Plus size={24} strokeWidth={3} className="drop-shadow-lg" />
-              </button>
-            </div>
+          {/* Central FAB — Refined */}
+          <div className="relative -top-3 flex items-center justify-center">
+            <button
+              onClick={() => openNewMissionModal()}
+              className="relative bg-indigo-500 active:bg-indigo-600 text-white p-3 rounded-2xl shadow-[0_4px_16px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)] active:scale-95 transition-all duration-200 ring-[3px] ring-[#080b14]"
+              aria-label="Ajouter une mission"
+            >
+              <Plus size={22} strokeWidth={2.5} />
+            </button>
           </div>
 
           <MobileNavButton
             active={location.pathname === '/payments'}
             onClick={() => navigate('/payments')}
-            icon={<Euro size={20} className={location.pathname === '/payments' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
-            label="PAIEMENTS"
+            icon={<Euro size={19} />}
+            label="Paiements"
           />
           <MobileNavButton
             active={location.pathname === '/stats'}
             onClick={() => navigate('/stats')}
-            icon={<BarChart3 size={20} className={location.pathname === '/stats' ? "stroke-[2.5px] drop-shadow-md" : "stroke-2"} />}
-            label="STATS"
+            icon={<BarChart3 size={19} />}
+            label="Stats"
           />
         </div>
       </nav>
@@ -453,60 +447,62 @@ const App: React.FC = () => {
       {/* PWA Prompt */}
       <PWAInstallPrompt />
 
-      {/* Modale de confirmation / autres overlays */}
+      {/* Modale de confirmation */}
       {confirmDialog}
 
-      {/* Snackbar de sauvegarde */}
+      {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-gray-400">
-          <div className="w-3 h-3 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden />
-          <span>Sauvegarde...</span>
+        <div className="fixed bottom-20 md:bottom-4 right-3 z-40 glass-card px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+          <div className="w-2.5 h-2.5 border-[1.5px] border-indigo-400 border-t-transparent rounded-full animate-spin" aria-hidden />
+          <span>Sauvegarde…</span>
         </div>
       )}
     </div>
   );
 };
 
+/* ============================================
+   NAV BUTTONS - Compact & Modern
+   ============================================ */
+
 const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
   <button
     onClick={onClick}
-    className={`w-full group flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 relative ${active
-      ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20 shadow-[0_0_20px_-5px_rgba(14,165,233,0.3)]'
-      : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.03]'
+    className={`w-full group flex items-center gap-2.5 px-2.5 py-[7px] rounded-xl transition-all duration-150 relative ${active
+      ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/15'
+      : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.03] border border-transparent'
       }`}
   >
-    <span className={`transition-all duration-200 ${active ? 'scale-110' : 'group-hover:translate-x-0.5'}`}>
+    <span className={`transition-transform duration-150 ${active ? 'scale-105' : ''}`}>
       {icon}
     </span>
-    <span className={`text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-200 ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
+    <span className={`text-[10px] font-semibold tracking-wide transition-all ${active ? 'opacity-100 font-bold' : 'opacity-70'}`}>{label}</span>
   </button>
 );
 
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-300 min-w-[64px] relative group ${active
-      ? 'text-white'
-      : 'text-gray-500 active:text-primary-400'
+    className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-w-[52px] relative ${active
+      ? 'text-indigo-400'
+      : 'text-gray-500 active:text-indigo-400'
       }`}
   >
+    {/* Active indicator dot */}
     {active && (
-      <div className="absolute inset-0 bg-white/10 rounded-2xl blur-sm animate-pulse" />
+      <div className="absolute -top-0.5 w-1 h-1 rounded-full bg-indigo-400" />
     )}
 
-    {/* Icône */}
-    <span className={`relative z-10 transition-all duration-300 transform ${active
-      ? '-translate-y-1 text-primary-400'
-      : 'translate-y-0 group-active:scale-90'
-      }`}>
+    {/* Icon */}
+    <span className={`relative z-10 transition-all duration-150 ${active ? '' : ''}`}>
       {icon}
     </span>
 
-    {/* Label */}
+    {/* Label - always visible for clarity */}
     {label && (
-      <span className={`relative z-10 text-[9px] font-black tracking-[0.15em] transition-all duration-300 uppercase mt-1 ${active
-        ? 'opacity-100 transform translate-y-0 text-white'
-        : 'opacity-0 transform translate-y-2 h-0 overflow-hidden'
+      <span className={`relative z-10 text-[8px] font-semibold tracking-wider mt-0.5 ${active
+        ? 'text-indigo-400'
+        : 'text-gray-600'
         }`}>
         {label}
       </span>

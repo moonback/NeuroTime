@@ -385,97 +385,96 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   };
 
   return (
-    <div className="space-y-5 md:space-y-6 pb-24 md:pb-8 animate-fade-in">
+    <div className="space-y-3 md:space-y-4 pb-20 md:pb-6 animate-fade-in">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-5 justify-between items-start md:items-center mb-6">
+      <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center mb-3">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Mes Missions</h1>
-          <p className="text-gray-300 text-sm md:text-base font-medium">Historique complet de vos interventions</p>
+          <h1 className="text-lg md:text-xl font-extrabold text-gray-50 tracking-tight">Mes Missions</h1>
+          <p className="text-gray-500 text-[10px] font-medium">Historique complet</p>
         </div>
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button
             onClick={() => setShowPdfModal(true)}
-            className="w-full md:w-auto glass-button hover:bg-red-500/10 text-red-400 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base border border-red-500/20 shadow-sm"
+            className="flex-1 md:flex-none glass-button hover:bg-red-500/10 text-red-400 font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] border border-red-500/15"
           >
-            <FileText size={18} strokeWidth={2.5} />
-            <span className="tracking-wide">Exporter PDF</span>
+            <FileText size={13} strokeWidth={2.5} />
+            <span>PDF</span>
           </button>
           <button
             onClick={() => exportMissionsToCSV(filteredMissions)}
-            className="w-full md:w-auto glass-button hover:bg-primary-500/10 text-primary-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base border border-primary-500/20 shadow-sm"
+            className="flex-1 md:flex-none glass-button hover:bg-indigo-500/10 text-indigo-300 font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] border border-indigo-500/15"
           >
-            <Download size={18} strokeWidth={2.5} />
-            <span className="tracking-wide">Exporter CSV</span>
+            <Download size={13} strokeWidth={2.5} />
+            <span>CSV</span>
           </button>
           <button
             onClick={onNew}
-            className="w-full md:w-auto bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base shadow-md hover:shadow-lg"
+            className="flex-1 md:flex-none bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] shadow-[0_2px_10px_rgba(99,102,241,0.25)]"
           >
-            <Plus size={18} strokeWidth={2.5} />
-            <span className="tracking-wide">Nouvelle Mission</span>
+            <Plus size={13} strokeWidth={2.5} />
+            <span>Nouvelle</span>
           </button>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div className="glass-card rounded-2xl p-4 md:p-5 flex flex-col gap-4 shadow-md">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} strokeWidth={2} />
+      <div className="glass-card rounded-xl p-3 flex flex-col gap-2.5">
+        <div className="flex flex-col md:flex-row gap-2.5 items-center justify-between">
+          <div className="relative w-full md:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} strokeWidth={2} />
             <input
               type="text"
-              placeholder="Rechercher une mission..."
+              placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 glass-light border-primary-500/15 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/40 outline-none transition-all text-sm text-gray-100 placeholder-gray-400 font-medium"
+              className="w-full pl-8 pr-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/30 outline-none transition-all text-[11px] text-gray-100 placeholder-gray-500 font-medium"
             />
           </div>
 
-          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-            {/* Client Filter */}
+          <div className="flex gap-2 w-full md:w-auto">
             {uniqueClients.length > 0 && (
               <div className="relative w-full md:w-auto">
                 <select
                   value={clientFilter}
                   onChange={(e) => setClientFilter(e.target.value)}
-                  className="w-full md:w-auto appearance-none pl-4 pr-10 py-2.5 glass-light border-primary-500/15 rounded-xl text-sm font-medium text-gray-200 focus:ring-2 focus:ring-primary-500/30 focus:outline-none cursor-pointer hover:bg-white/5 transition-colors"
+                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[10px] font-medium text-gray-300 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none cursor-pointer"
                 >
-                  <option value="all" className="bg-dark-200 text-gray-200">Tous les clients</option>
+                  <option value="all" className="bg-dark-200 text-gray-200">Tous clients</option>
                   {uniqueClients.map(client => (
                     <option key={client} value={client} className="bg-dark-200 text-gray-200">{client}</option>
                   ))}
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <Briefcase size={14} />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <Briefcase size={10} />
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between pt-2 md:pt-0">
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
+        <div className="flex flex-col md:flex-row gap-2 items-center justify-between">
+          <div className="flex items-center gap-1 w-full md:w-auto overflow-x-auto custom-scrollbar">
             {(['all', 'planned', 'completed', 'cancelled'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${statusFilter === s
-                  ? 'bg-primary-500 text-white shadow-md'
-                  : 'glass-button text-gray-400 hover:text-primary-300 hover:shadow-sm'
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all ${statusFilter === s
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-white/[0.04] text-gray-400 hover:text-indigo-300'
                   }`}
               >
                 {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
+          <div className="flex items-center gap-1 w-full md:w-auto overflow-x-auto custom-scrollbar">
             {(['all', 'paid', 'unpaid'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPaidFilter(p)}
-                className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all tracking-wide ${paidFilter === p
-                  ? 'bg-emerald-500 text-dark-300 shadow-md'
-                  : 'glass-button text-gray-400 hover:text-emerald-200 hover:shadow-sm'
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all ${paidFilter === p
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white/[0.04] text-gray-400 hover:text-emerald-300'
                   }`}
               >
                 {p === 'all' ? 'Tous' : p === 'paid' ? 'Payé' : 'Non payé'}
@@ -485,49 +484,38 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
         </div>
       </div>
 
-      {/* Stats Summary for Selection */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-3 text-xs md:text-sm text-gray-300 glass-light p-3 md:p-4 rounded-xl border border-primary-500/12">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="p-1.5 rounded-lg bg-primary-500/15 border border-primary-500/25">
-            <Filter size={14} className="text-primary-300" strokeWidth={2.5} />
-          </div>
-          <span className="font-medium"><b className="text-gray-50 font-bold">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
-          <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-          <span className="flex items-center gap-1.5 font-medium">
-            Total : <b className="text-primary-300 font-bold">{formatPrice(totalFilteredEarnings)} €</b>
-          </span>
+      {/* Stats Summary */}
+      <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-300 bg-white/[0.02] border border-white/[0.05] p-2 rounded-lg">
+        <div className="flex items-center gap-1.5">
+          <Filter size={11} className="text-indigo-400" strokeWidth={2.5} />
+          <span className="font-medium"><b className="text-gray-100 font-bold">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
+          <span className="text-gray-600">·</span>
+          <span className="font-medium">Total: <b className="text-indigo-300 font-bold">{formatPrice(totalFilteredEarnings)} €</b></span>
         </div>
         {statusFilter === 'completed' && (
-          <>
-            <span className="w-1.5 h-1.5 bg-gray-500 rounded-full hidden md:block"></span>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="flex items-center gap-1.5 font-medium">
-                <CheckCircle2 size={14} className="text-emerald-400" strokeWidth={2.5} />
-                Payées : <b className="text-emerald-300 font-bold">
-                  {filteredMissions.filter(m => m.isPaid).length}
-                </b>
-              </span>
-              <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <Circle size={14} className="text-gray-400" strokeWidth={2.5} />
-                Non payées : <b className="text-gray-300 font-bold">
-                  {filteredMissions.filter(m => !m.isPaid).length}
-                </b>
-              </span>
-            </div>
-          </>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">·</span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 size={10} className="text-emerald-400" strokeWidth={2.5} />
+              <b className="text-emerald-300">{filteredMissions.filter(m => m.isPaid).length}</b> payées
+            </span>
+            <span className="flex items-center gap-1">
+              <Circle size={10} className="text-gray-400" strokeWidth={2.5} />
+              <b className="text-gray-300">{filteredMissions.filter(m => !m.isPaid).length}</b> en attente
+            </span>
+          </div>
         )}
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-6">
+      <div className="md:hidden space-y-4">
         {filteredMissions.length === 0 ? (
-          <div className="glass-card rounded-2xl p-8 text-center">
-            <div className="mx-auto w-16 h-16 bg-dark-100/80 rounded-2xl flex items-center justify-center mb-4 border border-primary-500/20 shadow-md">
-              <Search size={24} className="text-gray-400" strokeWidth={2} />
+          <div className="glass-card rounded-xl p-6 text-center">
+            <div className="mx-auto w-10 h-10 bg-white/[0.04] rounded-lg flex items-center justify-center mb-2.5 border border-white/[0.06]">
+              <Search size={18} className="text-gray-400" strokeWidth={2} />
             </div>
-            <p className="text-lg font-bold text-gray-200 mb-2">Aucune mission trouvée</p>
-            <p className="text-xs text-gray-400 font-medium">Modifiez vos filtres ou créez une nouvelle mission</p>
+            <p className="text-sm font-bold text-gray-200 mb-1">Aucune mission</p>
+            <p className="text-[10px] text-gray-500">Modifiez vos filtres ou créez une mission</p>
           </div>
         ) : (
           sortedGroupKeys.map(monthKey => {
@@ -536,14 +524,14 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
             const monthDate = new Date(parseInt(year), parseInt(month) - 1);
 
             return (
-              <div key={monthKey} className="space-y-3">
-                <div className="sticky top-0 z-10 glass-strong backdrop-blur-md py-2 px-3 -mx-2 mb-2 border-b border-primary-500/20 flex items-center gap-2">
-                  <CalendarDays size={16} className="text-primary-400" />
-                  <h3 className="text-sm font-bold text-gray-100 capitalize">
+              <div key={monthKey} className="space-y-2">
+                <div className="sticky top-[52px] z-10 bg-[#080b14]/95 backdrop-blur-xl py-1.5 px-2 -mx-1 border-b border-indigo-500/15 flex items-center gap-1.5">
+                  <CalendarDays size={12} className="text-indigo-400" />
+                  <h3 className="text-[11px] font-bold text-gray-200 capitalize">
                     {format(monthDate, 'MMMM yyyy', { locale: fr })}
                   </h3>
-                  <span className="text-xs text-gray-500 font-medium ml-auto">
-                    {missionsInMonth.length} missions
+                  <span className="text-[9px] text-gray-500 font-medium ml-auto">
+                    {missionsInMonth.length}
                   </span>
                 </div>
 

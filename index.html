@@ -7,14 +7,13 @@
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Application de gestion personnelle pour freelances - Suivi de missions et statistiques" />
-    <meta name="theme-color" content="#008CFF" />
+    <meta name="theme-color" content="#6366f1" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="NeuroTime" />
     
     <!-- Splash Screen Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
     
     <!-- Icons -->
@@ -23,22 +22,26 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     
+    <!-- Preconnect for fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
     <!-- Splash Screen CSS (for native PWA splash) -->
     <style>
-      /* Prevent flash of unstyled content before React loads */
       body {
-        background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155);
+        background: #080b14;
         margin: 0;
         overflow-x: hidden;
         overflow-y: auto;
       }
       #root {
         min-height: 100vh;
+        min-height: 100dvh;
       }
     </style>
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts - Inter variable with all weights -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..900&display=swap" rel="stylesheet" />
   <script type="importmap">
 {
   "imports": {

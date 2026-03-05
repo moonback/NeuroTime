@@ -59,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   } = useDashboardExports(missions, allCompletedMissions);
 
   return (
-    <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
+    <div className="space-y-4 md:space-y-5 pb-20 md:pb-6 animate-fade-in">
       {/* Header amélioré */}
       <DashboardHeader
         selectedMonth={selectedMonth}
