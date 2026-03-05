@@ -8,8 +8,8 @@ import { Mission } from '../../types';
 interface DashboardKPIsProps {
   selectedMonthDate: Date;
   totalEarnings: number;
-  totalEarningsCompleted: number;
-  totalEarningsPlanned: number;
+  totalEarningsCollected: number;
+  totalEarningsExpected: number;
   totalHours: number;
   completedMissionsCount: number;
   upcomingMissionsCount: number;
@@ -26,8 +26,8 @@ interface DashboardKPIsProps {
 const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   selectedMonthDate,
   totalEarnings,
-  totalEarningsCompleted,
-  totalEarningsPlanned,
+  totalEarningsCollected,
+  totalEarningsExpected,
   totalHours,
   completedMissionsCount,
   upcomingMissionsCount,
@@ -57,7 +57,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
             icon={<Euro className="w-5 h-5 text-emerald-400" />}
             label="Chiffre d'Affaires"
             value={formatPriceWithSymbol(totalEarnings)}
-            subtext={hidePrices ? '***' : `Réalisé: ${formatPrice(totalEarningsCompleted)}€ • Prévu: ${formatPrice(totalEarningsPlanned)}€`}
+            subtext={hidePrices ? '***' : `Encaissé: ${formatPrice(totalEarningsCollected)}€ • Prévisionnel: ${formatPrice(totalEarningsExpected)}€`}
             color="bg-emerald-500/5 border-emerald-500/20"
             textColor="text-emerald-400"
             trend={monthlyComparison.percentage !== 0 ? {

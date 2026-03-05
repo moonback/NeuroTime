@@ -23,24 +23,29 @@ This roadmap outlines the evolution of NeuroTime from a simple mission tracker t
 - [x] **Responsive Design**: Optimized for mobile, tablet, and desktop.
 - [x] **Multi-slot Missions**: Support for complex schedules in a single mission.
 
-## 🛠️ Phase 3: V2 - Financial Optimization (Coming Soon)
-*Primary Goal: Financial tracking and simple billing.*
+## 🛠️ Phase 3: V2 - Pôle Financier & Administratif (En cours)
+*L'objectif est de transformer NeuroTime en outil de comptabilité basique.*
 
-- [ ] **Invoice Generation**: Generate PDF invoices directly from completed missions.
-- [ ] **Expense Tracking**: Add business-related expenses (travel, equipment).
-- [ ] **Tax Estimation**: Calculate estimated social contributions based on status (Auto-entrepreneur FR).
-- [x] **Data Export**: Export mission history as CSV/Excel for accounting.
-- [ ] **Dark/Light Mode**: Full theme customizer.
-- [ ] **Multi-currency Support**: Switch between EUR, USD, etc.
+- [x] **Exports Avancés** : Exportation de rapports filtrés en PDF et CSV.
+- [ ] **Facturation Automatisée** : Génération de factures légales en un clic depuis une ou plusieurs missions terminées.
+- [ ] **Gestion des Frais** : Possibilité d'ajouter des notes de frais (kilométrage, repas, matériel) liés à une mission.
+- [ ] **Profil Entreprise** : Saisie des informations légales (SIRET, Coordonnées) pour l'en-tête des documents.
+- [ ] **Dashboard URSSAF (France)** : Estimation automatique du montant des cotisations sociales à payer basées sur les revenus encaissés du mois/trimestre.
 
-## 🌐 Phase 4: V3 - Ecosystem & Growth (Future)
-*Primary Goal: Scalability and advanced features.*
+## 🤝 Phase 4: V3 - CRM & Vue Calendrier (À venir)
+*L'objectif est d'améliorer la gestion du temps et la relation client.*
 
-- [ ] **Shared Missions**: Ability to share mission details with co-workers.
-- [ ] **Advanced AI Insights**: Revenue forecasting and peak activity analysis.
-- [ ] **Calendar Integration**: Sync missions with Google Calendar or iCal.
-- [ ] **Contract Template**: Generate simple legal contracts for missions.
-- [ ] **Mobile App**: Native iOS/Android apps via Capacitor or React Native.
+- [ ] **Mini-CRM Client** : Une page dédiée à vos clients avec un historique détaillé, le chiffre d'affaires total généré par client, et des notes de profil.
+- [ ] **Calendrier Drag & Drop** : Un grand calendrier interactif (façon Google Calendar) permettant de glisser-déposer les missions pour les déplacer facilement.
+- [ ] **Rappels et Notifications Push** : Alertes (via la PWA) envoyées 1h avant le début d'une mission, ou rappels pour relancer un client qui n'a pas payé.
+- [ ] **Synchronisation Externe** : Exportation du planning vers iCal / Google Agenda.
+
+## 🚀 Phase 5: V4 - Écosystème Global (Futur)
+*L'objectif est la mise à l'échelle.*
+
+- [ ] **Application Mobile Native** : Déclinaison sur les stores iOS & Android en utilisant React Native ou Capacitor, avec mode hors-ligne absolu.
+- [ ] **Mode "Équipe"** : Pouvoir assigner une mission à un collègue si on ne peut pas l'assumer, ou partager un compte global.
+- [ ] **Suivi du temps en direct (Timer)** : Un bouton "Start / Stop" sur l'application mobile pour pointer lors de l'arrivée et du départ d'une mission.
 
 ---
 

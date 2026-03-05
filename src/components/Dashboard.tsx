@@ -32,6 +32,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     totalEarnings,
     totalEarningsCompleted,
     totalEarningsPlanned,
+    totalEarningsCollected,
+    totalEarningsExpected,
     upcomingMissions,
     nextMission,
     averageHourlyRate,
@@ -74,8 +76,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       <DashboardKPIs
         selectedMonthDate={selectedMonthDate}
         totalEarnings={totalEarnings}
-        totalEarningsCompleted={totalEarningsCompleted}
-        totalEarningsPlanned={totalEarningsPlanned}
+        totalEarningsCollected={totalEarningsCollected}
+        totalEarningsExpected={totalEarningsExpected}
         totalHours={totalHours}
         completedMissionsCount={selectedMonthCompletedMissions.length}
         upcomingMissionsCount={upcomingMissions.length}
