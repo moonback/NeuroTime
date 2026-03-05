@@ -147,7 +147,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
       // Gérer les créneaux horaires multiples ou un seul créneau
       if (initialData.timeSlots && initialData.timeSlots.length > 0) {
-        // Filtrer les créneaux invalides et s'assurer qu'ils ont des valeurs valides
         const validSlots = initialData.timeSlots.filter(slot =>
           slot && slot.startTime && slot.endTime &&
           slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
@@ -155,13 +154,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         if (validSlots.length > 0) {
           setTimeSlots(validSlots);
         } else {
-          // Si tous les créneaux sont invalides, utiliser les heures de début/fin
           setTimeSlots([
             { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
           ]);
         }
       } else {
-        // Compatibilité avec les anciennes missions (un seul créneau)
         setTimeSlots([
           { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
         ]);
@@ -192,7 +189,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   // Auto-calculate logic pour plusieurs créneaux
   useEffect(() => {
     if (calculationMode === 'auto' && timeSlots.length > 0 && date) {
-      // Vérifier que tous les créneaux ont des heures valides avant de calculer
       const hasValidSlots = timeSlots.every(slot =>
         slot.startTime && slot.endTime &&
         slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
@@ -206,13 +202,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           setComputedTotal(result.total);
         } catch (error) {
           console.error('Erreur lors du calcul automatique:', error);
-          // En cas d'erreur, réinitialiser les valeurs
           setDayHours(0);
           setNightHours(0);
           setComputedTotal(0);
         }
       } else {
-        // Réinitialiser si les données ne sont pas valides
         setDayHours(0);
         setNightHours(0);
         setComputedTotal(0);
@@ -227,7 +221,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       return;
     }
 
-    // Vérifier que tous les créneaux ont des heures valides
     const hasValidSlots = timeSlots.every(slot =>
       slot.startTime && slot.endTime &&
       slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
@@ -238,7 +231,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       return;
     }
 
-    // Construire une mission temporaire pour la vérification
     const firstSlot = timeSlots[0];
     const lastSlot = timeSlots[timeSlots.length - 1];
     const startIso = new Date(`${date}T${firstSlot.startTime}`).toISOString();
@@ -264,7 +256,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       totalEarnings: 0,
     };
 
-    // Chercher les doublons
     const conflicts = findDuplicateMissions(
       tempMission,
       missions,
@@ -350,7 +341,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     const updated = [...timeSlots];
     updated[index] = { ...updated[index], [field]: value };
     setTimeSlots(updated);
-    // Effacer les erreurs pour ce champ
     if (errors[`timeSlot_${index}_${field}`]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -367,7 +357,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       setTitle(model.title);
       setClient(model.client);
       setLocation(model.location);
-      // We keep the current date, but copy the times
       if (model.timeSlots && model.timeSlots.length > 0) {
         setTimeSlots(model.timeSlots);
       } else {
@@ -375,9 +364,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         const end = new Date(model.endTime);
         setTimeSlots([{ startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }]);
       }
-
-      // Optional: Copy description? 
-      // setDescription(model.description);
     }
   };
 
@@ -397,13 +383,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Vérifier si on est en train d'ajouter un nouveau client mais qu'il n'a pas été ajouté
     if (isAddingNewClient && !newClientName.trim()) {
       setErrors(prev => ({ ...prev, newClient: 'Veuillez ajouter le nouveau client ou annuler' }));
       return;
     }
 
-    // Valider le formulaire
     if (Object.keys(validateForm).length > 0) {
       setErrors(validateForm);
       return;
@@ -411,7 +395,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
     setErrors({});
 
-    // Calculer startTime et endTime pour compatibilité (premier et dernier créneau)
     const firstSlot = timeSlots[0];
     const lastSlot = timeSlots[timeSlots.length - 1];
 
@@ -439,9 +422,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       client,
       location,
       description,
-      startTime: startIso, // Pour compatibilité
-      endTime: endIso, // Pour compatibilité
-      timeSlots: timeSlots.length > 1 ? timeSlots : undefined, // Stocker seulement si plusieurs créneaux
+      startTime: startIso,
+      endTime: endIso,
+      timeSlots: timeSlots.length > 1 ? timeSlots : undefined,
       status: status,
       rateType: finalRateType,
       hourlyRate: calculationMode === 'auto' ? RATE_DAY : 0,
@@ -461,57 +444,60 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const isConverting = initialData?.status === 'planned' && status === 'completed';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
-      <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-md p-0 md:p-4 transition-all animate-fade-in">
+      <div className="glass-strong rounded-t-2xl md:rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh] md:max-h-[90vh] animate-slide-up-from-bottom md:animate-scale-in shadow-2xl border border-white/[0.06]">
 
-        {/* Header */}
-        <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light bg-gradient-to-r from-primary-500/10 via-transparent to-transparent'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <h2 className={`text-xl md:text-2xl font-black tracking-tight ${isConverting ? 'text-green-200' : initialData?.isPaid ? 'text-orange-300' : 'text-gray-100'}`}>
+        {/* Header — COMPACT */}
+        <div className={`flex justify-between items-center px-4 py-3 md:px-5 md:py-3.5 border-b relative overflow-hidden ${isConverting ? 'bg-emerald-500/10 border-emerald-500/20' : initialData?.isPaid ? 'bg-orange-500/10 border-orange-500/15' : 'border-white/[0.06] bg-white/[0.02]'}`}>
+          {/* Handle bar for mobile */}
+          <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-white/15 md:hidden" />
+
+          <div className="relative z-10 min-w-0">
+            <h2 className={`text-sm md:text-base font-extrabold tracking-tight ${isConverting ? 'text-emerald-300' : initialData?.isPaid ? 'text-orange-300' : 'text-gray-100'}`}>
               {isConverting ? 'Valider les heures' : initialData?.isPaid ? 'Consulter la mission' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
-            <p className={`text-xs md:text-sm mt-1.5 font-medium ${isConverting ? 'text-green-300' : initialData?.isPaid ? 'text-orange-400' : 'text-gray-300'}`}>
-              {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : initialData?.isPaid ? 'Cette mission est déjà payée et ne peut plus être modifiée.' : 'Remplissez les détails pour votre suivi.'}
+            <p className={`text-[9px] md:text-[10px] mt-0.5 font-medium truncate ${isConverting ? 'text-emerald-400/70' : initialData?.isPaid ? 'text-orange-400/70' : 'text-gray-500'}`}>
+              {isConverting ? 'Vérifiez les horaires réels.' : initialData?.isPaid ? 'Mission payée · Lecture seule' : 'Remplissez les détails'}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 md:p-2.5 hover:bg-dark-200/50 rounded-xl transition-all text-gray-400 hover:text-gray-100 hover:scale-110 hover:rotate-90 relative z-10 glass-button border border-transparent hover:border-primary-500/30">
-            <X size={18} strokeWidth={2.5} />
+          <button onClick={onClose} className="relative z-10 p-1.5 hover:bg-white/[0.06] rounded-lg transition-all text-gray-400 hover:text-gray-100 active:scale-90">
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar">
-          <div className="p-5 md:p-7 space-y-6 md:space-y-8">
+        <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar flex-1">
+          <div className="p-4 md:p-5 space-y-4 md:space-y-5">
 
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-              <div className="bg-primary-500/25 border border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
-                <Copy size={16} className="text-primary-300" strokeWidth={2.5} />
+              <div className="bg-indigo-500/10 border border-indigo-500/15 rounded-xl p-2.5 flex items-center gap-2.5 hover:border-indigo-500/25 transition-all">
+                <Copy size={13} className="text-indigo-400 shrink-0" strokeWidth={2.5} />
                 <select
                   onChange={handleCopyFromMission}
-                  className="bg-transparent text-xs md:text-sm text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
+                  className="bg-transparent text-[10px] text-indigo-300 font-semibold w-full focus:outline-none cursor-pointer"
                   defaultValue=""
                 >
                   <option value="" disabled>Copier depuis une mission précédente...</option>
                   {missions.slice(-10).reverse().map(m => (
-                    <option key={m.id} value={m.id} className="bg-dark-50">{m.title} - {m.client}</option>
+                    <option key={m.id} value={m.id} className="bg-[#0c0f1a]">{m.title} - {m.client}</option>
                   ))}
                 </select>
               </div>
             )}
 
             {/* Section 1: Informations Générales */}
-            <section className="space-y-4 md:space-y-5">
-              <h3 className="text-xs md:text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2.5 mb-1">
-                <Briefcase size={14} className="text-primary-400" strokeWidth={2.5} /> Détails de la mission
+            <section className="space-y-3">
+              <h3 className="section-title flex items-center gap-1.5">
+                <Briefcase size={11} className="text-indigo-400" strokeWidth={2.5} /> Détails
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                <div className="space-y-2">
-                  <label className="text-xs md:text-sm font-bold text-gray-200 flex items-center gap-1.5 tracking-wide">
-                    Titre de la mission
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Title */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+                    Titre
                     <Tooltip content="Nom descriptif de votre mission (ex: Régie Son, Accueil VIP)">
-                      <AlertCircle size={12} className="text-gray-400 cursor-help hover:text-primary-400 transition-colors" />
+                      <AlertCircle size={9} className="text-gray-500 cursor-help hover:text-indigo-400 transition-colors" />
                     </Tooltip>
                   </label>
                   <input
@@ -524,46 +510,46 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     }}
                     disabled={initialData?.isPaid}
                     placeholder="Ex: Régie Son - Concert"
-                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 font-medium ${errors.title ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''
-                      } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`w-full px-3 py-2 bg-white/[0.04] border rounded-lg outline-none transition-all text-xs text-gray-100 placeholder-gray-500 font-medium ${errors.title ? 'border-red-500/50 shadow-[0_0_0_1px_rgba(239,68,68,0.3)]' : 'border-white/[0.06]'
+                      } ${initialData?.isPaid ? 'opacity-50 cursor-not-allowed' : 'focus:border-indigo-500/40 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]'}`}
                   />
                   {errors.title && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} /> {errors.title}
+                    <p className="text-[9px] text-red-400 flex items-center gap-1">
+                      <AlertCircle size={9} /> {errors.title}
                     </p>
                   )}
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
+
+                {/* Client */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
                     Client
                     <Tooltip content="Sélectionnez un client existant ou ajoutez-en un nouveau">
-                      <AlertCircle size={12} className="text-gray-500 cursor-help" />
+                      <AlertCircle size={9} className="text-gray-500 cursor-help" />
                     </Tooltip>
                   </label>
 
                   {!isAddingNewClient ? (
-                    <div className="flex gap-2">
-                      <select
-                        value={client}
-                        onChange={handleClientChange}
-                        disabled={initialData?.isPaid}
-                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 ${errors.client ? 'border-red-500/50' : ''
-                          } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
-                      >
-                        <option value="">Sélectionner un client...</option>
-                        {clients.map(c => (
-                          <option key={c.id} value={c.name} className="bg-dark-50">
-                            {c.name}
-                          </option>
-                        ))}
-                        <option value="__new__" className="bg-primary-500/20 text-primary-300 font-medium">
-                          + Ajouter un nouveau client
+                    <select
+                      value={client}
+                      onChange={handleClientChange}
+                      disabled={initialData?.isPaid}
+                      className={`w-full px-3 py-2 bg-white/[0.04] border rounded-lg outline-none transition-all text-xs text-gray-100 ${errors.client ? 'border-red-500/50' : 'border-white/[0.06]'
+                        } ${initialData?.isPaid ? 'opacity-50 cursor-not-allowed' : 'focus:border-indigo-500/40'}`}
+                    >
+                      <option value="">Sélectionner...</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.name} className="bg-[#0c0f1a]">
+                          {c.name}
                         </option>
-                      </select>
-                    </div>
+                      ))}
+                      <option value="__new__" className="bg-indigo-500/20 text-indigo-300">
+                        + Nouveau client
+                      </option>
+                    </select>
                   ) : (
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
+                    <div className="space-y-1.5">
+                      <div className="flex gap-1.5">
                         <input
                           type="text"
                           value={newClientName}
@@ -582,16 +568,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           }}
                           placeholder="Nom du nouveau client"
                           autoFocus
-                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${errors.newClient ? 'border-red-500/50' : ''
+                          className={`flex-1 px-3 py-2 bg-white/[0.04] border rounded-lg outline-none transition-all text-xs text-gray-100 placeholder-gray-500 ${errors.newClient ? 'border-red-500/50' : 'border-white/[0.06] focus:border-indigo-500/40'
                             }`}
                         />
                         <button
                           type="button"
                           onClick={handleAddNewClient}
-                          className="px-3 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
+                          className="px-2 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/20 rounded-lg text-[9px] font-bold transition-all flex items-center gap-1"
                         >
-                          <CheckCircle size={14} />
-                          Ajouter
+                          <CheckCircle size={11} />
+                          OK
                         </button>
                         <button
                           type="button"
@@ -604,33 +590,31 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                               return newErrors;
                             });
                           }}
-                          className="px-3 py-2 bg-dark-200 hover:bg-dark-300 text-gray-400 border border-dark-300 rounded-lg text-xs font-medium transition-all"
+                          className="px-2 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-gray-400 border border-white/[0.06] rounded-lg text-[9px] font-bold transition-all"
                         >
-                          <X size={14} />
+                          <X size={11} />
                         </button>
                       </div>
                       {errors.newClient && (
-                        <p className="text-xs text-red-400 flex items-center gap-1">
-                          <AlertCircle size={12} /> {errors.newClient}
+                        <p className="text-[9px] text-red-400 flex items-center gap-1">
+                          <AlertCircle size={9} /> {errors.newClient}
                         </p>
                       )}
                     </div>
                   )}
 
                   {errors.client && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} /> {errors.client}
+                    <p className="text-[9px] text-red-400 flex items-center gap-1">
+                      <AlertCircle size={9} /> {errors.client}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs md:text-sm font-medium text-gray-200 flex items-center gap-1">
-                  <MapPin size={12} className="text-gray-500" /> Lieu
-                  <Tooltip content="Adresse ou lieu de la mission">
-                    <AlertCircle size={12} className="text-gray-500 cursor-help ml-1" />
-                  </Tooltip>
+              {/* Location */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+                  <MapPin size={9} className="text-gray-500" /> Lieu
                 </label>
                 <input
                   type="text"
@@ -642,48 +626,50 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   }}
                   disabled={initialData?.isPaid}
                   placeholder="Ex: Paris La Défense Arena"
-                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${errors.location ? 'border-red-500/50' : ''
-                    } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  className={`w-full px-3 py-2 bg-white/[0.04] border rounded-lg outline-none transition-all text-xs text-gray-100 placeholder-gray-500 ${errors.location ? 'border-red-500/50' : 'border-white/[0.06]'
+                    } ${initialData?.isPaid ? 'opacity-50 cursor-not-allowed' : 'focus:border-indigo-500/40 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]'}`}
                 />
                 {errors.location && (
-                  <p className="text-xs text-red-400 flex items-center gap-1">
-                    <AlertCircle size={12} /> {errors.location}
+                  <p className="text-[9px] text-red-400 flex items-center gap-1">
+                    <AlertCircle size={9} /> {errors.location}
                   </p>
                 )}
               </div>
             </section>
 
-            <hr className="glass-separator" />
+            {/* Separator */}
+            <div className="glass-separator" />
 
             {/* Section 2: Date & Horaires */}
-            <section className="space-y-3 md:space-y-4">
+            <section className="space-y-3">
               <div className="flex justify-between items-center">
-                <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <Calculator size={12} /> Horaires & Calcul
+                <h3 className="section-title flex items-center gap-1.5">
+                  <Calculator size={11} className="text-indigo-400" /> Horaires & Calcul
                 </h3>
 
-                {/* Toggle Mode */}
-                <div className={`bg-gray-100 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium ${initialData?.isPaid ? 'opacity-50 pointer-events-none' : ''}`}>
+                {/* Toggle Mode — DARK THEME */}
+                <div className={`bg-white/[0.04] border border-white/[0.06] p-0.5 rounded-lg flex text-[9px] font-bold ${initialData?.isPaid ? 'opacity-40 pointer-events-none' : ''}`}>
                   <button
                     type="button"
                     onClick={() => setCalculationMode('auto')}
-                    className={`px-2.5 md:px-3 py-0.5 md:py-1 rounded-md transition-all ${calculationMode === 'auto' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-2.5 py-1 rounded-md transition-all ${calculationMode === 'auto' ? 'bg-indigo-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
                   >
                     Auto
                   </button>
                   <button
                     type="button"
                     onClick={() => setCalculationMode('manual')}
-                    className={`px-2.5 md:px-3 py-0.5 md:py-1 rounded-md transition-all ${calculationMode === 'manual' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-2.5 py-1 rounded-md transition-all ${calculationMode === 'manual' ? 'bg-indigo-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
                   >
                     Manuel
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-gray-200">Date</label>
+              <div className="space-y-3">
+                {/* Date */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-gray-300">Date</label>
                   <input
                     type="date"
                     required
@@ -693,76 +679,79 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
                     }}
                     disabled={initialData?.isPaid}
-                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors.date ? 'border-red-500/50' : ''
-                      } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`w-full px-3 py-2 bg-white/[0.04] border rounded-lg outline-none text-xs text-gray-100 ${errors.date ? 'border-red-500/50' : 'border-white/[0.06]'
+                      } ${initialData?.isPaid ? 'opacity-50 cursor-not-allowed' : 'focus:border-indigo-500/40'}`}
+                    style={{ colorScheme: 'dark' }}
                   />
                   {errors.date && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} /> {errors.date}
+                    <p className="text-[9px] text-red-400 flex items-center gap-1">
+                      <AlertCircle size={9} /> {errors.date}
                     </p>
                   )}
                 </div>
 
                 {/* Créneaux horaires multiples */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs md:text-sm font-medium text-gray-200">Créneaux horaires</label>
+                    <label className="text-[10px] font-semibold text-gray-300">Créneaux horaires</label>
                     <button
                       type="button"
                       onClick={addTimeSlot}
                       disabled={initialData?.isPaid}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/15 rounded-md text-[9px] font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <Plus size={14} />
-                      Ajouter un créneau
+                      <Plus size={10} />
+                      Créneau
                     </button>
                   </div>
 
                   {timeSlots.map((slot, index) => (
-                    <div key={index} className="glass-light rounded-lg p-3 md:p-4 border-primary-500/20 space-y-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-400">Créneau {index + 1}</span>
+                    <div key={index} className="bg-white/[0.02] rounded-lg p-2.5 border border-white/[0.05] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Créneau {index + 1}</span>
                         {timeSlots.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeTimeSlot(index)}
-                            className="p-1.5 hover:bg-red-500/20 text-red-400 rounded transition-colors"
+                            className="p-1 hover:bg-red-500/15 text-red-400/60 hover:text-red-400 rounded transition-colors"
                             title="Supprimer ce créneau"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={11} />
                           </button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-xs text-gray-400">Début</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-0.5">
+                          <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Début</label>
                           <input
                             type="time"
                             required
                             value={slot.startTime}
                             onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
+                            className={`w-full px-2.5 py-1.5 bg-white/[0.04] border rounded-md outline-none text-xs text-gray-100 ${errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : 'border-white/[0.06] focus:border-indigo-500/40'
                               }`}
+                            style={{ colorScheme: 'dark' }}
                           />
                           {errors[`timeSlot_${index}_start`] && (
-                            <p className="text-xs text-red-400 flex items-center gap-1">
-                              <AlertCircle size={10} /> {errors[`timeSlot_${index}_start`]}
+                            <p className="text-[8px] text-red-400 flex items-center gap-0.5">
+                              <AlertCircle size={8} /> {errors[`timeSlot_${index}_start`]}
                             </p>
                           )}
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="text-xs text-gray-400">Fin</label>
+                        <div className="space-y-0.5">
+                          <label className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Fin</label>
                           <input
                             type="time"
                             required
                             value={slot.endTime}
                             onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
+                            className={`w-full px-2.5 py-1.5 bg-white/[0.04] border rounded-md outline-none text-xs text-gray-100 ${errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : 'border-white/[0.06] focus:border-indigo-500/40'
                               }`}
+                            style={{ colorScheme: 'dark' }}
                           />
                           {errors[`timeSlot_${index}_end`] && (
-                            <p className="text-xs text-red-400 flex items-center gap-1">
-                              <AlertCircle size={10} /> {errors[`timeSlot_${index}_end`]}
+                            <p className="text-[8px] text-red-400 flex items-center gap-0.5">
+                              <AlertCircle size={8} /> {errors[`timeSlot_${index}_end`]}
                             </p>
                           )}
                         </div>
@@ -771,67 +760,68 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   ))}
 
                   {errors.timeSlots && (
-                    <p className="text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} /> {errors.timeSlots}
+                    <p className="text-[9px] text-red-400 flex items-center gap-1">
+                      <AlertCircle size={9} /> {errors.timeSlots}
                     </p>
                   )}
 
                   {/* Avertissement de doublon */}
                   {duplicateWarning && (
-                    <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-3 flex items-start gap-2">
-                      <AlertCircle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-yellow-300 flex-1">{duplicateWarning}</p>
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2.5 flex items-start gap-2">
+                      <AlertCircle size={13} className="text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-yellow-300/80 flex-1">{duplicateWarning}</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Smart Calculator Display */}
-              <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              {/* Smart Calculator Display — COMPACT & PRO */}
+              <div className={`p-3 md:p-3.5 rounded-xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-emerald-500/[0.06] border-emerald-500/15' : 'bg-white/[0.02] border-white/[0.06]'}`}>
+                {/* Subtle shimmer on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
 
                 {calculationMode === 'auto' ? (
-                  <div className="space-y-3 md:space-y-4 relative z-10">
-                    <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-2.5 relative z-10">
+                    <div className="flex justify-between items-start gap-3">
                       <div>
-                        <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
-                        <p className="text-[10px] md:text-xs text-gray-400">
-                          {hidePrices ? 'Calcul automatique jour/nuit' : `Jour (${RATE_DAY}€) et nuit (${RATE_NIGHT}€ > 22h)`}
+                        <label className="text-[10px] font-bold text-gray-300 block">Calcul Automatique</label>
+                        <p className="text-[8px] text-gray-500 mt-0.5">
+                          {hidePrices ? 'Calcul jour/nuit' : `Jour ${RATE_DAY}€/h · Nuit ${RATE_NIGHT}€/h (>22h)`}
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                        <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
-                          {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={20} strokeWidth={2.5} />}
+                        <span className="text-[8px] text-gray-500 block uppercase tracking-wider font-bold">Total</span>
+                        <span className={`text-xl md:text-2xl font-extrabold flex items-center justify-end gap-0.5 tracking-tight ${status === 'completed' ? 'text-emerald-300' : 'text-indigo-300'}`}>
+                          {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={16} strokeWidth={2.5} />}
                         </span>
                       </div>
                     </div>
 
                     {/* Visual Bar Breakdown */}
                     {(dayHours > 0 || nightHours > 0) && (
-                      <div className="glass-light rounded-xl border-primary-500/20 p-3">
-                        <div className="flex h-3 w-full rounded-full overflow-hidden bg-dark-200 mb-3">
+                      <div className="bg-white/[0.03] rounded-lg border border-white/[0.04] p-2.5">
+                        <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-white/[0.04] mb-2">
                           {dayHours > 0 && (
-                            <div className="bg-orange-400 h-full" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
+                            <div className="bg-amber-400/70 h-full transition-all" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
                           {nightHours > 0 && (
-                            <div className="bg-primary-500 h-full" style={{ width: `${(nightHours / (dayHours + nightHours)) * 100}%` }} />
+                            <div className="bg-indigo-500/70 h-full transition-all" style={{ width: `${(nightHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
                         </div>
-                        <div className="flex justify-between items-center text-sm">
+                        <div className="flex justify-between items-center text-[10px]">
                           {dayHours > 0 ? (
-                            <div className="flex items-center gap-2 text-gray-200">
-                              <Sun size={16} className="text-orange-400" />
-                              <span className="font-semibold">{dayHours.toFixed(1)}h</span>
-                              {!hidePrices && <span className="text-gray-400">× {RATE_DAY}€</span>}
+                            <div className="flex items-center gap-1.5 text-gray-300">
+                              <Sun size={11} className="text-amber-400" />
+                              <span className="font-bold">{dayHours.toFixed(1)}h</span>
+                              {!hidePrices && <span className="text-gray-500 text-[9px]">× {RATE_DAY}€</span>}
                             </div>
                           ) : <span />}
 
                           {nightHours > 0 ? (
-                            <div className="flex items-center gap-2 text-gray-200">
-                              <Moon size={16} className="text-primary-400" />
-                              <span className="font-semibold">{nightHours.toFixed(1)}h</span>
-                              {!hidePrices && <span className="text-gray-400">× {RATE_NIGHT}€</span>}
+                            <div className="flex items-center gap-1.5 text-gray-300">
+                              <Moon size={11} className="text-indigo-400" />
+                              <span className="font-bold">{nightHours.toFixed(1)}h</span>
+                              {!hidePrices && <span className="text-gray-500 text-[9px]">× {RATE_NIGHT}€</span>}
                             </div>
                           ) : <span />}
                         </div>
@@ -840,12 +830,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   </div>
                 ) : (
                   // Manual Mode
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex-1">
-                      <label className="text-sm font-bold text-gray-200 block mb-1">Montant Forfaitaire</label>
-                      <p className="text-xs text-gray-400">Saisie manuelle du total</p>
+                      <label className="text-[10px] font-bold text-gray-300 block">Montant Forfaitaire</label>
+                      <p className="text-[8px] text-gray-500 mt-0.5">Saisie manuelle</p>
                     </div>
-                    <div className="w-1/2">
+                    <div className="w-2/5">
                       <div className="relative">
                         <input
                           type={hidePrices ? "password" : "number"}
@@ -858,10 +848,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             }
                           }}
                           placeholder={hidePrices ? '•••' : undefined}
-                          className="w-full pl-4 pr-10 py-3 glass-input rounded-xl text-right font-bold text-xl outline-none text-gray-100"
+                          className="w-full pl-3 pr-8 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-right font-extrabold text-lg outline-none text-gray-100 focus:border-indigo-500/40"
                           disabled={hidePrices}
                         />
-                        {!hidePrices && <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />}
+                        {!hidePrices && <Euro className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500" size={14} />}
                       </div>
                     </div>
                   </div>
@@ -869,50 +859,49 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               </div>
             </section>
 
-            <hr className="glass-separator" />
+            {/* Separator */}
+            <div className="glass-separator" />
 
             {/* Section 3: IA & Notes */}
-            <section className="space-y-4">
+            <section className="space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles size={14} /> Description (IA)
+                <h3 className="section-title flex items-center gap-1.5">
+                  <Sparkles size={11} className="text-purple-400" /> Notes
                 </h3>
                 <button
                   type="button"
                   onClick={handleEnhanceDescription}
                   disabled={isEnhancing || !description}
-                  className="text-xs flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-100 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-[9px] flex items-center gap-1 bg-purple-500/10 text-purple-300 px-2 py-1 rounded-md hover:bg-purple-500/20 font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed border border-purple-500/15"
                 >
-                  <Sparkles size={12} />
-                  {isEnhancing ? 'Réécriture en cours...' : 'Reformuler pro'}
+                  <Sparkles size={9} />
+                  {isEnhancing ? 'IA...' : 'Reformuler'}
                 </button>
               </div>
 
-              <div className="relative">
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Notes rapides : monté les spots, câblage régie, fin 2h du mat..."
-                  rows={3}
-                  className="w-full px-4 py-3 glass-input rounded-xl outline-none transition-all resize-none text-sm leading-relaxed text-gray-100 placeholder-gray-500"
-                />
-              </div>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Notes rapides : monté les spots, câblage régie..."
+                rows={2}
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg outline-none transition-all resize-none text-xs leading-relaxed text-gray-100 placeholder-gray-500 focus:border-indigo-500/40"
+              />
             </section>
 
-            {/* Status Selector */}
-            <div className="flex gap-4 items-center glass-light p-3 rounded-xl border-primary-500/20">
-              <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
-              <div className="flex gap-2">
+            {/* Status Selector — COMPACT */}
+            <div className="flex items-center gap-2.5 bg-white/[0.02] border border-white/[0.05] p-2 rounded-lg">
+              <span className="text-[10px] font-bold text-gray-400 pl-1">Statut</span>
+              <div className="flex gap-1.5 flex-1">
                 {(['planned', 'completed', 'cancelled'] as const).map(s => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setStatus(s)}
-                    className={`px-3 py-1 text-xs rounded-full border transition-all capitalize ${status === s
-                        ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold'
-                          : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
-                            : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
-                        : 'glass-button text-gray-400 hover:text-primary-300'
+                    className={`flex-1 px-2 py-1.5 text-[9px] rounded-md border transition-all capitalize font-bold ${status === s
+                      ? s === 'completed' ? 'bg-emerald-500/15 border-emerald-500/20 text-emerald-300'
+                        : s === 'cancelled' ? 'bg-red-500/15 border-red-500/20 text-red-300'
+                          : 'bg-indigo-500/15 border-indigo-500/20 text-indigo-300'
+                      : 'bg-transparent border-white/[0.04] text-gray-500 hover:text-gray-300'
                       }`}
                   >
                     {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -922,39 +911,36 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="p-5 md:p-7 border-t border-primary-500/20 glass-light flex gap-3 md:gap-4 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          {/* Footer Actions — COMPACT */}
+          <div className="px-4 py-3 md:px-5 md:py-3.5 border-t border-white/[0.06] bg-white/[0.02] flex gap-2.5 sticky bottom-0">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 md:py-3.5 px-5 rounded-xl glass-button text-gray-200 font-bold hover:shadow-lg transition-all text-sm md:text-base relative z-10 tracking-wide"
+              className="flex-1 py-2.5 px-3 rounded-xl glass-button text-gray-300 font-bold transition-all text-[11px] tracking-wide active:scale-[0.97]"
             >
               Annuler
             </button>
             {!initialData?.isPaid ? (
               <button
                 type="submit"
-                className={`flex-[2] text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${isConverting
-                    ? 'bg-green-500 hover:bg-green-600 glow-green'
-                    : 'bg-primary-500 hover:bg-primary-600 glow-primary'
+                className={`flex-[2] text-white font-bold py-2.5 px-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-[11px] active:scale-[0.97] ${isConverting
+                  ? 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_2px_12px_rgba(16,185,129,0.25)]'
+                  : 'bg-indigo-500 hover:bg-indigo-400 shadow-[0_2px_12px_rgba(99,102,241,0.25)]'
                   }`}
               >
-                <span className="flex items-center gap-2.5 tracking-wide">
-                  {isConverting ? <CheckCircle size={18} strokeWidth={2.5} /> : <Calendar size={18} strokeWidth={2.5} />}
-                  {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  {isConverting ? <CheckCircle size={14} strokeWidth={2.5} /> : <Calendar size={14} strokeWidth={2.5} />}
+                  {isConverting ? 'Valider' : initialData ? 'Mettre à jour' : 'Enregistrer'}
                 </span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-[2] bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10"
+                className="flex-[2] bg-orange-500 hover:bg-orange-400 text-white font-bold py-2.5 px-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 text-[11px] active:scale-[0.97]"
               >
-                <span className="flex items-center gap-2.5 tracking-wide uppercase">
-                  <CheckCircle size={18} strokeWidth={3} />
-                  Fermer (Payé)
-                </span>
+                <CheckCircle size={14} strokeWidth={2.5} />
+                <span className="tracking-wide">Fermer</span>
               </button>
             )}
           </div>
