@@ -310,9 +310,10 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
     return value.toFixed(0);
   };
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('planned');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'completed' | 'cancelled'>('all');
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [clientFilter, setClientFilter] = useState<string>('all');
+  const [monthFilter, setMonthFilter] = useState<string>('all');
   const [swipedMissionId, setSwipedMissionId] = useState<string | null>(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [pdfStartDate, setPdfStartDate] = useState('');
@@ -322,6 +323,12 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   const uniqueClients = useMemo(() => {
     const clients = new Set(missions.map(m => m.client).filter(Boolean));
     return Array.from(clients).sort();
+  }, [missions]);
+
+  // Extraire les mois uniques pour le filtre
+  const uniqueMonths = useMemo(() => {
+    const months = new Set<string>(missions.map(m => format(new Date(m.startTime), 'yyyy-MM')));
+    return Array.from(months).sort((a, b) => b.localeCompare(a));
   }, [missions]);
 
   const filteredMissions = useMemo(() => {
@@ -340,10 +347,13 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
 
         const matchesClient = clientFilter === 'all' || m.client === clientFilter;
 
-        return matchesSearch && matchesStatus && matchesPaid && matchesClient;
+        const missionMonth = format(new Date(m.startTime), 'yyyy-MM');
+        const matchesMonth = monthFilter === 'all' || missionMonth === monthFilter;
+
+        return matchesSearch && matchesStatus && matchesPaid && matchesClient && matchesMonth;
       })
       .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-  }, [missions, searchTerm, statusFilter, paidFilter, clientFilter]);
+  }, [missions, searchTerm, statusFilter, paidFilter, clientFilter, monthFilter]);
 
   // Group missions by month
   const groupedMissions = useMemo(() => {
@@ -390,7 +400,12 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center mb-3">
         <div>
           <h1 className="text-lg md:text-xl font-extrabold text-gray-50 tracking-tight">Mes Missions</h1>
-          <p className="text-gray-500 text-[10px] font-medium">Historique complet</p>
+          <p className="text-gray-500 text-[10px] font-medium tracking-wide">
+            {monthFilter === 'all'
+              ? 'Historique complet'
+              : `Missions de ${format(new Date(parseInt(monthFilter.split('-')[0]), parseInt(monthFilter.split('-')[1]) - 1), 'MMMM yyyy', { locale: fr })}`
+            }
+          </p>
         </div>
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button
@@ -432,6 +447,30 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           </div>
 
           <div className="flex gap-2 w-full md:w-auto">
+            {uniqueMonths.length > 0 && (
+              <div className="relative w-full md:w-auto">
+                <select
+                  value={monthFilter}
+                  onChange={(e) => setMonthFilter(e.target.value)}
+                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[10px] font-medium text-gray-300 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none cursor-pointer"
+                >
+                  <option value="all" className="bg-dark-200 text-gray-200">Tous les mois</option>
+                  {uniqueMonths.map(monthKey => {
+                    const [year, month] = monthKey.split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    return (
+                      <option key={monthKey} value={monthKey} className="bg-dark-200 text-gray-200 capitalize">
+                        {format(date, 'MMMM yyyy', { locale: fr })}
+                      </option>
+                    );
+                  })}
+                </select>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <CalendarDays size={10} />
+                </div>
+              </div>
+            )}
+
             {uniqueClients.length > 0 && (
               <div className="relative w-full md:w-auto">
                 <select
