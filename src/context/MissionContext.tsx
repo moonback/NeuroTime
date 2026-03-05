@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { Mission } from '../types';
-import { loadMissions, saveMissions } from '../services/storageService';
+import { Mission, Payment } from '../types';
+import { loadMissions, saveMissions, loadPayments, savePayment as savePaymentToStorage, deletePayment as deletePaymentFromStorage } from '../services/storageService';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
 
@@ -13,6 +13,10 @@ interface MissionContextType {
   deleteMission: (id: string) => void;
   refreshMissions: () => Promise<void>;
   importMissions: (importedMissions: Mission[]) => void;
+  payments: Payment[];
+  addPayment: (payment: Payment) => Promise<void>;
+  deletePayment: (id: string) => Promise<void>;
+  refreshPayments: () => Promise<void>;
 }
 
 const MissionContext = createContext<MissionContextType | undefined>(undefined);
@@ -20,6 +24,7 @@ const MissionContext = createContext<MissionContextType | undefined>(undefined);
 export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -31,15 +36,19 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsLoaded(false);
       return;
     }
-    
+
     setIsLoading(true);
     try {
-      const data = await loadMissions();
-      setMissions(data);
+      const [missionsData, paymentsData] = await Promise.all([
+        loadMissions(),
+        loadPayments()
+      ]);
+      setMissions(missionsData);
+      setPayments(paymentsData);
       setIsLoaded(true);
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
-      toast.error('Erreur lors du chargement des missions');
+      toast.error('Erreur lors du chargement des données');
     } finally {
       setIsLoading(false);
     }
@@ -88,16 +97,58 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     toast.success(`${importedMissions.length} missions importées`);
   }, []);
 
+  const addPayment = useCallback(async (payment: Payment) => {
+    try {
+      await savePaymentToStorage(payment);
+      setPayments(prev => [...prev.filter(p => p.id !== payment.id), payment]);
+
+      // Mettre à jour les missions localement
+      setMissions(prev => prev.map(m =>
+        payment.missionIds.includes(m.id)
+          ? { ...m, isPaid: true, paymentId: payment.id }
+          : m
+      ));
+
+      toast.success('Paiement enregistré');
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du paiement:', error);
+      toast.error('Erreur lors de l\'enregistrement du paiement');
+    }
+  }, []);
+
+  const deletePayment = useCallback(async (id: string) => {
+    try {
+      await deletePaymentFromStorage(id);
+      setPayments(prev => prev.filter(p => p.id !== id));
+
+      // Mettre à jour les missions localement (les marquer comme non payées)
+      setMissions(prev => prev.map(m =>
+        m.paymentId === id
+          ? { ...m, isPaid: false, paymentId: undefined }
+          : m
+      ));
+
+      toast.success('Paiement supprimé');
+    } catch (error) {
+      console.error('Erreur lors de la suppression du paiement:', error);
+      toast.error('Erreur lors de la suppression du paiement');
+    }
+  }, []);
+
   return (
-    <MissionContext.Provider value={{ 
-      missions, 
-      isLoading, 
-      isSaving, 
-      addMission, 
-      updateMission, 
+    <MissionContext.Provider value={{
+      missions,
+      isLoading,
+      isSaving,
+      addMission,
+      updateMission,
       deleteMission,
       refreshMissions: loadData,
-      importMissions
+      importMissions,
+      payments,
+      addPayment,
+      deletePayment,
+      refreshPayments: loadData
     }}>
       {children}
     </MissionContext.Provider>

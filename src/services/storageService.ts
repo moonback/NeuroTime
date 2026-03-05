@@ -1,10 +1,14 @@
-import { Mission } from '../types';
-import { 
-  saveMissionsToSupabase, 
-  loadMissionsFromSupabase 
+import { Mission, Payment } from '../types';
+import {
+  saveMissionsToSupabase,
+  loadMissionsFromSupabase,
+  loadPaymentsFromSupabase,
+  savePaymentToSupabase,
+  deletePaymentFromSupabase
 } from './supabaseService';
 
 const STORAGE_KEY = 'NeuroTime_missions_v1';
+const PAYMENTS_KEY = 'NeuroTime_payments_v1';
 
 // Fonction de sauvegarde avec fallback sur localStorage
 export const saveMissions = async (missions: Mission[]): Promise<void> => {
@@ -15,7 +19,7 @@ export const saveMissions = async (missions: Mission[]): Promise<void> => {
     console.error('Failed to save missions to local storage', localError);
     throw new Error('Impossible de sauvegarder les données localement');
   }
-  
+
   // Essayer ensuite Supabase (non bloquant)
   try {
     await saveMissionsToSupabase(missions);
@@ -37,21 +41,21 @@ export const saveMissions = async (missions: Mission[]): Promise<void> => {
  */
 const resolveConflicts = (localMissions: Mission[], supabaseMissions: Mission[]): Mission[] => {
   const missionMap = new Map<string, Mission>();
-  
+
   // Ajouter toutes les missions Supabase (source de vérité)
   supabaseMissions.forEach(mission => {
     missionMap.set(mission.id, mission);
   });
-  
+
   // Vérifier les missions locales pour détecter les conflits
   localMissions.forEach(localMission => {
     const supabaseMission = missionMap.get(localMission.id);
-    
+
     if (supabaseMission) {
       // Conflit détecté : comparer les dates de mise à jour
       const localUpdatedAt = localMission.updatedAt || localMission.startTime;
       const supabaseUpdatedAt = supabaseMission.updatedAt || supabaseMission.startTime;
-      
+
       // Prendre la version la plus récente
       if (new Date(localUpdatedAt) > new Date(supabaseUpdatedAt)) {
         console.log(`Conflit résolu : version locale plus récente pour mission ${localMission.id}`);
@@ -65,7 +69,7 @@ const resolveConflicts = (localMissions: Mission[], supabaseMissions: Mission[])
       missionMap.set(localMission.id, localMission);
     }
   });
-  
+
   return Array.from(missionMap.values());
 };
 
@@ -79,18 +83,18 @@ export const loadMissions = async (): Promise<Mission[]> => {
   } catch (error) {
     console.error('Failed to load missions from localStorage', error);
   }
-  
+
   // Essayer ensuite Supabase pour synchroniser
   try {
     const supabaseMissions = await loadMissionsFromSupabase();
-    
+
     if (supabaseMissions.length > 0 || localMissions.length > 0) {
       // Résoudre les conflits entre les deux sources
       const resolvedMissions = resolveConflicts(localMissions, supabaseMissions);
-      
+
       // Synchroniser avec localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(resolvedMissions));
-      
+
       // Si des conflits ont été résolus, sauvegarder la version résolue dans Supabase
       if (resolvedMissions.length > 0) {
         try {
@@ -100,7 +104,7 @@ export const loadMissions = async (): Promise<Mission[]> => {
           console.warn('Impossible de sauvegarder les missions résolues dans Supabase:', error);
         }
       }
-      
+
       return resolvedMissions;
     }
   } catch (error: any) {
@@ -111,7 +115,68 @@ export const loadMissions = async (): Promise<Mission[]> => {
       console.error('Erreur lors du chargement depuis Supabase, utilisation du localStorage:', error);
     }
   }
-  
+
   // Retourner les données locales si Supabase n'a pas fonctionné
   return localMissions;
+};
+
+// ==================== GESTION DES PAIEMENTS ====================
+
+export const loadPayments = async (): Promise<Payment[]> => {
+  // Local first
+  let localPayments: Payment[] = [];
+  try {
+    const data = localStorage.getItem(PAYMENTS_KEY);
+    localPayments = data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Failed to load payments from localStorage', error);
+  }
+
+  // Then Supabase
+  try {
+    const supabasePayments = await loadPaymentsFromSupabase();
+    if (supabasePayments.length > 0) {
+      // Pour l'instant on simple-merge, on pourrait faire de la résolution de conflits
+      localStorage.setItem(PAYMENTS_KEY, JSON.stringify(supabasePayments));
+      return supabasePayments;
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des paiements depuis Supabase:', error);
+  }
+
+  return localPayments;
+};
+
+export const savePayment = async (payment: Payment): Promise<void> => {
+  // Update local
+  try {
+    const current = await loadPayments();
+    const exists = current.find(p => p.id === payment.id);
+    let updated;
+    if (exists) {
+      updated = current.map(p => p.id === payment.id ? payment : p);
+    } else {
+      updated = [...current, payment];
+    }
+    localStorage.setItem(PAYMENTS_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to save payment locally', error);
+  }
+
+  // Update Supabase
+  await savePaymentToSupabase(payment);
+};
+
+export const deletePayment = async (id: string): Promise<void> => {
+  // Update local
+  try {
+    const current = await loadPayments();
+    const updated = current.filter(p => p.id !== id);
+    localStorage.setItem(PAYMENTS_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to delete payment locally', error);
+  }
+
+  // Update Supabase
+  await deletePaymentFromSupabase(id);
 };

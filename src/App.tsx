@@ -26,7 +26,18 @@ import { Mission } from './types';
 
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { missions, isLoading, isSaving, addMission, updateMission, deleteMission, importMissions } = useMissions();
+  const {
+    missions,
+    payments,
+    isLoading,
+    isSaving,
+    addMission,
+    updateMission,
+    deleteMission,
+    importMissions,
+    addPayment,
+    deletePayment
+  } = useMissions();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -379,7 +390,10 @@ const App: React.FC = () => {
               <Route path="/payments" element={
                 <PaymentsView
                   missions={missions}
+                  payments={payments}
                   onTogglePaid={handleTogglePaid}
+                  onAddPayment={addPayment}
+                  onDeletePayment={deletePayment}
                   hidePrices={hidePrices}
                 />
               } />

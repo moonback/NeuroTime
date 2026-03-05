@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Mission } from '../types';
+import { Mission, Payment } from '../types';
 import { getSupabase } from './authService';
 import { retry } from '../utils/retry';
 
@@ -25,22 +25,27 @@ const missionToDb = (mission: Mission, userId?: string) => {
     total_earnings: mission.totalEarnings,
     details: mission.details,
   };
-  
+
   // Ajouter is_paid (par défaut false si non défini)
   if (mission.isPaid !== undefined) {
     dbRow.is_paid = mission.isPaid;
   }
-  
+
   // Ajouter logistics seulement s'il existe (pour compatibilité avec anciennes bases)
   if (mission.logistics !== undefined) {
     dbRow.logistics = mission.logistics;
   }
-  
+
   // Ajouter time_slots seulement s'il existe (pour compatibilité avec anciennes bases)
   if (mission.timeSlots !== undefined) {
     dbRow.time_slots = mission.timeSlots.length > 1 ? mission.timeSlots : null;
   }
-  
+
+  // Ajouter payment_id seulement s'il existe
+  if (mission.paymentId !== undefined) {
+    dbRow.payment_id = mission.paymentId;
+  }
+
   return dbRow;
 };
 
@@ -61,13 +66,14 @@ const dbToMission = (dbRow: any): Mission => ({
   timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
   isPaid: dbRow.is_paid || false, // Récupérer le statut de paiement (par défaut false)
   updatedAt: dbRow.updated_at || undefined, // Récupérer la date de mise à jour
+  paymentId: dbRow.payment_id || undefined, // Récupérer l'ID du virement
 });
 
 // Obtenir l'ID de l'utilisateur connecté
 const getCurrentUserId = async (): Promise<string | null> => {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
-  
+
   const { data: { user } } = await supabase.auth.getUser();
   return user?.id || null;
 };
@@ -93,11 +99,11 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
         .from('missions')
         .select('id')
         .eq('user_id', userId);
-      
+
       if (selectError) {
         throw selectError;
       }
-      
+
       const existingIds = new Set((existingData || []).map(row => row.id));
       const missionIds = new Set(missions.map(m => m.id));
 
@@ -118,7 +124,7 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
       // Utiliser upsert pour insérer ou mettre à jour les missions
       if (missions.length > 0) {
         const missionsDb = missions.map(m => missionToDb(m, userId));
-        
+
         // Filtrer les colonnes undefined pour éviter les erreurs si les colonnes n'existent pas encore
         const missionsDbFiltered = missionsDb.map(mission => {
           const filtered: any = {};
@@ -129,7 +135,7 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
           });
           return filtered;
         });
-        
+
         const { error: upsertError } = await supabase
           .from('missions')
           .upsert(missionsDbFiltered, { onConflict: 'id' });
@@ -166,11 +172,11 @@ export const loadMissionsFromSupabase = async (): Promise<Mission[]> => {
         .select('*')
         .eq('user_id', userId)
         .order('start_time', { ascending: false });
-      
+
       if (result.error) {
         throw result.error;
       }
-      
+
       return result;
     });
 
@@ -448,6 +454,117 @@ export const syncClientsWithMissionsInSupabase = async (missions: { client: stri
     }
   } catch (error) {
     console.error('Erreur lors de la synchronisation des clients avec les missions:', error);
+  }
+};
+
+// ==================== GESTION DES PAIEMENTS / VIREMENTS ====================
+
+export const loadPaymentsFromSupabase = async (): Promise<Payment[]> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
+
+  const userId = await getCurrentUserId();
+  if (!userId) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Erreur lors du chargement des paiements:', error);
+      return [];
+    }
+
+    return (data || []).map(row => ({
+      id: row.id,
+      date: row.date,
+      amount: row.amount,
+      client: row.client,
+      description: row.description,
+      reference: row.reference,
+      missionIds: row.mission_ids || [],
+      method: row.method || 'virement',
+      createdAt: row.created_at,
+    }));
+  } catch (error) {
+    console.error('Erreur lors du chargement des paiements depuis Supabase:', error);
+    return [];
+  }
+};
+
+export const savePaymentToSupabase = async (payment: Payment): Promise<void> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  try {
+    const paymentDb = {
+      id: payment.id,
+      user_id: userId,
+      date: payment.date,
+      amount: payment.amount,
+      client: payment.client,
+      description: payment.description,
+      reference: payment.reference,
+      mission_ids: payment.missionIds,
+      method: payment.method,
+      created_at: payment.createdAt,
+    };
+
+    const { error } = await supabase
+      .from('payments')
+      .upsert(paymentDb);
+
+    if (error) throw error;
+
+    // Mettre à jour les missions liées
+    if (payment.missionIds.length > 0) {
+      const { error: updateError } = await supabase
+        .from('missions')
+        .update({ payment_id: payment.id, is_paid: true })
+        .in('id', payment.missionIds)
+        .eq('user_id', userId);
+
+      if (updateError) throw updateError;
+    }
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du paiement:', error);
+    throw error;
+  }
+};
+
+export const deletePaymentFromSupabase = async (paymentId: string): Promise<void> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  try {
+    // Retirer le paymentId des missions associées avant de supprimer le paiement
+    const { error: updateError } = await supabase
+      .from('missions')
+      .update({ payment_id: null, is_paid: false })
+      .eq('payment_id', paymentId)
+      .eq('user_id', userId);
+
+    if (updateError) throw updateError;
+
+    const { error } = await supabase
+      .from('payments')
+      .delete()
+      .eq('id', paymentId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Erreur lors de la suppression du paiement:', error);
+    throw error;
   }
 };
 
