@@ -11,9 +11,13 @@ interface DashboardKPIsProps {
   totalEarningsCollected: number;
   totalEarningsExpected: number;
   totalHours: number;
+  totalDayHours: number;
+  totalNightHours: number;
   completedMissionsCount: number;
   upcomingMissionsCount: number;
   averageHourlyRate: number;
+  averageDayHourlyRate: number;
+  averageNightHourlyRate: number;
   monthlyComparison: {
     percentage: number;
     isPositive: boolean;
@@ -29,9 +33,13 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   totalEarningsCollected,
   totalEarningsExpected,
   totalHours,
+  totalDayHours,
+  totalNightHours,
   completedMissionsCount,
   upcomingMissionsCount,
   averageHourlyRate,
+  averageDayHourlyRate,
+  averageNightHourlyRate,
   monthlyComparison,
   mostProfitableMission,
   hidePrices = false
@@ -72,7 +80,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
             icon={<Clock className="w-5 h-5 text-primary-400" />}
             label="Volume Horaire"
             value={`${totalHours.toFixed(1)} h`}
-            subtext="Total mensuel"
+            subtext={`Jour: ${totalDayHours}h • Nuit: ${totalNightHours}h`}
             color="bg-primary-500/5 border-primary-500/20"
             textColor="text-primary-400"
           />
@@ -96,7 +104,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           icon={<DollarSign className="w-4 h-4 text-blue-400" />}
           label="Taux Horaire"
           value={hidePrices ? '***' : `${averageHourlyRate.toFixed(0)} €/h`}
-          subtext="Rentabilité moyenne"
+          subtext={`Jour: ${averageDayHourlyRate.toFixed(0)}€/h • Nuit: ${averageNightHourlyRate.toFixed(0)}€/h`}
           color="bg-blue-500/5 border-blue-500/20"
           textColor="text-blue-400"
         />

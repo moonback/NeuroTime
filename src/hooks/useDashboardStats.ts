@@ -44,13 +44,35 @@ export const useDashboardStats = (missions: Mission[]) => {
     });
   }, [missions, selectedMonthStartTime, selectedMonthEndTime]);
 
-  // Heures et gains des missions terminées du mois sélectionné
+  // Heures et gains des missions terminées du mois sélectionné (exclusion des personnalisées pour le volume horaire)
   const totalHours = useMemo(() => {
     let hours = 0;
     for (const m of selectedMonthCompletedMissions) {
-      const start = new Date(m.startTime).getTime();
-      const end = new Date(m.endTime).getTime();
-      hours += (end - start) / (1000 * 60 * 60);
+      if (m.rateType !== 'custom') {
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        hours += (end - start) / (1000 * 60 * 60);
+      }
+    }
+    return Math.round(hours * 10) / 10;
+  }, [selectedMonthCompletedMissions]);
+
+  const totalDayHours = useMemo(() => {
+    let hours = 0;
+    for (const m of selectedMonthCompletedMissions) {
+      if (m.rateType !== 'custom') {
+        hours += m.details?.dayHours || 0;
+      }
+    }
+    return Math.round(hours * 10) / 10;
+  }, [selectedMonthCompletedMissions]);
+
+  const totalNightHours = useMemo(() => {
+    let hours = 0;
+    for (const m of selectedMonthCompletedMissions) {
+      if (m.rateType !== 'custom') {
+        hours += m.details?.nightHours || 0;
+      }
     }
     return Math.round(hours * 10) / 10;
   }, [selectedMonthCompletedMissions]);
@@ -148,6 +170,37 @@ export const useDashboardStats = (missions: Mission[]) => {
     return Math.round(rate * 100) / 100;
   }, [selectedMonthCompletedMissions]);
 
+  const averageDayHourlyRate = useMemo(() => {
+    let earnings = 0;
+    let hours = 0;
+    for (const m of selectedMonthCompletedMissions) {
+      if (m.rateType !== 'custom' && (m.details?.dayHours || 0) > 0) {
+        // Approximation: on utilise le ratio d'heures pour diviser le gain si mixte
+        const totalMissionHours = (m.details?.dayHours || 0) + (m.details?.nightHours || 0);
+        const dayRatio = (m.details?.dayHours || 0) / totalMissionHours;
+        earnings += (m.totalEarnings || 0) * dayRatio;
+        hours += m.details?.dayHours || 0;
+      }
+    }
+    if (hours === 0) return 0;
+    return Math.round((earnings / hours) * 100) / 100;
+  }, [selectedMonthCompletedMissions]);
+
+  const averageNightHourlyRate = useMemo(() => {
+    let earnings = 0;
+    let hours = 0;
+    for (const m of selectedMonthCompletedMissions) {
+      if (m.rateType !== 'custom' && (m.details?.nightHours || 0) > 0) {
+        const totalMissionHours = (m.details?.dayHours || 0) + (m.details?.nightHours || 0);
+        const nightRatio = (m.details?.nightHours || 0) / totalMissionHours;
+        earnings += (m.totalEarnings || 0) * nightRatio;
+        hours += m.details?.nightHours || 0;
+      }
+    }
+    if (hours === 0) return 0;
+    return Math.round((earnings / hours) * 100) / 100;
+  }, [selectedMonthCompletedMissions]);
+
   // Comparaison mensuelle
   const monthlyComparison = useMemo(() => {
     const lastMonthStart = startOfMonth(subMonths(selectedMonthDate, 1));
@@ -227,6 +280,8 @@ export const useDashboardStats = (missions: Mission[]) => {
     allCompletedMissions,
     selectedMonthCompletedMissions,
     totalHours,
+    totalDayHours,
+    totalNightHours,
     totalEarnings,
     totalEarningsCompleted,
     totalEarningsPlanned,
@@ -236,6 +291,8 @@ export const useDashboardStats = (missions: Mission[]) => {
     recentCompletedMissions,
     nextMission,
     averageHourlyRate,
+    averageDayHourlyRate,
+    averageNightHourlyRate,
     monthlyComparison,
     mostProfitableMission,
     lastThreeMonths

@@ -34,9 +34,13 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     totalEarningsPlanned,
     totalEarningsCollected,
     totalEarningsExpected,
+    totalDayHours,
+    totalNightHours,
     upcomingMissions,
     nextMission,
     averageHourlyRate,
+    averageDayHourlyRate,
+    averageNightHourlyRate,
     monthlyComparison,
     mostProfitableMission,
     lastThreeMonths
@@ -79,9 +83,13 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         totalEarningsCollected={totalEarningsCollected}
         totalEarningsExpected={totalEarningsExpected}
         totalHours={totalHours}
+        totalDayHours={totalDayHours}
+        totalNightHours={totalNightHours}
         completedMissionsCount={selectedMonthCompletedMissions.length}
         upcomingMissionsCount={upcomingMissions.length}
         averageHourlyRate={averageHourlyRate}
+        averageDayHourlyRate={averageDayHourlyRate}
+        averageNightHourlyRate={averageNightHourlyRate}
         monthlyComparison={monthlyComparison}
         mostProfitableMission={mostProfitableMission}
         hidePrices={hidePrices}

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Mission } from '../types';
 import { BarChart3, Clock, Calendar, Target } from 'lucide-react';
 import { format, getDay, startOfWeek, eachDayOfInterval, isSameDay, startOfMonth, endOfMonth } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 
 interface DashboardStatsProps {
   missions: Mission[];
@@ -13,13 +13,13 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
   const referenceDate = selectedMonth || new Date();
   const monthStart = startOfMonth(referenceDate);
   const monthEnd = endOfMonth(referenceDate);
-  
+
   const completedMissions = useMemo(() => {
     const monthStartTime = monthStart.getTime();
     const monthEndTime = monthEnd.getTime();
-    
+
     return missions.filter(m => {
-      if (m.status !== 'completed') return false;
+      if (m.status !== 'completed' || m.rateType === 'custom') return false;
       const missionEndTime = new Date(m.endTime).getTime();
       return missionEndTime >= monthStartTime && missionEndTime <= monthEndTime;
     });
@@ -28,14 +28,14 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
   // Durée moyenne des missions - calcul optimisé
   const averageDuration = useMemo(() => {
     if (completedMissions.length === 0) return 0;
-    
+
     let totalHours = 0;
     for (const m of completedMissions) {
       const start = new Date(m.startTime).getTime();
       const end = new Date(m.endTime).getTime();
       totalHours += (end - start) / (1000 * 60 * 60);
     }
-    
+
     const average = totalHours / completedMissions.length;
     return Math.round(average * 10) / 10; // Arrondir à 1 décimale
   }, [completedMissions]);
@@ -43,22 +43,22 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
   // Heures de pointe (jours de la semaine les plus travaillés) - calcul optimisé
   const peakDays = useMemo(() => {
     const dayCounts: Record<number, { count: number; hours: number }> = {};
-    
+
     for (const mission of completedMissions) {
       const day = getDay(new Date(mission.startTime));
       const start = new Date(mission.startTime).getTime();
       const end = new Date(mission.endTime).getTime();
       const hours = (end - start) / (1000 * 60 * 60);
-      
+
       if (!dayCounts[day]) {
         dayCounts[day] = { count: 0, hours: 0 };
       }
       dayCounts[day].count += 1;
       dayCounts[day].hours += hours;
     }
-    
+
     const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    
+
     return Object.entries(dayCounts)
       .map(([day, data]) => ({
         day: parseInt(day),
@@ -74,7 +74,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
   const completionRate = useMemo(() => {
     const monthStartTime = monthStart.getTime();
     const monthEndTime = monthEnd.getTime();
-    
+
     let planned = 0;
     for (const m of missions) {
       if (m.status === 'planned') {
@@ -84,10 +84,10 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
         }
       }
     }
-    
+
     const completed = completedMissions.length;
     const total = planned + completed;
-    
+
     if (total === 0) return 0;
     return Math.round((completed / total) * 100);
   }, [missions, completedMissions, monthStart, monthEnd]);
@@ -97,18 +97,18 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
     const weeks = [];
     const monthStartWeek = startOfWeek(monthStart, { weekStartsOn: 1 });
     const monthEndWeek = startOfWeek(monthEnd, { weekStartsOn: 1 });
-    
+
     // Calculer toutes les semaines du mois
     let currentWeek = monthStartWeek;
     let weekIndex = 1;
-    
+
     while (currentWeek <= monthEndWeek) {
       const weekStartTime = currentWeek.getTime();
       const weekEndTime = weekStartTime + 6 * 24 * 60 * 60 * 1000;
-      
+
       let hours = 0;
       let count = 0;
-      
+
       for (const m of completedMissions) {
         const missionStartTime = new Date(m.startTime).getTime();
         if (missionStartTime >= weekStartTime && missionStartTime <= weekEndTime) {
@@ -118,17 +118,17 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
           hours += (end - start) / (1000 * 60 * 60);
         }
       }
-      
+
       weeks.push({
         week: `Sem. ${weekIndex}`,
         hours: Math.round(hours * 10) / 10, // Arrondir à 1 décimale
         count,
       });
-      
+
       currentWeek = new Date(currentWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
       weekIndex++;
     }
-    
+
     return weeks;
   }, [completedMissions, monthStart, monthEnd]);
 
@@ -142,7 +142,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
           </div>
           <h3 className="text-lg md:text-xl font-bold text-gray-100">Statistiques avancées</h3>
         </div>
-        
+
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 glass-light rounded-lg border border-gray-700/30 backdrop-blur-sm">
             <div className="flex items-center gap-3">
@@ -200,12 +200,12 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
           </div>
           <h3 className="text-lg md:text-xl font-bold text-gray-100">Activité hebdomadaire</h3>
         </div>
-        
+
         <div className="space-y-3">
           {weeklyHours.map((week, index) => {
             const maxHours = Math.max(...weeklyHours.map(w => w.hours), 1);
             const percentage = (week.hours / maxHours) * 100;
-            
+
             return (
               <div key={index} className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
