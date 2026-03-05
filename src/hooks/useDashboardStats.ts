@@ -279,6 +279,7 @@ export const useDashboardStats = (missions: Mission[]) => {
     selectedMonthDate,
     allCompletedMissions,
     selectedMonthCompletedMissions,
+    selectedMonthPlannedMissions,
     totalHours,
     totalDayHours,
     totalNightHours,

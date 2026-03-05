@@ -54,10 +54,6 @@ const App: React.FC = () => {
   }, [editingMission, updateMission, addMission]);
 
   const handleEditMission = (mission: Mission) => {
-    if (mission.isPaid) {
-      toast.warning('Cette mission a été payée et ne peut plus être modifiée.');
-      return;
-    }
     setEditingMission(mission);
     setSelectedDateForNew(undefined);
     setIsModalOpen(true);

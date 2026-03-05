@@ -30,59 +30,59 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [client, setClient] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
-  
+
   // Time fields - Support multiple time slots
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
     { startTime: '09:00', endTime: '18:00' }
   ]);
-  
+
   // Financial fields
   const [calculationMode, setCalculationMode] = useState<'auto' | 'manual'>('auto');
   const [manualTotal, setManualTotal] = useState<number>(0);
-  
+
   // Computed state
   const [computedTotal, setComputedTotal] = useState<number>(0);
   const [dayHours, setDayHours] = useState<number>(0);
   const [nightHours, setNightHours] = useState<number>(0);
-  
+
   const [status, setStatus] = useState<'planned' | 'completed' | 'cancelled'>('planned');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [duplicateWarning, setDuplicateWarning] = useState<string>('');
-  
+
   // Client management
   const [clients, setClients] = useState<Client[]>([]);
   const [isAddingNewClient, setIsAddingNewClient] = useState(false);
   const [newClientName, setNewClientName] = useState('');
-  
+
   // Validation
   const validateForm = useMemo(() => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!title.trim()) {
       newErrors.title = 'Le titre est requis';
     } else if (title.length < 3) {
       newErrors.title = 'Le titre doit contenir au moins 3 caractères';
     }
-    
+
     if (!client.trim()) {
       newErrors.client = 'Le client est requis';
     }
-    
+
     if (!location.trim()) {
       newErrors.location = 'Le lieu est requis';
     }
-    
+
     if (!date) {
       newErrors.date = 'La date est requise';
     }
-    
+
     // Validation des créneaux horaires
     if (timeSlots.length === 0) {
       newErrors.timeSlots = 'Au moins un créneau horaire est requis';
     }
-    
+
     timeSlots.forEach((slot, index) => {
       if (!slot.startTime) {
         newErrors[`timeSlot_${index}_start`] = 'Heure de début requise';
@@ -90,14 +90,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       if (!slot.endTime) {
         newErrors[`timeSlot_${index}_end`] = 'Heure de fin requise';
       }
-      
+
       if (slot.startTime && slot.endTime) {
         const start = new Date(`${date}T${slot.startTime}`);
         let end = new Date(`${date}T${slot.endTime}`);
         if (end <= start) {
           end.setDate(end.getDate() + 1);
         }
-        
+
         const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
         if (diffHours > 24) {
           newErrors[`timeSlot_${index}_end`] = 'La durée ne peut pas dépasser 24 heures';
@@ -107,12 +107,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         }
       }
     });
-    
+
     // Validation manuelle
     if (calculationMode === 'manual' && manualTotal <= 0) {
       newErrors.manualTotal = 'Le montant doit être supérieur à 0';
     }
-    
+
     return newErrors;
   }, [title, client, location, date, timeSlots, calculationMode, manualTotal]);
 
@@ -139,17 +139,17 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       setClient(initialData.client);
       setLocation(initialData.location);
       setDescription(initialData.description);
-      
+
       const start = new Date(initialData.startTime);
       const end = new Date(initialData.endTime);
-      
+
       setDate(formatDateForInput(start));
-      
+
       // Gérer les créneaux horaires multiples ou un seul créneau
       if (initialData.timeSlots && initialData.timeSlots.length > 0) {
         // Filtrer les créneaux invalides et s'assurer qu'ils ont des valeurs valides
-        const validSlots = initialData.timeSlots.filter(slot => 
-          slot && slot.startTime && slot.endTime && 
+        const validSlots = initialData.timeSlots.filter(slot =>
+          slot && slot.startTime && slot.endTime &&
           slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
         );
         if (validSlots.length > 0) {
@@ -166,7 +166,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
           { startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }
         ]);
       }
-      
+
       setStatus(initialData.status);
 
       if (initialData.rateType === 'custom') {
@@ -175,7 +175,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       } else {
         setCalculationMode('auto');
       }
-      
+
       setIsAddingNewClient(false);
       setNewClientName('');
     } else {
@@ -193,11 +193,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   useEffect(() => {
     if (calculationMode === 'auto' && timeSlots.length > 0 && date) {
       // Vérifier que tous les créneaux ont des heures valides avant de calculer
-      const hasValidSlots = timeSlots.every(slot => 
-        slot.startTime && slot.endTime && 
+      const hasValidSlots = timeSlots.every(slot =>
+        slot.startTime && slot.endTime &&
         slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
       );
-      
+
       if (hasValidSlots) {
         try {
           const result = calculateEarningsMultiple(date, timeSlots);
@@ -228,8 +228,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     }
 
     // Vérifier que tous les créneaux ont des heures valides
-    const hasValidSlots = timeSlots.every(slot => 
-      slot.startTime && slot.endTime && 
+    const hasValidSlots = timeSlots.every(slot =>
+      slot.startTime && slot.endTime &&
       slot.startTime.trim() !== '' && slot.endTime.trim() !== ''
     );
 
@@ -294,14 +294,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
     setIsAddingNewClient(false);
     setNewClientName('');
   };
-  
+
   // Handle adding new client
   const handleAddNewClient = async () => {
     if (!newClientName.trim()) {
       setErrors(prev => ({ ...prev, newClient: 'Le nom du client est requis' }));
       return;
     }
-    
+
     try {
       const newClient = await addClient(newClientName.trim());
       const updatedClients = await getAllClients(missions || []);
@@ -318,7 +318,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       setErrors(prev => ({ ...prev, newClient: error.message || 'Erreur lors de l\'ajout du client' }));
     }
   };
-  
+
   // Handle client selection change
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -334,18 +334,18 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       setErrors(prev => ({ ...prev, client: '' }));
     }
   };
-  
+
   // Fonctions pour gérer les créneaux horaires
   const addTimeSlot = () => {
     setTimeSlots([...timeSlots, { startTime: '09:00', endTime: '18:00' }]);
   };
-  
+
   const removeTimeSlot = (index: number) => {
     if (timeSlots.length > 1) {
       setTimeSlots(timeSlots.filter((_, i) => i !== index));
     }
   };
-  
+
   const updateTimeSlot = (index: number, field: 'startTime' | 'endTime', value: string) => {
     const updated = [...timeSlots];
     updated[index] = { ...updated[index], [field]: value };
@@ -375,7 +375,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         const end = new Date(model.endTime);
         setTimeSlots([{ startTime: formatTimeForInput(start), endTime: formatTimeForInput(end) }]);
       }
-      
+
       // Optional: Copy description? 
       // setDescription(model.description);
     }
@@ -396,41 +396,41 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Vérifier si on est en train d'ajouter un nouveau client mais qu'il n'a pas été ajouté
     if (isAddingNewClient && !newClientName.trim()) {
       setErrors(prev => ({ ...prev, newClient: 'Veuillez ajouter le nouveau client ou annuler' }));
       return;
     }
-    
+
     // Valider le formulaire
     if (Object.keys(validateForm).length > 0) {
       setErrors(validateForm);
       return;
     }
-    
+
     setErrors({});
-    
+
     // Calculer startTime et endTime pour compatibilité (premier et dernier créneau)
     const firstSlot = timeSlots[0];
     const lastSlot = timeSlots[timeSlots.length - 1];
-    
+
     const startIso = new Date(`${date}T${firstSlot.startTime}`).toISOString();
     let endObj = new Date(`${date}T${lastSlot.endTime}`);
     const startObj = new Date(`${date}T${firstSlot.startTime}`);
-    
+
     if (endObj <= startObj) {
       endObj.setDate(endObj.getDate() + 1);
     }
     const endIso = endObj.toISOString();
 
     const finalTotal = calculationMode === 'auto' ? computedTotal : manualTotal;
-    
+
     let finalRateType: 'day' | 'night' | 'mixed' | 'custom' = 'custom';
     if (calculationMode === 'auto') {
-        if (dayHours > 0 && nightHours > 0) finalRateType = 'mixed';
-        else if (nightHours > 0) finalRateType = 'night';
-        else finalRateType = 'day';
+      if (dayHours > 0 && nightHours > 0) finalRateType = 'mixed';
+      else if (nightHours > 0) finalRateType = 'night';
+      else finalRateType = 'day';
     }
 
     const newMission: Mission = {
@@ -444,7 +444,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       timeSlots: timeSlots.length > 1 ? timeSlots : undefined, // Stocker seulement si plusieurs créneaux
       status: status,
       rateType: finalRateType,
-      hourlyRate: calculationMode === 'auto' ? RATE_DAY : 0, 
+      hourlyRate: calculationMode === 'auto' ? RATE_DAY : 0,
       totalEarnings: finalTotal,
       details: {
         dayHours,
@@ -463,16 +463,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-4 transition-all animate-fade-in">
       <div className="glass-strong rounded-2xl md:rounded-3xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[95vh] animate-scale-in shadow-2xl">
-        
+
         {/* Header */}
         <div className={`flex justify-between items-center p-5 md:p-7 border-b relative overflow-hidden ${isConverting ? 'bg-green-500/25 border-green-500/40 glass-light' : 'border-primary-500/25 glass-light bg-gradient-to-r from-primary-500/10 via-transparent to-transparent'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
-            <h2 className={`text-xl md:text-2xl font-black tracking-tight ${isConverting ? 'text-green-200' : 'text-gray-100'}`}>
-              {isConverting ? 'Valider les heures' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
+            <h2 className={`text-xl md:text-2xl font-black tracking-tight ${isConverting ? 'text-green-200' : initialData?.isPaid ? 'text-orange-300' : 'text-gray-100'}`}>
+              {isConverting ? 'Valider les heures' : initialData?.isPaid ? 'Consulter la mission' : initialData ? 'Modifier la mission' : 'Nouvelle mission'}
             </h2>
-            <p className={`text-xs md:text-sm mt-1.5 font-medium ${isConverting ? 'text-green-300' : 'text-gray-300'}`}>
-              {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : 'Remplissez les détails pour votre suivi.'}
+            <p className={`text-xs md:text-sm mt-1.5 font-medium ${isConverting ? 'text-green-300' : initialData?.isPaid ? 'text-orange-400' : 'text-gray-300'}`}>
+              {isConverting ? 'Vérifiez les horaires réels pour finaliser le montant.' : initialData?.isPaid ? 'Cette mission est déjà payée et ne peut plus être modifiée.' : 'Remplissez les détails pour votre suivi.'}
             </p>
           </div>
           <button onClick={onClose} className="p-2 md:p-2.5 hover:bg-dark-200/50 rounded-xl transition-all text-gray-400 hover:text-gray-100 hover:scale-110 hover:rotate-90 relative z-10 glass-button border border-transparent hover:border-primary-500/30">
@@ -482,22 +482,22 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
         <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar">
           <div className="p-5 md:p-7 space-y-6 md:space-y-8">
-            
+
             {/* Template Selector (Only on new mission) */}
             {!initialData && missions.length > 0 && (
-               <div className="bg-primary-500/25 border border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
-                 <Copy size={16} className="text-primary-300" strokeWidth={2.5} />
-                 <select 
-                   onChange={handleCopyFromMission}
-                   className="bg-transparent text-xs md:text-sm text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
-                   defaultValue=""
-                 >
-                   <option value="" disabled>Copier depuis une mission précédente...</option>
-                   {missions.slice(-10).reverse().map(m => (
-                     <option key={m.id} value={m.id} className="bg-dark-50">{m.title} - {m.client}</option>
-                   ))}
-                 </select>
-               </div>
+              <div className="bg-primary-500/25 border border-primary-500/40 rounded-xl p-3 md:p-4 flex items-center gap-3 glass-light hover:border-primary-500/60 transition-all animate-slide-in-up shadow-lg">
+                <Copy size={16} className="text-primary-300" strokeWidth={2.5} />
+                <select
+                  onChange={handleCopyFromMission}
+                  className="bg-transparent text-xs md:text-sm text-primary-200 font-semibold w-full focus:outline-none cursor-pointer"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Copier depuis une mission précédente...</option>
+                  {missions.slice(-10).reverse().map(m => (
+                    <option key={m.id} value={m.id} className="bg-dark-50">{m.title} - {m.client}</option>
+                  ))}
+                </select>
+              </div>
             )}
 
             {/* Section 1: Informations Générales */}
@@ -505,7 +505,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               <h3 className="text-xs md:text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2.5 mb-1">
                 <Briefcase size={14} className="text-primary-400" strokeWidth={2.5} /> Détails de la mission
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                 <div className="space-y-2">
                   <label className="text-xs md:text-sm font-bold text-gray-200 flex items-center gap-1.5 tracking-wide">
@@ -522,10 +522,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       setTitle(e.target.value);
                       if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
                     }}
+                    disabled={initialData?.isPaid}
                     placeholder="Ex: Régie Son - Concert"
-                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 font-medium ${
-                      errors.title ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''
-                    }`}
+                    className={`w-full px-4 md:px-5 py-3 md:py-3.5 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 font-medium ${errors.title ? 'border-red-500/60 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''
+                      } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
                   />
                   {errors.title && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
@@ -540,15 +540,15 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       <AlertCircle size={12} className="text-gray-500 cursor-help" />
                     </Tooltip>
                   </label>
-                  
+
                   {!isAddingNewClient ? (
                     <div className="flex gap-2">
                       <select
                         value={client}
                         onChange={handleClientChange}
-                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 ${
-                          errors.client ? 'border-red-500/50' : ''
-                        }`}
+                        disabled={initialData?.isPaid}
+                        className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 ${errors.client ? 'border-red-500/50' : ''
+                          } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
                         <option value="">Sélectionner un client...</option>
                         {clients.map(c => (
@@ -582,9 +582,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           }}
                           placeholder="Nom du nouveau client"
                           autoFocus
-                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                            errors.newClient ? 'border-red-500/50' : ''
-                          }`}
+                          className={`flex-1 px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${errors.newClient ? 'border-red-500/50' : ''
+                            }`}
                         />
                         <button
                           type="button"
@@ -617,7 +616,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       )}
                     </div>
                   )}
-                  
+
                   {errors.client && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.client}
@@ -641,10 +640,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     setLocation(e.target.value);
                     if (errors.location) setErrors(prev => ({ ...prev, location: '' }));
                   }}
+                  disabled={initialData?.isPaid}
                   placeholder="Ex: Paris La Défense Arena"
-                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${
-                    errors.location ? 'border-red-500/50' : ''
-                  }`}
+                  className={`w-full px-4 py-3 glass-input rounded-xl outline-none transition-all text-sm text-gray-100 placeholder-gray-500 ${errors.location ? 'border-red-500/50' : ''
+                    } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
                 />
                 {errors.location && (
                   <p className="text-xs text-red-400 flex items-center gap-1">
@@ -658,13 +657,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
             {/* Section 2: Date & Horaires */}
             <section className="space-y-3 md:space-y-4">
-               <div className="flex justify-between items-center">
-                 <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <div className="flex justify-between items-center">
+                <h3 className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Calculator size={12} /> Horaires & Calcul
                 </h3>
-                
+
                 {/* Toggle Mode */}
-                <div className="bg-gray-100 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium">
+                <div className={`bg-gray-100 p-0.5 rounded-md flex text-[10px] md:text-xs font-medium ${initialData?.isPaid ? 'opacity-50 pointer-events-none' : ''}`}>
                   <button
                     type="button"
                     onClick={() => setCalculationMode('auto')}
@@ -693,9 +692,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       setDate(e.target.value);
                       if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
                     }}
-                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-100 ${
-                      errors.date ? 'border-red-500/50' : ''
-                    }`}
+                    disabled={initialData?.isPaid}
+                    className={`w-full px-4 py-3 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors.date ? 'border-red-500/50' : ''
+                      } ${initialData?.isPaid ? 'opacity-70 cursor-not-allowed' : ''}`}
                   />
                   {errors.date && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
@@ -703,7 +702,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     </p>
                   )}
                 </div>
-                
+
                 {/* Créneaux horaires multiples */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -711,13 +710,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                     <button
                       type="button"
                       onClick={addTimeSlot}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all"
+                      disabled={initialData?.isPaid}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 border border-primary-500/30 rounded-lg text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus size={14} />
                       Ajouter un créneau
                     </button>
                   </div>
-                  
+
                   {timeSlots.map((slot, index) => (
                     <div key={index} className="glass-light rounded-lg p-3 md:p-4 border-primary-500/20 space-y-3">
                       <div className="flex items-center justify-between mb-2">
@@ -741,9 +741,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.startTime}
                             onChange={(e) => updateTimeSlot(index, 'startTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
-                              errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
-                            }`}
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors[`timeSlot_${index}_start`] ? 'border-red-500/50' : ''
+                              }`}
                           />
                           {errors[`timeSlot_${index}_start`] && (
                             <p className="text-xs text-red-400 flex items-center gap-1">
@@ -758,9 +757,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                             required
                             value={slot.endTime}
                             onChange={(e) => updateTimeSlot(index, 'endTime', e.target.value)}
-                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${
-                              errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
-                            }`}
+                            className={`w-full px-4 py-2.5 glass-input rounded-xl outline-none text-sm text-gray-100 ${errors[`timeSlot_${index}_end`] ? 'border-red-500/50' : ''
+                              }`}
                           />
                           {errors[`timeSlot_${index}_end`] && (
                             <p className="text-xs text-red-400 flex items-center gap-1">
@@ -771,13 +769,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       </div>
                     </div>
                   ))}
-                  
+
                   {errors.timeSlots && (
                     <p className="text-xs text-red-400 flex items-center gap-1">
                       <AlertCircle size={12} /> {errors.timeSlots}
                     </p>
                   )}
-                  
+
                   {/* Avertissement de doublon */}
                   {duplicateWarning && (
                     <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-3 flex items-start gap-2">
@@ -791,22 +789,22 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
               {/* Smart Calculator Display */}
               <div className={`p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all relative overflow-hidden group ${status === 'completed' ? 'bg-green-500/20 border-green-500/30 glass-card' : 'glass-card border-primary-500/20'}`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                
+
                 {calculationMode === 'auto' ? (
                   <div className="space-y-3 md:space-y-4 relative z-10">
                     <div className="flex justify-between items-start gap-4">
-                       <div>
-                         <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
-                         <p className="text-[10px] md:text-xs text-gray-400">
-                           {hidePrices ? 'Calcul automatique jour/nuit' : `Jour (${RATE_DAY}€) et nuit (${RATE_NIGHT}€ > 22h)`}
-                         </p>
-                       </div>
-                       <div className="text-right">
-                          <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
-                          <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
-                            {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={20} strokeWidth={2.5} />}
-                          </span>
-                       </div>
+                      <div>
+                        <label className="text-xs md:text-sm font-bold text-gray-200 block mb-1">Calcul Automatique</label>
+                        <p className="text-[10px] md:text-xs text-gray-400">
+                          {hidePrices ? 'Calcul automatique jour/nuit' : `Jour (${RATE_DAY}€) et nuit (${RATE_NIGHT}€ > 22h)`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] md:text-xs text-gray-400 block mb-1 uppercase tracking-wide">Total Estimé</span>
+                        <span className={`text-2xl md:text-3xl font-bold flex items-center justify-end gap-1 ${status === 'completed' ? 'text-green-300' : 'text-primary-300'} group-hover:scale-105 transition-transform duration-300`}>
+                          {formatPrice(computedTotal, 2)} {!hidePrices && <Euro size={20} strokeWidth={2.5} />}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Visual Bar Breakdown */}
@@ -816,25 +814,25 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           {dayHours > 0 && (
                             <div className="bg-orange-400 h-full" style={{ width: `${(dayHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
-                           {nightHours > 0 && (
+                          {nightHours > 0 && (
                             <div className="bg-primary-500 h-full" style={{ width: `${(nightHours / (dayHours + nightHours)) * 100}%` }} />
                           )}
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           {dayHours > 0 ? (
-                             <div className="flex items-center gap-2 text-gray-200">
-                               <Sun size={16} className="text-orange-400" />
-                               <span className="font-semibold">{dayHours.toFixed(1)}h</span>
-                               {!hidePrices && <span className="text-gray-400">× {RATE_DAY}€</span>}
-                             </div>
+                            <div className="flex items-center gap-2 text-gray-200">
+                              <Sun size={16} className="text-orange-400" />
+                              <span className="font-semibold">{dayHours.toFixed(1)}h</span>
+                              {!hidePrices && <span className="text-gray-400">× {RATE_DAY}€</span>}
+                            </div>
                           ) : <span />}
-                          
+
                           {nightHours > 0 ? (
-                             <div className="flex items-center gap-2 text-gray-200">
-                               <Moon size={16} className="text-primary-400" />
-                               <span className="font-semibold">{nightHours.toFixed(1)}h</span>
-                               {!hidePrices && <span className="text-gray-400">× {RATE_NIGHT}€</span>}
-                             </div>
+                            <div className="flex items-center gap-2 text-gray-200">
+                              <Moon size={16} className="text-primary-400" />
+                              <span className="font-semibold">{nightHours.toFixed(1)}h</span>
+                              {!hidePrices && <span className="text-gray-400">× {RATE_NIGHT}€</span>}
+                            </div>
                           ) : <span />}
                         </div>
                       </div>
@@ -842,13 +840,13 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   </div>
                 ) : (
                   // Manual Mode
-                   <div className="flex items-center justify-between gap-4">
-                     <div className="flex-1">
-                        <label className="text-sm font-bold text-gray-200 block mb-1">Montant Forfaitaire</label>
-                         <p className="text-xs text-gray-400">Saisie manuelle du total</p>
-                     </div>
-                     <div className="w-1/2">
-                       <div className="relative">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <label className="text-sm font-bold text-gray-200 block mb-1">Montant Forfaitaire</label>
+                      <p className="text-xs text-gray-400">Saisie manuelle du total</p>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="relative">
                         <input
                           type={hidePrices ? "password" : "number"}
                           min="0"
@@ -864,9 +862,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                           disabled={hidePrices}
                         />
                         {!hidePrices && <Euro className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />}
-                       </div>
-                     </div>
-                   </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </section>
@@ -876,7 +874,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             {/* Section 3: IA & Notes */}
             <section className="space-y-4">
               <div className="flex justify-between items-center">
-                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Sparkles size={14} /> Description (IA)
                 </h3>
                 <button
@@ -889,7 +887,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                   {isEnhancing ? 'Réécriture en cours...' : 'Reformuler pro'}
                 </button>
               </div>
-              
+
               <div className="relative">
                 <textarea
                   value={description}
@@ -902,27 +900,26 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             </section>
 
             {/* Status Selector */}
-             <div className="flex gap-4 items-center glass-light p-3 rounded-xl border-primary-500/20">
-               <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
-               <div className="flex gap-2">
-                 {(['planned', 'completed', 'cancelled'] as const).map(s => (
-                   <button
+            <div className="flex gap-4 items-center glass-light p-3 rounded-xl border-primary-500/20">
+              <span className="text-sm font-medium text-gray-200 pl-2">Statut :</span>
+              <div className="flex gap-2">
+                {(['planned', 'completed', 'cancelled'] as const).map(s => (
+                  <button
                     key={s}
                     type="button"
                     onClick={() => setStatus(s)}
-                    className={`px-3 py-1 text-xs rounded-full border transition-all capitalize ${
-                      status === s 
-                      ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold' 
-                        : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
-                        : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
-                      : 'glass-button text-gray-400 hover:text-primary-300'
-                    }`}
-                   >
-                     {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
-                   </button>
-                 ))}
-               </div>
-             </div>
+                    className={`px-3 py-1 text-xs rounded-full border transition-all capitalize ${status === s
+                        ? s === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-300 font-bold'
+                          : s === 'cancelled' ? 'bg-red-500/20 border-red-500/30 text-red-300 font-bold'
+                            : 'bg-primary-500/20 border-primary-500/30 text-primary-300 font-bold'
+                        : 'glass-button text-gray-400 hover:text-primary-300'
+                      }`}
+                  >
+                    {s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Footer Actions */}
@@ -935,19 +932,31 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
             >
               Annuler
             </button>
-            <button
-              type="submit"
-              className={`flex-[2] text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${
-                isConverting 
-                ? 'bg-green-500 hover:bg-green-600 glow-green' 
-                : 'bg-primary-500 hover:bg-primary-600 glow-primary'
-              }`}
-            >
-              <span className="flex items-center gap-2.5 tracking-wide">
-                {isConverting ? <CheckCircle size={18} strokeWidth={2.5} /> : <Calendar size={18} strokeWidth={2.5} />}
-                {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
-              </span>
-            </button>
+            {!initialData?.isPaid ? (
+              <button
+                type="submit"
+                className={`flex-[2] text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10 ${isConverting
+                    ? 'bg-green-500 hover:bg-green-600 glow-green'
+                    : 'bg-primary-500 hover:bg-primary-600 glow-primary'
+                  }`}
+              >
+                <span className="flex items-center gap-2.5 tracking-wide">
+                  {isConverting ? <CheckCircle size={18} strokeWidth={2.5} /> : <Calendar size={18} strokeWidth={2.5} />}
+                  {isConverting ? 'Valider les heures' : initialData ? 'Mettre à jour' : 'Enregistrer'}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-[2] bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 md:py-3.5 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm md:text-base relative z-10"
+              >
+                <span className="flex items-center gap-2.5 tracking-wide uppercase">
+                  <CheckCircle size={18} strokeWidth={3} />
+                  Fermer (Payé)
+                </span>
+              </button>
+            )}
           </div>
         </form>
       </div>

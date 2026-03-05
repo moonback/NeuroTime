@@ -25,6 +25,7 @@ interface DashboardKPIsProps {
   };
   mostProfitableMission: Mission | null;
   hidePrices?: boolean;
+  onRevenueClick?: () => void;
 }
 
 const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
@@ -42,7 +43,8 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   averageNightHourlyRate,
   monthlyComparison,
   mostProfitableMission,
-  hidePrices = false
+  hidePrices = false,
+  onRevenueClick
 }) => {
   const formatPrice = (value: number | null | undefined): string => {
     if (hidePrices) return '***';
@@ -72,6 +74,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
               value: Math.abs(monthlyComparison.percentage),
               isPositive: monthlyComparison.isPositive,
             } : undefined}
+            onClick={onRevenueClick}
           />
         </div>
 

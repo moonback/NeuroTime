@@ -11,6 +11,8 @@ import UpcomingMissionsList from './dashboard/UpcomingMissionsList';
 import DataPersistence from './dashboard/DataPersistence';
 
 import RecentHistory from './dashboard/RecentHistory';
+import RevenueMissionsModal from './dashboard/RevenueMissionsModal';
+import { useState } from 'react';
 
 interface DashboardProps {
   missions: Mission[];
@@ -28,6 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     selectedMonthDate,
     allCompletedMissions,
     selectedMonthCompletedMissions,
+    selectedMonthPlannedMissions,
     totalHours,
     totalEarnings,
     totalEarningsCompleted,
@@ -45,6 +48,8 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     mostProfitableMission,
     lastThreeMonths
   } = useDashboardStats(missions);
+
+  const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
 
   const {
     downloadCSV,
@@ -92,6 +97,16 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
         averageNightHourlyRate={averageNightHourlyRate}
         monthlyComparison={monthlyComparison}
         mostProfitableMission={mostProfitableMission}
+        hidePrices={hidePrices}
+        onRevenueClick={() => setIsRevenueModalOpen(true)}
+      />
+
+      <RevenueMissionsModal
+        isOpen={isRevenueModalOpen}
+        onClose={() => setIsRevenueModalOpen(false)}
+        missions={[...selectedMonthCompletedMissions, ...selectedMonthPlannedMissions]}
+        selectedMonthDate={selectedMonthDate}
+        onEdit={onEdit}
         hidePrices={hidePrices}
       />
 

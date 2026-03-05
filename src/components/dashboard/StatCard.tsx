@@ -12,20 +12,23 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
+  onClick?: () => void;
 }
 
-const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, color, textColor, trend }) => {
+const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, color, textColor, trend, onClick }) => {
   const renderedIcon = React.isValidElement(icon)
     ? React.cloneElement(icon as React.ReactElement, { strokeWidth: 2.5 })
     : icon;
 
   return (
     <div
+      onClick={onClick}
       className={[
         'group relative overflow-hidden rounded-2xl p-4 glass-card',
         'transition-all duration-500 animate-slide-in-up',
         'hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20',
         'border border-white/5',
+        onClick ? 'cursor-pointer active:scale-95' : '',
         color,
       ].join(' ')}
     >
