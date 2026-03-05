@@ -3,11 +3,15 @@ const PREFERENCES_KEY = 'neurotime_preferences_v1';
 export interface UserPreferences {
   hidePrices: boolean;
   sidebarPinned: boolean;
+  dayRate: number;
+  nightRate: number;
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   hidePrices: false,
   sidebarPinned: false,
+  dayRate: 25,
+  nightRate: 30,
 };
 
 /**

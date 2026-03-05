@@ -16,6 +16,7 @@ const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
 const StatsView = lazy(() => import('./components/StatsView'));
 const UrssafView = lazy(() => import('./components/UrssafView'));
+const ProfileView = lazy(() => import('./components/ProfileView'));
 
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -252,6 +253,12 @@ const App: React.FC = () => {
             icon={<Calculator size={15} />}
             label="URSSAF"
           />
+          <NavButton
+            active={location.pathname === '/profile'}
+            onClick={() => { navigate('/profile'); setIsSidebarOpen(false) }}
+            icon={<User size={15} />}
+            label="Mon Profil"
+          />
         </nav>
 
         <div className="p-2.5 space-y-2.5">
@@ -275,7 +282,12 @@ const App: React.FC = () => {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-bold text-white truncate leading-none mb-0.5">{user.email?.split('@')[0]}</span>
-                <span className="text-[7px] text-gray-500 font-semibold uppercase tracking-wider">En ligne</span>
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="text-[7px] text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider text-left"
+                >
+                  Voir Profil
+                </button>
               </div>
             </div>
 
@@ -377,6 +389,9 @@ const App: React.FC = () => {
                   hidePrices={hidePrices}
                 />
               } />
+              <Route path="/profile" element={
+                <ProfileView />
+              } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
@@ -423,10 +438,16 @@ const App: React.FC = () => {
             label="Paiements"
           />
           <MobileNavButton
-            active={location.pathname === '/stats'}
-            onClick={() => navigate('/stats')}
-            icon={<BarChart3 size={19} />}
-            label="Stats"
+            active={location.pathname === '/urssaf'}
+            onClick={() => navigate('/urssaf')}
+            icon={<Calculator size={19} />}
+            label="URSSAF"
+          />
+          <MobileNavButton
+            active={location.pathname === '/profile'}
+            onClick={() => navigate('/profile')}
+            icon={<User size={19} />}
+            label="Profil"
           />
         </div>
       </nav>

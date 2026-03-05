@@ -7,6 +7,7 @@ import { TimeSlot } from '../types';
 import { Tooltip } from './Tooltip';
 import { getAllClients, addClient, Client, syncClientsWithMissions } from '../services/clientService';
 import { findDuplicateMissions, formatConflictMessage } from '../utils/missionValidation';
+import { usePreferences } from '../hooks/usePreferences';
 
 interface MissionFormProps {
   isOpen: boolean;
@@ -30,6 +31,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
   const [client, setClient] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+
+  const { dayRate: prefDayRate, nightRate: prefNightRate } = usePreferences();
 
   // Time fields - Support multiple time slots
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -196,7 +199,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
 
       if (hasValidSlots) {
         try {
-          const result = calculateEarningsMultiple(date, timeSlots);
+          const result = calculateEarningsMultiple(date, timeSlots, prefDayRate, prefNightRate);
           setDayHours(result.dayHours);
           setNightHours(result.nightHours);
           setComputedTotal(result.total);
@@ -427,7 +430,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       timeSlots: timeSlots.length > 1 ? timeSlots : undefined,
       status: status,
       rateType: finalRateType,
-      hourlyRate: calculationMode === 'auto' ? RATE_DAY : 0,
+      hourlyRate: calculationMode === 'auto' ? prefDayRate : 0,
       totalEarnings: finalTotal,
       details: {
         dayHours,
@@ -786,7 +789,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
                       <div>
                         <label className="text-[10px] font-bold text-gray-300 block">Calcul Automatique</label>
                         <p className="text-[8px] text-gray-500 mt-0.5">
-                          {hidePrices ? 'Calcul jour/nuit' : `Jour ${RATE_DAY}€/h · Nuit ${RATE_NIGHT}€/h (>22h)`}
+                          {hidePrices ? 'Calcul jour/nuit' : `Jour ${prefDayRate}€/h · Nuit ${prefNightRate}€/h (>22h)`}
                         </p>
                       </div>
                       <div className="text-right">

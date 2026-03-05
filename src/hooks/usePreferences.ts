@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  loadPreferences, 
-  savePreferences, 
-  updatePreference, 
-  UserPreferences 
+import {
+  loadPreferences,
+  savePreferences,
+  updatePreference,
+  UserPreferences
 } from '../services/preferencesService';
 
 /**
@@ -66,6 +66,10 @@ export const usePreferences = () => {
     sidebarPinned: preferences.sidebarPinned,
     setSidebarPinned: (value: boolean) => update('sidebarPinned', value),
     toggleSidebarPinned: () => toggle('sidebarPinned'),
+    dayRate: preferences.dayRate,
+    setDayRate: (value: number) => update('dayRate', value),
+    nightRate: preferences.nightRate,
+    setNightRate: (value: number) => update('nightRate', value),
   };
 };
 
