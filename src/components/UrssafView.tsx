@@ -13,28 +13,35 @@ const URSSAF_RATE = 0.231; // Taux standard prestations de services (BNC/BIC) 20
 
 const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false }) => {
     const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+    const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+        return format(new Date(), 'yyyy-MM');
+    });
 
-    const now = new Date();
+    const selectedMonthDate = useMemo(() => {
+        return new Date(`${selectedMonth}-01`);
+    }, [selectedMonth]);
+
+    const now = new Date(); // still used for reference
 
     // Calcul du Chiffre d'Affaires Encaissé (missions terminées et payées)
     const earningsData = useMemo(() => {
         const paidMissions = missions.filter(m => m.status === 'completed' && m.isPaid);
 
-        // Période en cours
+        // Période sélectionnée
         let start: Date;
-        let end: Date = now;
+        let end: Date;
 
         if (selectedPeriod === 'month') {
-            start = startOfMonth(now);
-            end = endOfMonth(now);
+            start = startOfMonth(selectedMonthDate);
+            end = endOfMonth(selectedMonthDate);
         } else if (selectedPeriod === 'quarter') {
-            const currentMonth = now.getMonth();
+            const currentMonth = selectedMonthDate.getMonth();
             const quarterStartMonth = Math.floor(currentMonth / 3) * 3;
-            start = new Date(now.getFullYear(), quarterStartMonth, 1);
-            end = endOfMonth(new Date(now.getFullYear(), quarterStartMonth + 2, 1));
+            start = new Date(selectedMonthDate.getFullYear(), quarterStartMonth, 1);
+            end = endOfMonth(new Date(selectedMonthDate.getFullYear(), quarterStartMonth + 2, 1));
         } else {
-            start = new Date(now.getFullYear(), 0, 1);
-            end = new Date(now.getFullYear(), 11, 31);
+            start = new Date(selectedMonthDate.getFullYear(), 0, 1);
+            end = new Date(selectedMonthDate.getFullYear(), 11, 31);
         }
 
         const currentRevenue = paidMissions
@@ -55,8 +62,8 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
             prevStart = subMonths(start, 3);
             prevEnd = subMonths(end, 3);
         } else {
-            prevStart = new Date(now.getFullYear() - 1, 0, 1);
-            prevEnd = new Date(now.getFullYear() - 1, 11, 31);
+            prevStart = new Date(start.getFullYear() - 1, 0, 1);
+            prevEnd = new Date(start.getFullYear() - 1, 11, 31);
         }
 
         const prevRevenue = paidMissions
@@ -74,10 +81,10 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
             prevRevenue,
             cotisations,
             netRevenue,
-            periodLabel: selectedPeriod === 'month' ? format(now, 'MMMM yyyy', { locale: fr }) :
-                selectedPeriod === 'quarter' ? `Trimestre en cours` : `Année ${now.getFullYear()}`
+            periodLabel: selectedPeriod === 'month' ? format(selectedMonthDate, 'MMMM yyyy', { locale: fr }) :
+                selectedPeriod === 'quarter' ? `Trimestre ${Math.floor(selectedMonthDate.getMonth() / 3) + 1} ${selectedMonthDate.getFullYear()}` : `Année ${selectedMonthDate.getFullYear()}`
         };
-    }, [missions, selectedPeriod, now]);
+    }, [missions, selectedPeriod, selectedMonthDate]);
 
     const formatPrice = (val: number) => {
         if (hidePrices) return '*** €';
@@ -93,25 +100,44 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
                     <p className="text-gray-300 text-sm md:text-base font-medium">Estimez vos cotisations sociales sur vos revenus encaissés</p>
                 </div>
 
-                <div className="flex bg-dark-100/50 p-1 rounded-xl border border-white/5 backdrop-blur-md">
-                    <button
-                        onClick={() => setSelectedPeriod('month')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'month' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
-                    >
-                        MOIS
-                    </button>
-                    <button
-                        onClick={() => setSelectedPeriod('quarter')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'quarter' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
-                    >
-                        TRIMESTRE
-                    </button>
-                    <button
-                        onClick={() => setSelectedPeriod('year')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'year' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
-                    >
-                        ANNÉE
-                    </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    {/* Month Selector */}
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-dark-100/50 border border-white/5 group transition-all hover:border-primary-500/30 backdrop-blur-md">
+                        <Calculator className="w-4 h-4 text-primary-400" strokeWidth={2.5} />
+                        <div className="flex flex-col">
+                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider leading-none mb-1">
+                                Période de calcul
+                            </span>
+                            <input
+                                type="month"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="bg-transparent border-none text-xs font-black text-white focus:outline-none cursor-pointer leading-none"
+                                style={{ colorScheme: 'dark' }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex bg-dark-100/50 p-1 rounded-xl border border-white/5 backdrop-blur-md">
+                        <button
+                            onClick={() => setSelectedPeriod('month')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'month' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                        >
+                            MOIS
+                        </button>
+                        <button
+                            onClick={() => setSelectedPeriod('quarter')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'quarter' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                        >
+                            TRIM.
+                        </button>
+                        <button
+                            onClick={() => setSelectedPeriod('year')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedPeriod === 'year' ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                        >
+                            ANNÉE
+                        </button>
+                    </div>
                 </div>
             </div>
 
