@@ -2,10 +2,10 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Mission } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays, Download } from 'lucide-react';
+import { Search, Edit, Trash2, MapPin, Clock, Briefcase, Plus, Filter, Euro, CheckCircle2, Circle, CheckCircle, CalendarDays, Download, FileText, X } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
 import { exportMissionsToCSV } from '../utils/export';
-
+import { exportMissionsToPdf } from '../utils/exportPdf';
 interface MissionsListProps {
   missions: Mission[];
   onEdit: (mission: Mission) => void;
@@ -314,6 +314,9 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   const [paidFilter, setPaidFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [clientFilter, setClientFilter] = useState<string>('all');
   const [swipedMissionId, setSwipedMissionId] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfStartDate, setPdfStartDate] = useState('');
+  const [pdfEndDate, setPdfEndDate] = useState('');
 
   // Extraire les clients uniques
   const uniqueClients = useMemo(() => {
@@ -361,6 +364,26 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
 
   const totalFilteredEarnings = filteredMissions.reduce((acc, m) => acc + (m.totalEarnings || 0), 0);
 
+  const handleExportPdf = () => {
+    if (!pdfStartDate || !pdfEndDate) {
+      alert('Veuillez sélectionner une date de début et de fin.');
+      return;
+    }
+    const start = new Date(pdfStartDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(pdfEndDate);
+    end.setHours(23, 59, 59, 999);
+
+    const missionsToExport = missions.filter(m => {
+      if (m.status !== 'completed') return false;
+      const mDate = new Date(m.startTime);
+      return mDate >= start && mDate <= end;
+    });
+
+    exportMissionsToPdf(missionsToExport, start, end);
+    setShowPdfModal(false);
+  };
+
   return (
     <div className="space-y-5 md:space-y-6 pb-24 md:pb-8 animate-fade-in">
       {/* Header & Controls */}
@@ -370,6 +393,13 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           <p className="text-gray-300 text-sm md:text-base font-medium">Historique complet de vos interventions</p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          <button
+            onClick={() => setShowPdfModal(true)}
+            className="w-full md:w-auto glass-button hover:bg-red-500/10 text-red-400 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base border border-red-500/20 shadow-sm"
+          >
+            <FileText size={18} strokeWidth={2.5} />
+            <span className="tracking-wide">Exporter PDF</span>
+          </button>
           <button
             onClick={() => exportMissionsToCSV(filteredMissions)}
             className="w-full md:w-auto glass-button hover:bg-primary-500/10 text-primary-300 font-semibold py-3 px-5 md:py-3.5 md:px-6 rounded-xl flex items-center justify-center gap-2.5 transition-all text-sm md:text-base border border-primary-500/20 shadow-sm"
@@ -688,6 +718,68 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
           </div>
         )}
       </div>
+
+      {showPdfModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-300/80 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-scale-in border border-primary-500/20">
+            <div className="flex items-center justify-between p-5 border-b border-white/5">
+              <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
+                <FileText className="text-red-400" />
+                Export PDF des missions terminées
+              </h2>
+              <button
+                onClick={() => setShowPdfModal(false)}
+                className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-gray-300">
+                Sélectionnez une période pour exporter vos missions terminées.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Date de début</label>
+                  <input
+                    type="date"
+                    value={pdfStartDate}
+                    onChange={(e) => setPdfStartDate(e.target.value)}
+                    className="w-full px-4 py-2.5 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500/30 outline-none text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Date de fin</label>
+                  <input
+                    type="date"
+                    value={pdfEndDate}
+                    onChange={(e) => setPdfEndDate(e.target.value)}
+                    className="w-full px-4 py-2.5 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500/30 outline-none text-gray-100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-5 border-t border-white/5 bg-white/[0.02]">
+              <button
+                onClick={() => setShowPdfModal(false)}
+                className="px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleExportPdf}
+                disabled={!pdfStartDate || !pdfEndDate}
+                className="px-5 py-2.5 text-sm font-medium bg-red-500 hover:bg-red-600 disabled:bg-gray-600 disabled:text-gray-400 text-white rounded-xl transition-all shadow-lg hover:shadow-red-500/20"
+              >
+                Générer PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
