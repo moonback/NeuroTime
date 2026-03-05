@@ -1,6 +1,6 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3, Calculator } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -15,6 +15,7 @@ const MissionsList = lazy(() => import('./components/MissionsList'));
 const PaymentsView = lazy(() => import('./components/PaymentsView'));
 const MissionForm = lazy(() => import('./components/MissionForm'));
 const StatsView = lazy(() => import('./components/StatsView'));
+const UrssafView = lazy(() => import('./components/UrssafView'));
 
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -249,6 +250,12 @@ const App: React.FC = () => {
             icon={<BarChart3 size={16} />}
             label="Analyses"
           />
+          <NavButton
+            active={location.pathname === '/urssaf'}
+            onClick={() => { navigate('/urssaf'); setIsSidebarOpen(false) }}
+            icon={<Calculator size={16} />}
+            label="URSSAF"
+          />
         </nav>
 
         <div className="p-3 space-y-3">
@@ -365,6 +372,12 @@ const App: React.FC = () => {
                 <PaymentsView
                   missions={missions}
                   onTogglePaid={handleTogglePaid}
+                  hidePrices={hidePrices}
+                />
+              } />
+              <Route path="/urssaf" element={
+                <UrssafView
+                  missions={missions}
                   hidePrices={hidePrices}
                 />
               } />
