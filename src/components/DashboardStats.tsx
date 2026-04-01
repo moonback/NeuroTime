@@ -139,7 +139,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
                 <p className="text-[9px] text-gray-500">Missions terminées</p>
               </div>
             </div>
-            <p className="text-sm font-bold text-emerald-300">{completionRate}%</p>
+            <p className="num-financial text-sm font-bold text-emerald-300">{completionRate}%</p>
           </div>
 
           {peakDays.length > 0 && (
@@ -154,7 +154,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] text-gray-500">{day.count} mission{day.count > 1 ? 's' : ''}</span>
-                      <span className="text-[10px] font-bold text-purple-300">{day.hours}h</span>
+                      <span className="num-financial text-[10px] font-bold text-purple-300">{day.hours}h</span>
                     </div>
                   </div>
                 ))}
@@ -184,7 +184,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
                   <span className="text-gray-300 font-medium">{week.week}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] text-gray-500">{week.count} m.</span>
-                    <span className="text-[11px] font-bold text-blue-300">{week.hours}h</span>
+                    <span className="num-financial text-[11px] font-bold text-blue-300">{week.hours}h</span>
                   </div>
                 </div>
                 <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">

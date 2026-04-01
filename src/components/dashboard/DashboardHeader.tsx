@@ -27,7 +27,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Top Bar: Title & Primary Actions */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col min-w-0">
-          <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight">
+          <h1 className="font-display text-lg md:text-xl font-bold text-white tracking-tight">
             Tableau de bord
           </h1>
           <p className="text-gray-500 text-[9px] font-semibold uppercase tracking-[0.12em] flex items-center gap-1.5 mt-0.5">

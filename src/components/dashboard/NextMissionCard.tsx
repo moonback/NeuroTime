@@ -240,7 +240,7 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
                   <span className="text-[9px] font-semibold">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
                 </div>
                 {!hidePrices && (
-                  <div className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/15 text-emerald-400 font-bold text-[10px]">
+                  <div className="num-financial px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/15 text-emerald-400 font-bold text-[10px]">
                     {formatPrice(nextMission.totalEarnings)}€
                   </div>
                 )}

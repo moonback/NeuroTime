@@ -250,7 +250,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold text-orange-400">{formatPrice(clientTotal, 2)} €</p>
+                        <p className="num-financial text-sm font-bold text-orange-400">{formatPrice(clientTotal, 2)} €</p>
                         <button
                           onClick={() => { setSelectedClient(client); setActiveTab('reconcile'); }}
                           className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -318,7 +318,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <p className="text-sm font-bold text-gray-100 truncate">{mission.title}</p>
-                          <p className="text-sm font-bold text-indigo-400 ml-2">{formatPrice(mission.totalEarnings, 2)} €</p>
+                          <p className="num-financial text-sm font-bold text-indigo-400 ml-2">{formatPrice(mission.totalEarnings, 2)} €</p>
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-gray-500">
                           <span className="flex items-center gap-1"><Calendar size={10} /> {format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
@@ -398,11 +398,11 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
                   <div className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 mb-4">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Missions groupées</span>
-                      <span className="text-xs font-black text-indigo-400">{selectedMissionIds.length}</span>
+                      <span className="num-financial text-xs font-black text-indigo-400">{selectedMissionIds.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Valeur totale</span>
-                      <span className="text-xs font-black text-gray-100">{selectedTotal.toFixed(2)} €</span>
+                      <span className="num-financial text-xs font-black text-gray-100">{selectedTotal.toFixed(2)} €</span>
                     </div>
                   </div>
 
@@ -456,7 +456,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
 
                         <div className="flex items-center justify-between md:justify-end gap-6 text-right">
                           <div className="text-right">
-                            <p className="text-sm font-black text-emerald-400">{formatPrice(payment.amount, 2)} €</p>
+                            <p className="num-financial text-sm font-black text-emerald-400">{formatPrice(payment.amount, 2)} €</p>
                             <p className="text-[9px] text-gray-600 font-bold uppercase tracking-wider">{payment.method}</p>
                           </div>
                           <div className="flex items-center gap-3">
@@ -531,7 +531,7 @@ const StatCard = ({ label, value, subValue, icon, progress, color }: any) => {
           {React.cloneElement(icon as React.ReactElement, { size: 18, strokeWidth: 2.5 })}
         </div>
       </div>
-      <p className="text-xl md:text-2xl font-black text-gray-100 tracking-tight leading-none mb-1.5">{value}</p>
+      <p className="num-financial text-xl md:text-2xl font-black text-gray-100 tracking-tight leading-none mb-1.5">{value}</p>
       <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 leading-none">{label}</p>
 
       {subValue && <p className="text-[9px] text-gray-600 font-medium mt-3 flex items-center gap-1">{subValue}</p>}
