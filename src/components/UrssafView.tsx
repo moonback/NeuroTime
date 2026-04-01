@@ -96,7 +96,7 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-50 tracking-tight mb-2">Simulateur URSSAF</h1>
+                    <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-50 tracking-tight mb-2">Simulateur URSSAF</h1>
                     <p className="text-gray-300 text-sm md:text-base font-medium">Estimez vos cotisations sociales sur vos revenus encaissés</p>
                 </div>
 
@@ -150,7 +150,7 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
                     </div>
                     <div className="flex flex-col gap-1 relative z-10">
                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">CA Encaissé</span>
-                        <span className="text-3xl font-black text-white">{formatPrice(earningsData.currentRevenue)}</span>
+                        <span className="num-financial text-3xl font-black text-white">{formatPrice(earningsData.currentRevenue)}</span>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="text-xs text-gray-400">{earningsData.periodLabel}</span>
                             {earningsData.currentRevenue > earningsData.prevRevenue && earningsData.prevRevenue > 0 && (
@@ -170,7 +170,7 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
                     </div>
                     <div className="flex flex-col gap-1 relative z-10">
                         <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">Charges URSSAF ({Math.round(URSSAF_RATE * 1000) / 10}%)</span>
-                        <span className="text-3xl font-black text-white">{formatPrice(earningsData.cotisations)}</span>
+                        <span className="num-financial text-3xl font-black text-white">{formatPrice(earningsData.cotisations)}</span>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="text-xs text-gray-400 italic">Montant à provisionner</span>
                         </div>
@@ -184,7 +184,7 @@ const UrssafView: React.FC<UrssafViewProps> = ({ missions, hidePrices = false })
                     </div>
                     <div className="flex flex-col gap-1 relative z-10">
                         <span className="text-[10px] font-black uppercase tracking-widest text-primary-400">Revenu Net Estimé</span>
-                        <span className="text-3xl font-black text-white">{formatPrice(earningsData.netRevenue)}</span>
+                        <span className="num-financial text-3xl font-black text-white">{formatPrice(earningsData.netRevenue)}</span>
                         <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                             <Info size={12} className="text-primary-400" />
                             <span>Après prélèvements sociaux</span>

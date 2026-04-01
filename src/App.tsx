@@ -345,21 +345,28 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className={`min-h-screen min-h-[100dvh] pb-16 md:pb-0 bg-transparent overflow-y-auto relative pt-[52px] md:pt-0 transition-all duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'md:ml-56' : 'md:ml-0'}`}>
-        <div className="p-3 md:p-5 lg:p-6 max-w-12xl mx-auto animate-fade-in relative">
-          {/* Sidebar Toggle Button (Desktop) */}
-          <div className="hidden md:block absolute top-3 left-3 z-10 opacity-40 hover:opacity-100 transition-opacity">
-            {!sidebarOpen && (
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="p-1.5 glass-button rounded-lg text-gray-400 hover:text-white"
-                aria-label="Ouvrir la navigation"
-              >
-                <Menu size={20} />
-              </button>
-            )}
-          </div>
+        {/* Sidebar Toggle Button (Desktop) */}
+        <div className="hidden md:block fixed top-3 left-3 z-10 opacity-40 hover:opacity-100 transition-opacity">
+          {!sidebarOpen && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-1.5 glass-button rounded-lg text-gray-400 hover:text-white"
+              aria-label="Ouvrir la navigation"
+            >
+              <Menu size={20} />
+            </button>
+          )}
+        </div>
 
-          <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
+        <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
+          {/*
+            key={location.key} forces React to unmount/remount this div
+            on every navigation, re-triggering the entrance animation.
+          */}
+          <div
+            key={location.key}
+            className="p-3 md:p-5 lg:p-6 max-w-12xl mx-auto animate-slide-in-up relative"
+          >
             <Routes>
               <Route path="/" element={
                 <Dashboard
@@ -408,8 +415,8 @@ const App: React.FC = () => {
               } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Suspense>
-        </div>
+          </div>
+        </Suspense>
       </main>
 
       {/* Mobile Bottom Navigation — COMPACT & PRO */}

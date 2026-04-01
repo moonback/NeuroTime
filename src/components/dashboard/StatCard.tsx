@@ -58,7 +58,7 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
               ].join(' ')}
             >
               {trend.isPositive ? <TrendingUp size={10} strokeWidth={2.5} /> : <TrendingDown size={10} strokeWidth={2.5} />}
-              <span className="tabular-nums">{trend.value}%</span>
+              <span className="num-financial">{trend.value}%</span>
             </div>
           )}
         </div>
@@ -68,7 +68,7 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
           <p className="text-[9px] uppercase font-semibold tracking-[0.1em] text-gray-500">
             {label}
           </p>
-          <p className={`text-lg md:text-xl font-extrabold tracking-tight ${textColor} truncate leading-tight`}>
+          <p className={`num-financial text-lg md:text-xl font-extrabold tracking-tight ${textColor} truncate leading-tight`}>
             {value}
           </p>
           {subtext && (

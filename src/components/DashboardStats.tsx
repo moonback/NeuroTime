@@ -128,7 +128,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ missions, selectedMonth
                 <p className="text-[9px] text-gray-500">Par mission</p>
               </div>
             </div>
-            <p className="text-sm font-bold text-indigo-300">{averageDuration.toFixed(1)}h</p>
+            <p className="num-financial text-sm font-bold text-indigo-300">{averageDuration.toFixed(1)}h</p>
           </div>
 
           <div className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">

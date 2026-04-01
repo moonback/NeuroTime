@@ -1,157 +1,123 @@
-# Analyse Complète du Projet NeuroTime
+NeuroTime — UI/UX Audit & Refactoring Plan
+Aesthetic Direction: "Dark Chronograph"
+Think luxury pilot's instrument panel meets premium financial terminal. Every number rendered like it was machined — crisp, weighted, intentional. The aurora blobs stay, but they breathe rather than shout. Glass surfaces gain depth. Data visualization becomes the hero.
 
-## 1. Architecture et Structure du Code
+Part 1 — Current UI/UX Debt
+Critical Issues
+#	Area	Debt	Location
+1	Feedback	confirm() native browser dialog still present	PaymentsView.tsx:148
+2	Design System	Tailwind 4 config still uses the old extend JS object pattern instead of native @theme {} CSS variables	tailwind.config.js, index.css
+3	Typography	Inter everywhere — functional but generic, kills the "premium" positioning	index.css:3,17
+4	Charts	Default Recharts tooltips (white box) clash with the dark glass theme; no entrance animations on bars/pies	StatsView.tsx:80+
+5	Animation coherence	12 keyframes in index.css with inconsistent easing/duration values; no shared animation token system	index.css:58-250
+6	Numbers	Financial figures (€ 1,234.50) rendered in the same prop font as body copy — no monospace data type	All view components
+7	Glass inconsistency	5 glass variants (.glass, .glass-light, .glass-strong, .glass-card, .glass-premium) with hardcoded rgba values not linked to a single source of truth	index.css:350+
+8	Page transitions	Route changes have no exit animation — content simply replaces content	App.tsx:363-410
+9	PWA colors	Theme color #008CFF doesn't match the app's actual primary #6366f1	vite.config.ts
+10	Accessibility	No prefers-contrast: more media query override; focus rings use outline-none in several places	Multiple components
+Medium Issues
+SplashScreen.tsx (540 lines) has inline SVG circuit animation that could be a standalone CSS-only component
+MissionsList.tsx and MissionForm.tsx are each 1500+ lines — needs breaking up
+Aurora blobs use float-soft (20s CSS animation) running on all pages simultaneously — a performance concern on low-end devices
+DashboardStats.tsx / DashboardGoals.tsx placed side-by-side but have no visual hierarchy differentiation from other cards
+Part 2 — Proposed Design System
+2.1 Typography
+Replace Inter with a two-font system:
 
-**Diagnostic :**
-L'architecture actuelle présente une **dette structurelle majeure**. Les fichiers sources (`App.tsx`, `components/`, `services/`) sont mélangés à la racine du projet, alors qu'un dossier `src/` existe aussi. C'est non-standard pour un projet Vite/React et rend la maintenance difficile.
 
-*   **Problème critique** : Mélange de fichiers à la racine et dans `src/`.
-*   **Routing manuel** : Vous utilisez un `useState('dashboard')` pour la navigation. Cela casse l'historique du navigateur (bouton retour) et empêche le partage de liens directs (ex: `/missions/123`).
+Display / Headings: "Syne" (geometric, unique, excellent at large scale)
+Body copy: "Figtree" (warmer, more readable than Inter at small sizes)
+Numbers / Data: "DM Mono" (precision instrument feel for financial values)
+This trio is already on Google Fonts, zero bundle cost.
 
-**Recommandations :**
+2.2 Color System → Tailwind 4 @theme block
+Move from JS config to native CSS variables that Tailwind 4 can read directly:
 
-| Priorité | Action | Difficulté | Pourquoi ? |
-| :--- | :--- | :--- | :--- |
-| 1 | **Standardisation `src/`** | 🟢 Facile | Déplacer `components`, `services`, `hooks`, `types`, `utils`, `App.tsx` et `index.css` DANS le dossier `src/`. La racine ne doit contenir que la config (`vite.config.ts`, `package.json`, etc.). |
-| 2 | **Adopter React Router** | 🟡 Moyen | Remplacer le `useState<ViewState>` par `react-router-dom`. Cela active l'historique natif et les URLs profondes. |
-| 3 | **Architecture "Feature-first"** | 🟡 Moyen | Au lieu de `components/` vs `services/`, regroupez par domaine : `features/missions`, `features/finance`, `features/auth`. |
 
-**Exemple de structure cible :**
-```text
-src/
-  ├── assets/
-  ├── components/ (ui partagée : Button, Modal, Card)
-  ├── features/
-  │   ├── missions/ (components + hooks + services dédiés)
-  │   ├── finance/
-  │   └── dashboard/
-  ├── layouts/ (MainLayout avec Sidebar)
-  ├── context/ (AuthContext, MissionContext)
-  ├── services/ (API clients : supabase, openai)
-  ├── App.tsx
-  └── main.tsx
-```
+@theme {
+  /* Backgrounds */
+  --color-void:     oklch(10% 0.02 270);   /* #080b14 equivalent */
+  --color-surface:  oklch(14% 0.025 270);
+  --color-surface-2:oklch(18% 0.028 270);
+  --color-border:   oklch(28% 0.03 270);
 
----
+  /* Primary — electric violet (richer than plain indigo) */
+  --color-primary:      oklch(62% 0.22 280);   /* ~#7C5AF6 */
+  --color-primary-glow: oklch(72% 0.22 280);
 
-## 2. Qualité du Code
+  /* Gold accent — for earnings, money, achievements */
+  --color-gold:     oklch(78% 0.14 85);    /* ~#F5B731 */
+  --color-gold-dim: oklch(65% 0.12 85);
 
-**Diagnostic :**
-*   **App.tsx monolithique** : `App.tsx` fait plus de 500 lignes. Il gère l'auth, le chargement des données, le routing, les modales et l'état global. C'est trop.
-*   **Prop Drilling** : L'état `missions` est passé manuellement de `App` -> `Dashboard` -> `DashboardKPIs`.
-*   **Usage de `any`** : Présent dans `supabaseService.ts` (`const dbRow: any`). Cela annule les bénéfices de TypeScript.
+  /* Teal — for time slots, hours */
+  --color-teal:     oklch(72% 0.14 195);   /* ~#2DD4BF */
 
-**Recommandations :**
+  /* Semantic */
+  --color-success:  oklch(70% 0.16 155);   /* emerald */
+  --color-warning:  oklch(78% 0.14 65);    /* amber */
+  --color-danger:   oklch(65% 0.20 25);    /* red */
 
-| Priorité | Action | Difficulté | Pourquoi ? |
-| :--- | :--- | :--- | :--- |
-| 1 | **Extraire les Contextes** | 🟡 Moyen | Créer `MissionContext` et `AuthContext` pour ne plus passer les props manuellement partout. |
-| 2 | **Typage Strict** | 🟢 Facile | Remplacer `any` par `Database['public']['Tables']['missions']['Row']` (généré via Supabase CLI) ou un type partiel explicite. |
-| 3 | **Custom Hooks** | 🟢 Facile | Extraire la logique de `App.tsx` dans `useMissionData()` et `useAuthLogic()`. |
+  /* Animation tokens */
+  --duration-fast:    150ms;
+  --duration-normal:  250ms;
+  --duration-slow:    400ms;
+  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:         cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:      cubic-bezier(0.4, 0, 0.2, 1);
+}
+Key differentiation: The gold accent for financial data is the memorable design decision. When a user sees € 2,400 in gold DM Mono, it registers as "value" at a subconscious level — much more satisfying than the same number in white Inter.
 
----
+2.3 Glass System — Single Source of Truth
+All 5 glass variants derive from one set of CSS variables:
 
-## 3. Gestion de l'état
 
-**Diagnostic :**
-Actuellement : `useState` dans `App.tsx` + `useEffect` pour la synchronisation.
-C'est fonctionnel mais fragile pour une app "Offline First". Si deux composants modifient une mission, la synchro peut être complexe.
+:root {
+  --glass-bg:      oklch(14% 0.025 270 / 72%);
+  --glass-border:  oklch(100% 0 0 / 8%);
+  --glass-blur:    16px;
+  --glass-shadow:  0 8px 32px oklch(0% 0 0 / 40%);
+}
+2.4 Premium Chart Styling
+Custom <GlassTooltip> component for Recharts with:
 
-**Recommandations :**
+Glass background matching the card system
+Gold text for values, DM Mono font
+Animated scale-in entrance
+Custom active bar with a violet top-cap gradient
+Part 3 — Refactoring Checklist (Prioritized)
+These are the files I will touch, in order of impact-to-effort ratio:
 
-1.  **React Query (TanStack Query)** : C'est le standard industriel pour gérer l'état serveur (Supabase). Il gère le cache, le refetch en background (reconnexion internet) et les états de chargement nativement.
-    *   *Alternative légère* : Garder votre structure actuelle mais déplacer la logique dans un `MissionProvider` qui expose `{ missions, addMission, updateMission }`.
+Phase 1 — Design Foundation (highest leverage, touches everything)
+Priority	File	Change
+🔴 P1	src/index.css	Migrate to @theme {} tokens, add Syne + Figtree + DM Mono, consolidate 12 keyframes with shared easing variables, fix glass system
+🔴 P1	tailwind.config.js	Remove JS extend duplicating what @theme now owns; keep only plugin-required config
+🔴 P1	vite.config.ts	Fix theme color to match --color-primary
+Phase 2 — User Feedback & Interactions
+Priority	File	Change
+🔴 P1	src/components/PaymentsView.tsx:148	Replace confirm() with useConfirmDialog hook
+🟠 P2	src/App.tsx:363-410	Add <AnimatePresence> (Framer Motion) or CSS View Transitions API for route changes
+🟠 P2	src/components/ConfirmDialog.tsx	Polish to match new glass system, add danger variant gradient border
+Phase 3 — Charts (Visual Impact)
+Priority	File	Change
+🟠 P2	src/components/StatsView.tsx	New <GlassTooltip> component, gradient bar fills, animated pie with label connectors, earnings in gold DM Mono
+Phase 4 — Typography & Numbers
+Priority	File	Change
+🟡 P3	All view components	Wrap financial values in <span class="font-mono text-gold"> via a <Price> utility component
+🟡 P3	src/components/dashboard/StatCard.tsx	Apply Syne for stat values, DM Mono for numbers
+Phase 5 — PWA & Accessibility
+Priority	File	Change
+🟡 P3	vite.config.ts	Fix PWA theme color, add prefers-color-scheme meta
+🟢 P4	src/index.css	Add @media (prefers-contrast: more) block, audit focus rings
+Part 4 — New Dependencies Needed
+Package	Why	Bundle Cost
+framer-motion	Page transitions, staggered list entries, chart bar animations	~47kb gzipped
+Everything else (sonner, react-router-dom@7, recharts) is already installed.
 
-2.  **Zustand** (Optionnel) : Si vous avez besoin d'état global UI complexe (ex: état du calendrier, filtres actifs, sidebar) qui n'est pas lié à la base de données.
+Summary of What Will Be Unforgettable
+Gold numbers — every euro amount in DM Mono with a subtle gold tint. Feels like Bloomberg Terminal meets Apple Card.
+Syne headings — the section titles gain personality; the app stops looking like a generic React SaaS dashboard.
+Coherent animation grammar — all transitions share the same 4 easing tokens. The app "feels" physically consistent.
+Glass tooltip on charts — the moment the user hovers a bar chart and sees a frosted-glass card pop up instead of a white div, the premium perception spikes.
+Ready to execute. Should I start with Phase 1 (the CSS/design foundation in index.css + tailwind.config.js)? That's the highest-leverage change and makes every subsequent phase easier since all components inherit the new tokens automatically.
 
----
-
-## 4. Expérience Utilisateur (UX)
-
-**Points forts** : PWA installable, mode sombre (neo-aurora), indicateurs de chargement.
-
-**Points de friction identifiés :**
-*   **Navigation** : Le bouton "Précédent" du navigateur fait quitter l'app au lieu de changer de vue.
-*   **Sauvegarde** : Le "Debounce" de 500ms dans `App.tsx` est bien, mais l'utilisateur ne sait pas toujours si c'est sauvegardé (le petit indicateur est discret).
-*   **Feedback** : Les `alert()` et `window.confirm()` (lignes 146, 159, 188) bloquent l'interface et font "vieillot".
-
-**Recommandations :**
-
-| Priorité | Action | Difficulté | Pourquoi ? |
-| :--- | :--- | :--- | :--- |
-| 1 | **Toasts Notifications** | 🟢 Facile | Remplacer `alert()` par `sonner` ou `react-hot-toast` pour des notifications non-bloquantes et esthétiques. |
-| 2 | **Modales natives** | 🟡 Moyen | Remplacer `window.confirm` par votre composant `AuthModal` réutilisé ou une nouvelle `ConfirmModal` stylisée. |
-| 3 | **Skeleton Loading** | 🟢 Facile | Remplacer le `LoadingSpinner` plein écran par des "Skeletons" (fausses cartes grises) pour une perception de vitesse accrue. |
-
----
-
-## 5. Fonctionnalités à ajouter
-
-Voici 5 fonctionnalités à haute valeur ajoutée pour un freelance :
-
-1.  **Chronomètre de mission (Time Tracking)** (🟡 Moyen)
-    *   *Quoi* : Un bouton "Start/Stop" sur une mission pour enregistrer le temps réel.
-    *   *Valeur* : Précision facturation vs estimations.
-
-2.  **Générateur de Devis/Facture PDF** (🟢 Facile)
-    *   *Quoi* : Transformer une mission terminée en PDF stylisé prêt à l'envoi.
-    *   *Valeur* : Gain de temps administratif immédiat.
-
-3.  **Portail Client (Lien magique)** (🔴 Complexe)
-    *   *Quoi* : Une page publique (lecture seule) partageable avec le client pour qu'il voie l'avancement ou valide les heures.
-    *   *Valeur* : Professionnalisme et transparence.
-
-4.  **Assistant IA Contextuel (RAG)** (🟡 Moyen)
-    *   *Quoi* : "Combien j'ai gagné le mois dernier comparé à l'an dernier ?" via Gemini.
-    *   *Valeur* : Analyse de données sans créer de rapports complexes manuellement.
-
-5.  **Calendrier "Drag & Drop"** (🟡 Moyen)
-    *   *Quoi* : Déplacer une mission d'un jour à l'autre dans la vue calendrier pour changer sa date.
-    *   *Valeur* : Planification visuelle intuitive.
-
----
-
-## 6. Performance et Optimisation
-
-**Diagnostic :**
-*   `lazy` loading est déjà utilisé, c'est très bien.
-*   Le chargement initial charge *toutes* les missions (`select('*')`). Avec 1000 missions, l'app sera lente.
-
-**Recommandations :**
-
-1.  **Pagination / Infinite Scroll** : Ne charger que les missions du mois en cours + futures par défaut. Charger l'historique à la demande.
-2.  **Virtualisation** : Utiliser `react-window` si la liste des missions dépasse 50 éléments pour ne rendre que ce qui est visible à l'écran.
-3.  **Optimisation Images** : Si vous ajoutez des uploads (logos, avatars), redimensionnez-les côté client avant envoi.
-
----
-
-## 7. Sécurité et Bonnes Pratiques
-
-**Audit Rapide :**
-*   ✅ **RLS** : Vous utilisez `user_id` dans les requêtes, c'est bien, mais il faut s'assurer que les **Policies RLS** Supabase (côté SQL) interdisent bien l'accès aux données d'autres users. Le filtre JS ne suffit pas.
-*   ⚠️ **Variables d'env** : Vérifiez que `VITE_GEMINI_API_KEY` n'est pas exposée si elle permet des actions coûteuses (idéalement, passer par une Edge Function Supabase pour appeler Gemini, pour ne pas exposer la clé au client).
-
----
-
-## 8. Configuration et Tooling
-
-**Manques actuels :** Pas de tests, pas de linter strict visible.
-
-**Recommandations :**
-
-1.  **Biomé ou ESLint+Prettier** : Installer et configurer pour forcer un style de code cohérent.
-2.  **Husky** : Un "pre-commit hook" pour empêcher de commiter du code qui ne compile pas.
-3.  **Vitest** : Ajouter des tests unitaires, surtout pour `calculations.ts` (argent/heures = critique) et `supabaseService.ts`.
-
----
-
-## Résumé : Top 5 Actions Prioritaires
-
-Voici votre feuille de route immédiate pour assainir le projet avant d'ajouter des features :
-
-1.  🛠 **Restructuration** : Déplacer tout le code source dans `src/` proprement.
-2.  🚦 **Routing** : Installer `react-router-dom` et remplacer la navigation par état.
-3.  📦 **Context API** : Créer un `MissionProvider` pour sortir la logique de gestion de données de `App.tsx`.
-4.  🧪 **Tests Unitaires** : Écrire des tests pour `calculations.ts` (c'est le cœur financier, il ne doit pas bugger).
-5.  💅 **UX Polish** : Remplacer `window.confirm` et `alert` par des composants UI modernes (Toasts/Modales).
-
+Or if you'd prefer, I can start with the PaymentsView.tsx confirm() fix (quick win, zero risk) and the Recharts chart upgrade simultaneously.

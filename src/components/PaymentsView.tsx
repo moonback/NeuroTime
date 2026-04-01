@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { formatTimeSlots } from '../utils/timeSlots';
 import { toast } from 'sonner';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 interface PaymentsViewProps {
   missions: Mission[];
@@ -41,6 +42,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
   onDeletePayment,
   hidePrices = false
 }) => {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   const [activeTab, setActiveTab] = useState<'overview' | 'reconcile' | 'history'>('overview');
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [selectedMissionIds, setSelectedMissionIds] = useState<string[]>([]);
@@ -145,13 +147,20 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
   };
 
   const handleDeletePayment = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce virement ? Les missions liées redeviendront "Non payées".')) {
-      await onDeletePayment(id);
-    }
+    const ok = await confirm({
+      title: 'Supprimer ce virement ?',
+      description: 'Les missions liées redeviendront "Non payées". Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    await onDeletePayment(id);
   };
 
   return (
     <div className="space-y-4 md:space-y-6 pb-24 md:pb-8 animate-fade-in">
+      {confirmDialog}
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
