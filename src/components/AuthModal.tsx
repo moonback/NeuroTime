@@ -71,12 +71,18 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 transition-all animate-fade-in">
-      <div className="glass-strong rounded-2xl w-full max-w-sm overflow-hidden flex flex-col animate-scale-in border border-white/[0.08]">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+        aria-describedby={error ? 'auth-error' : undefined}
+        className="glass-strong rounded-2xl w-full max-w-sm overflow-hidden flex flex-col animate-scale-in border border-white/[0.08]"
+      >
 
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-white/[0.06] bg-white/[0.03] relative overflow-hidden">
           <div className="relative z-10">
-            <h2 className="text-base font-bold text-gray-50">
+            <h2 id="auth-modal-title" className="font-display text-base font-bold text-gray-50">
               {mode === 'login' ? 'Connexion' : 'Inscription'}
             </h2>
             <p className="text-[10px] mt-0.5 text-gray-400">
@@ -96,55 +102,65 @@ const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 flex items-center gap-2 text-red-300 text-[11px]">
-              <AlertCircle size={14} />
+            <div
+              id="auth-error"
+              role="alert"
+              className="bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 flex items-center gap-2 text-red-300 text-[11px]"
+            >
+              <AlertCircle size={14} aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Email Field */}
           <div className="space-y-1">
-            <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
-              <Mail size={10} className="text-gray-400" /> Email
+            <label htmlFor="auth-email" className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+              <Mail size={10} className="text-gray-400" aria-hidden="true" /> Email
             </label>
             <input
+              id="auth-email"
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
+              className="glass-input w-full px-3 py-2 rounded-lg text-xs text-gray-100"
             />
           </div>
 
           {/* Password Field */}
           <div className="space-y-1">
-            <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
-              <Lock size={10} className="text-gray-400" /> Mot de passe
+            <label htmlFor="auth-password" className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+              <Lock size={10} className="text-gray-400" aria-hidden="true" /> Mot de passe
             </label>
             <input
+              id="auth-password"
               type="password"
               required
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'login' ? '••••••••' : 'Au moins 6 caractères'}
-              className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
+              className="glass-input w-full px-3 py-2 rounded-lg text-xs text-gray-100"
             />
           </div>
 
           {/* Confirm Password (Signup only) */}
           {mode === 'signup' && (
             <div className="space-y-1">
-              <label className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
-                <Lock size={10} className="text-gray-400" /> Confirmer
+              <label htmlFor="auth-confirm" className="text-[10px] font-semibold text-gray-300 flex items-center gap-1">
+                <Lock size={10} className="text-gray-400" aria-hidden="true" /> Confirmer
               </label>
               <input
+                id="auth-confirm"
                 type="password"
                 required
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all text-xs text-gray-100 placeholder-gray-500"
+                className="glass-input w-full px-3 py-2 rounded-lg text-xs text-gray-100"
               />
             </div>
           )}
@@ -178,6 +194,20 @@ const AuthModal: React.FC<AuthModalProps> = ({
             )}
           </button>
         </form>
+
+        {/* Mode switch */}
+        <div className="px-4 pb-4 text-center">
+          <button
+            type="button"
+            onClick={switchMode}
+            className="text-[11px] text-gray-500 hover:text-indigo-300 transition-colors"
+          >
+            {mode === 'login'
+              ? 'Pas encore de compte ? Créer un compte'
+              : 'Déjà un compte ? Se connecter'
+            }
+          </button>
+        </div>
       </div>
     </div>
   );
