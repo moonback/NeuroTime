@@ -56,7 +56,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
     downloadCompletedReportMD,
     downloadCompletedReportPDF,
     backupData
-  } = useDashboardExports(missions, allCompletedMissions);
+  } = useDashboardExports(missions, allCompletedMissions, selectedMonthDate);
 
   return (
     <div className="space-y-4 md:space-y-5 pb-20 md:pb-6 animate-fade-in">

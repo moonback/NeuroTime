@@ -6,7 +6,7 @@ import { Mission } from '../types';
 import { formatTimeSlots } from '../utils/timeSlots';
 import { toast } from 'sonner';
 
-export const useDashboardExports = (missions: Mission[], allCompletedMissions: Mission[]) => {
+export const useDashboardExports = (missions: Mission[], allCompletedMissions: Mission[], selectedMonthDate: Date = new Date()) => {
 
   const escapeCsv = (value: string | number | null | undefined) => {
     if (value === undefined || value === null) return '""';
@@ -56,9 +56,9 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
   }, [missions]);
 
   const downloadCompletedReportMD = useCallback(() => {
-    const now = new Date();
-    const monthStartTime = startOfMonth(now).getTime();
-    const monthEndTime = endOfMonth(now).getTime();
+    const targetDate = selectedMonthDate;
+    const monthStartTime = startOfMonth(targetDate).getTime();
+    const monthEndTime = endOfMonth(targetDate).getTime();
 
     const currentMonthMissions = allCompletedMissions.filter(m => {
       const missionEndTime = new Date(m.endTime).getTime();
@@ -88,7 +88,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       });
     });
 
-    const currentMonthLabel = format(now, 'MMMM yyyy', { locale: fr });
+    const currentMonthLabel = format(targetDate, 'MMMM yyyy', { locale: fr });
 
     let mdContent = `# 📋 Rapport des Missions Terminées - ${currentMonthLabel}\n\n`;
     mdContent += `\`\`\`\n`;
@@ -162,14 +162,15 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [allCompletedMissions]);
+  }, [allCompletedMissions, selectedMonthDate]);
 
   const downloadCompletedReportPDF = useCallback(async () => {
     try {
+      const targetDate = selectedMonthDate;
+      const monthStartTime = startOfMonth(targetDate).getTime();
+      const monthEndTime = endOfMonth(targetDate).getTime();
+      const monthLabel = format(targetDate, 'MMMM yyyy', { locale: fr });
       const now = new Date();
-      const monthStartTime = startOfMonth(now).getTime();
-      const monthEndTime = endOfMonth(now).getTime();
-      const monthLabel = format(now, 'MMMM yyyy', { locale: fr });
 
       const currentMonthMissions = allCompletedMissions.filter(m => {
         const missionEndTime = new Date(m.endTime).getTime();
@@ -539,7 +540,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
       console.error('Erreur lors de la génération du PDF:', error);
       toast.error('Erreur lors de la génération du PDF. Veuillez réessayer.');
     }
-  }, [allCompletedMissions]);
+  }, [allCompletedMissions, selectedMonthDate]);
 
   const backupData = useCallback(() => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(missions, null, 2));

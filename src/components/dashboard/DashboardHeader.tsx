@@ -83,7 +83,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-white">Exporter le rapport</h3>
-                  <p className="text-[9px] text-gray-500 capitalize">{format(selectedMonthDate, 'MMMM yyyy', { locale: fr })}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <input
+                      type="month"
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      className="bg-transparent border-none text-[10px] font-bold text-indigo-400 focus:outline-none cursor-pointer p-0 capitalize"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                  </div>
                 </div>
               </div>
               <button
