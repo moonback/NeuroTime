@@ -10,7 +10,7 @@ export interface UserPreferences {
 const DEFAULT_PREFERENCES: UserPreferences = {
   hidePrices: false,
   sidebarPinned: false,
-  dayRate: 25,
+  dayRate: 20,
   nightRate: 30,
 };
 
