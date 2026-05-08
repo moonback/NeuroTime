@@ -290,7 +290,7 @@ body {
 }
 
 /* ============================================
-   MINIMAL CARD SYSTEM - Flat design
+   MINIMAL CARD SYSTEM - Enhanced for desktop
    ============================================ */
 .glass {
   background: var(--bg-secondary);
@@ -312,7 +312,8 @@ body {
   border: 1px solid var(--border-subtle);
   transition:
     border-color var(--dur-normal) var(--ease-in-out),
-    background-color var(--dur-normal) var(--ease-in-out);
+    background-color var(--dur-normal) var(--ease-in-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .glass-card:hover {
@@ -320,9 +321,36 @@ body {
   background: var(--bg-tertiary);
 }
 
+/* Desktop enhancement */
+@media (min-width: 768px) {
+  .glass-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
 .glass-premium {
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle shine effect on hover (desktop only) */
+@media (min-width: 768px) {
+  .glass-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .glass-premium:hover::before {
+    left: 100%;
+  }
 }
 
 /* ============================================
@@ -440,6 +468,60 @@ textarea,
   width: 250px;
   height: 250px;
   filter: blur(100px);
+}
+
+/* ============================================
+   ENHANCED HEADER & SIDEBAR
+   ============================================ */
+
+/* Backdrop blur support for modern browsers */
+@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+/* Smooth badge animation */
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.badge-animate {
+  animation: badge-pop 0.3s var(--ease-out);
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shimmer effect for CTA button */
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* ============================================
@@ -571,6 +653,168 @@ textarea:disabled {
 .stagger-4 { animation-delay: 200ms; }
 .stagger-5 { animation-delay: 250ms; }
 .stagger-6 { animation-delay: 300ms; }
+
+/* ============================================
+   DESKTOP ENHANCEMENTS
+   ============================================ */
+
+/* Improved grid layouts for large screens */
+@media (min-width: 1280px) {
+  .desktop-grid-enhanced {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Better spacing on desktop */
+@media (min-width: 768px) {
+  .desktop-spacing {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-spacing {
+    padding: 2.5rem;
+  }
+}
+
+/* Smooth hover effects for interactive elements */
+@media (min-width: 768px) {
+  .hover-lift {
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .hover-scale {
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-glow {
+    transition: box-shadow var(--dur-normal) var(--ease-out);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  }
+}
+
+/* Enhanced scrollbar for desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    border: 2px solid var(--bg-primary);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* Desktop-only decorative elements */
+@media (min-width: 768px) {
+  .desktop-decoration {
+    position: relative;
+  }
+
+  .desktop-decoration::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    opacity: 0;
+    transition: opacity var(--dur-normal) var(--ease-out);
+  }
+
+  .desktop-decoration:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Better focus states for desktop */
+@media (min-width: 768px) {
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+/* Improved typography hierarchy for desktop */
+@media (min-width: 768px) {
+  .desktop-title {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .desktop-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+
+  .desktop-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+}
+
+/* Grid auto-fit for responsive cards */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .auto-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auto-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* Enhanced button states for desktop */
+@media (min-width: 768px) {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+
+  button:not(:disabled):active {
+    transform: translateY(0);
+  }
+}
 
 /* ============================================
    ACCESSIBILITY

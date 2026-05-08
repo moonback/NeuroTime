@@ -46,7 +46,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Toujours ouvert par défaut sur desktop
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
@@ -198,41 +198,59 @@ const App: React.FC = () => {
         <div className="aurora-blob teal small" style={{ bottom: '-80px', left: '25%' }} />
       </div>
 
-      {/* Desktop Sidebar Opener */}
-      {!sidebarPinned && (
+      {/* Desktop Sidebar Opener - Only show when sidebar is closed */}
+      {!sidebarOpen && (
         <div
-          className="hidden md:block fixed inset-y-0 left-0 z-20 w-3 h-full"
+          className="hidden md:block fixed inset-y-0 left-0 z-20 w-3 h-full hover:bg-[var(--primary)]/5 transition-colors cursor-pointer"
           onMouseEnter={() => setIsSidebarOpen(true)}
+          onClick={() => setIsSidebarOpen(true)}
         />
       )}
 
-      {/* Sidebar — MINIMAL & COMPACT */}
+      {/* Sidebar — ENHANCED MINIMAL — Always visible on desktop */}
       <aside
-        className={`hidden md:flex flex-col w-52 border-r border-[var(--border-subtle)] fixed inset-y-0 z-20 transition-transform duration-300 ease-out bg-[var(--bg-secondary)] ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`hidden md:flex flex-col w-52 border-r border-[var(--border-subtle)] fixed inset-y-0 z-20 transition-all duration-300 ease-out bg-[var(--bg-secondary)] backdrop-blur-sm ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/20' : '-translate-x-full'
           }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
-        <div className="p-3 pb-2 flex flex-col gap-2">
+        {/* Header avec gradient subtil */}
+        <div className="p-3 pb-2 flex flex-col gap-2 border-b border-[var(--border-subtle)] bg-gradient-to-b from-[var(--bg-elevated)]/30 to-transparent">
           <div className="flex justify-between items-center">
-            <div className="flex flex-col">
-              <img src="/logo.png" alt="Logo NeuroTime" className="h-6 w-auto object-contain object-left mb-0.5" />
+            <div className="flex flex-col group">
+              <img src="/logo.png" alt="Logo NeuroTime" className="h-6 w-auto object-contain object-left mb-0.5 transition-transform group-hover:scale-105" />
               <span className="text-[7px] text-[var(--text-tertiary)] font-medium uppercase tracking-[0.15em] leading-none">
                 Freelance Platform
               </span>
             </div>
-            <button
-              type="button"
-              onClick={toggleSidebarPinned}
-              className={`p-1 rounded-md transition-all ${sidebarPinned ? 'text-[var(--primary)] bg-[var(--primary-light)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
-            >
-              {sidebarPinned ? <PinOff size={12} /> : <Pin size={12} />}
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleSidebarPinned}
+                className={`p-1.5 rounded-md transition-all hover:scale-110 ${sidebarPinned ? 'text-[var(--primary)] bg-[var(--primary-light)] shadow-sm shadow-[var(--primary)]/20' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+                title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
+              >
+                {sidebarPinned ? <PinOff size={12} /> : <Pin size={12} />}
+              </button>
+              {!sidebarPinned && (
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-1.5 rounded-md transition-all hover:scale-110 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+                  title="Fermer la sidebar"
+                >
+                  <ChevronLeft size={12} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
-          <div className="px-2 mb-1">
-            <span className="text-[7px] text-[var(--text-tertiary)] font-medium uppercase tracking-[0.1em]">Navigation</span>
+        {/* Navigation avec indicateurs améliorés */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
+          <div className="px-2 mb-2 flex items-center gap-1.5">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+            <span className="text-[7px] text-[var(--text-tertiary)] font-medium uppercase tracking-[0.1em]">Menu</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-[var(--border-default)] via-transparent to-transparent" />
           </div>
           <NavButton
             active={location.pathname === '/'}
@@ -245,12 +263,14 @@ const App: React.FC = () => {
             onClick={() => { navigate('/missions'); setIsSidebarOpen(false) }}
             icon={<ListChecks size={14} />}
             label="Missions"
+            badge={missions.filter(m => m.status === 'planned').length}
           />
           <NavButton
             active={location.pathname === '/payments'}
             onClick={() => { navigate('/payments'); setIsSidebarOpen(false) }}
             icon={<Euro size={14} />}
             label="Paiements"
+            badge={missions.filter(m => m.status === 'completed' && !m.isPaid).length}
           />
           <NavButton
             active={location.pathname === '/stats'}
@@ -272,96 +292,112 @@ const App: React.FC = () => {
           />
         </nav>
 
-        <div className="p-2 space-y-2">
+        {/* Footer avec CTA et profil améliorés */}
+        <div className="p-2 space-y-2 border-t border-[var(--border-subtle)] bg-gradient-to-t from-[var(--bg-elevated)]/30 to-transparent">
           <button
             onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
-            className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/25 text-white font-medium py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] hover:scale-[1.02] group relative overflow-hidden"
           >
-            <Plus size={14} strokeWidth={2.5} />
-            <span className="text-[9px] uppercase tracking-wider font-semibold">Nouvelle mission</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <Plus size={14} strokeWidth={2.5} className="relative z-10" />
+            <span className="text-[9px] uppercase tracking-wider font-semibold relative z-10">Nouvelle mission</span>
           </button>
 
-          <div className="p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] space-y-2">
-            <div className="flex items-center gap-1.5">
-              <div className="relative">
-                <div className="w-6 h-6 rounded-md bg-[var(--primary)] flex items-center justify-center text-[9px] font-semibold text-white">
+          <div className="p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] space-y-2 hover:border-[var(--border-default)] transition-all">
+            <div className="flex items-center gap-2">
+              <div className="relative group/avatar">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center text-[10px] font-bold text-white shadow-sm transition-transform group-hover/avatar:scale-110">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-[var(--success)]" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse" />
                 </div>
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] font-medium text-[var(--text-primary)] truncate leading-none mb-0.5">{user.email?.split('@')[0]}</span>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-[9px] font-semibold text-[var(--text-primary)] truncate leading-none mb-1">{user.email?.split('@')[0]}</span>
                 <button
                   onClick={() => navigate('/profile')}
-                  className="text-[7px] text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium uppercase tracking-wider text-left"
+                  className="text-[7px] text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium uppercase tracking-wider text-left hover:underline underline-offset-2"
                 >
-                  Voir Profil
+                  Voir Profil →
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={toggleHidePrices}
-                className={`flex flex-col items-center justify-center gap-0.5 p-1 rounded-md border transition-all text-[7px] font-medium uppercase ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-md border transition-all text-[7px] font-medium uppercase hover:scale-105 ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 shadow-sm shadow-orange-500/10' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]'}`}
+                title={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
               >
-                {hidePrices ? <EyeOff size={10} /> : <Eye size={10} />}
-                <span>Tarifs</span>
+                {hidePrices ? <EyeOff size={11} /> : <Eye size={11} />}
+                <span className="leading-none">{hidePrices ? 'Masqué' : 'Visible'}</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-0.5 p-1 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-red-400 transition-all text-[7px] font-medium uppercase"
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-all text-[7px] font-medium uppercase hover:scale-105"
+                title="Se déconnecter"
               >
-                <LogOut size={10} />
-                <span>Quitter</span>
+                <LogOut size={11} />
+                <span className="leading-none">Quitter</span>
               </button>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Mobile Header — MINIMAL */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-30 pb-safe">
-        <div className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
-          <div className="flex items-center justify-between px-3 py-2">
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Logo NeuroTime" className="h-5 object-contain" />
-              <span className="text-[9px] text-[var(--text-tertiary)] font-medium">
-                {format(new Date(), 'dd MMM yyyy', { locale: fr })}
-              </span>
+      {/* Mobile Header — ENHANCED */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-30 pb-safe backdrop-blur-md">
+        <div className="bg-[var(--bg-secondary)]/95 border-b border-[var(--border-subtle)] shadow-lg shadow-black/5">
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="relative group">
+                <img src="/logo.png" alt="Logo NeuroTime" className="h-5 object-contain transition-transform group-hover:scale-110" />
+                <div className="absolute -inset-1 bg-[var(--primary)]/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-[var(--text-primary)] font-semibold leading-none mb-0.5">
+                  {format(new Date(), 'EEEE', { locale: fr })}
+                </span>
+                <span className="text-[8px] text-[var(--text-tertiary)] font-medium leading-none">
+                  {format(new Date(), 'dd MMM yyyy', { locale: fr })}
+                </span>
+              </div>
             </div>
-            <button
-              onClick={toggleHidePrices}
-              className={`flex items-center justify-center p-1.5 rounded-md transition-all ${hidePrices ? 'text-orange-400 bg-orange-500/10' : 'text-[var(--text-tertiary)] bg-[var(--bg-tertiary)]'}`}
-              aria-pressed={hidePrices}
-            >
-              {hidePrices ? <EyeOff size={15} /> : <Eye size={15} />}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleHidePrices}
+                className={`flex items-center justify-center p-2 rounded-lg transition-all active:scale-95 ${hidePrices ? 'text-orange-400 bg-orange-500/10 border border-orange-500/20' : 'text-[var(--text-tertiary)] bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] hover:border-[var(--border-default)]'}`}
+                aria-pressed={hidePrices}
+                title={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
+              >
+                {hidePrices ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content — ENHANCED DESKTOP LAYOUT */}
       <main className={`min-h-screen min-h-[100dvh] pb-14 md:pb-0 bg-transparent overflow-y-auto relative pt-[44px] md:pt-0 transition-all duration-300 ease-out ${sidebarOpen ? 'md:ml-52' : 'md:ml-0'}`}>
-        {/* Sidebar Toggle Button (Desktop) */}
-        <div className="hidden md:block fixed top-2 left-2 z-10 opacity-40 hover:opacity-100 transition-opacity">
-          {!sidebarOpen && (
+        {/* Sidebar Toggle Button (Desktop) - Only visible when closed */}
+        {!sidebarOpen && (
+          <div className="hidden md:block fixed top-4 left-4 z-10">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-1.5 glass-button rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              className="p-2.5 glass-button rounded-xl text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:scale-110 transition-all shadow-lg shadow-black/10 hover:shadow-[var(--primary)]/20 border border-[var(--border-subtle)] hover:border-[var(--primary)]/30"
               aria-label="Ouvrir la navigation"
+              title="Ouvrir la sidebar"
             >
-              <Menu size={18} />
+              <Menu size={20} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
           <div
             key={location.key}
-            className="p-3 md:p-4 lg:p-5 max-w-7xl mx-auto animate-slide-in-up relative"
+            className="p-3 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-slide-in-up relative"
           >
             <Routes>
               <Route path="/" element={
@@ -490,43 +526,56 @@ const App: React.FC = () => {
 };
 
 /* ============================================
-   NAV BUTTONS - Minimal & Clean
+   NAV BUTTONS - Enhanced with badges & hover effects
    ============================================ */
 
-const NavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
+const NavButton = ({ active, onClick, icon, label, badge }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, badge?: number }) => (
   <button
     onClick={onClick}
-    className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-md transition-all duration-150 ${active
-      ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20'
-      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] border border-transparent'
+    className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-md transition-all duration-150 relative ${active
+      ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 shadow-sm shadow-[var(--primary)]/10'
+      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] border border-transparent hover:border-[var(--border-subtle)]'
       }`}
   >
-    <span className={`transition-transform duration-150 ${active ? 'scale-105' : ''}`}>
+    {/* Active indicator */}
+    {active && (
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3 bg-[var(--primary)] rounded-r-full" />
+    )}
+    
+    <span className={`transition-transform duration-150 ${active ? 'scale-105' : 'group-hover:scale-110'}`}>
       {icon}
     </span>
-    <span className={`text-[9px] font-medium tracking-wide ${active ? 'font-semibold' : ''}`}>{label}</span>
+    <span className={`text-[9px] font-medium tracking-wide flex-1 text-left ${active ? 'font-semibold' : ''}`}>{label}</span>
+    
+    {/* Badge for notifications */}
+    {badge !== undefined && badge > 0 && (
+      <span className="min-w-[16px] h-4 px-1 flex items-center justify-center bg-[var(--primary)] text-white text-[7px] font-bold rounded-full">
+        {badge > 99 ? '99+' : badge}
+      </span>
+    )}
   </button>
 );
 
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center py-1 px-1 rounded-md transition-all duration-150 min-w-[48px] ${active
+    className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all duration-150 min-w-[52px] relative ${active
       ? 'text-[var(--primary)]'
-      : 'text-[var(--text-tertiary)] active:text-[var(--primary)]'
+      : 'text-[var(--text-tertiary)] active:text-[var(--primary)] active:scale-95'
       }`}
   >
+    {/* Active indicator - top dot */}
     {active && (
-      <div className="absolute -top-0.5 w-1 h-1 rounded-full bg-[var(--primary)]" />
+      <div className="absolute -top-0.5 w-1 h-1 rounded-full bg-[var(--primary)] animate-pulse" />
     )}
 
-    <span className="relative z-10">
+    <span className={`relative z-10 transition-transform ${active ? 'scale-110' : ''}`}>
       {icon}
     </span>
 
     {label && (
-      <span className={`relative z-10 text-[7px] font-medium tracking-wider mt-0.5 ${active
-        ? 'text-[var(--primary)]'
+      <span className={`relative z-10 text-[7px] font-medium tracking-wider mt-1 transition-all ${active
+        ? 'text-[var(--primary)] font-semibold'
         : 'text-[var(--text-tertiary)]'
         }`}>
         {label}

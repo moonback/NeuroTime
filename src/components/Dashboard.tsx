@@ -59,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   } = useDashboardExports(missions, allCompletedMissions, selectedMonthDate);
 
   return (
-    <div className="space-y-3 md:space-y-4 pb-16 md:pb-4 animate-fade-in">
+    <div className="space-y-3 md:space-y-5 pb-16 md:pb-8 animate-fade-in">
       {/* Header amélioré */}
       <DashboardHeader
         selectedMonth={selectedMonth}
@@ -81,25 +81,27 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
 
-      {/* KPI Stats Grid */}
-      <DashboardKPIs
-        selectedMonthDate={selectedMonthDate}
-        totalEarnings={totalEarnings}
-        totalEarningsCollected={totalEarningsCollected}
-        totalEarningsExpected={totalEarningsExpected}
-        totalHours={totalHours}
-        totalDayHours={totalDayHours}
-        totalNightHours={totalNightHours}
-        completedMissionsCount={selectedMonthCompletedMissions.length}
-        upcomingMissionsCount={upcomingMissions.length}
-        averageHourlyRate={averageHourlyRate}
-        averageDayHourlyRate={averageDayHourlyRate}
-        averageNightHourlyRate={averageNightHourlyRate}
-        monthlyComparison={monthlyComparison}
-        mostProfitableMission={mostProfitableMission}
-        hidePrices={hidePrices}
-        onRevenueClick={() => setIsRevenueModalOpen(true)}
-      />
+      {/* KPI Stats Grid — ENHANCED FOR DESKTOP */}
+      <div className="animate-slide-in-up stagger-1">
+        <DashboardKPIs
+          selectedMonthDate={selectedMonthDate}
+          totalEarnings={totalEarnings}
+          totalEarningsCollected={totalEarningsCollected}
+          totalEarningsExpected={totalEarningsExpected}
+          totalHours={totalHours}
+          totalDayHours={totalDayHours}
+          totalNightHours={totalNightHours}
+          completedMissionsCount={selectedMonthCompletedMissions.length}
+          upcomingMissionsCount={upcomingMissions.length}
+          averageHourlyRate={averageHourlyRate}
+          averageDayHourlyRate={averageDayHourlyRate}
+          averageNightHourlyRate={averageNightHourlyRate}
+          monthlyComparison={monthlyComparison}
+          mostProfitableMission={mostProfitableMission}
+          hidePrices={hidePrices}
+          onRevenueClick={() => setIsRevenueModalOpen(true)}
+        />
+      </div>
 
       <RevenueMissionsModal
         isOpen={isRevenueModalOpen}
@@ -111,28 +113,38 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       />
 
       {/* Détail des 3 derniers mois */}
-      <RecentHistory data={lastThreeMonths} hidePrices={hidePrices} />
+      <div className="animate-slide-in-up stagger-2">
+        <RecentHistory data={lastThreeMonths} hidePrices={hidePrices} />
+      </div>
 
-      {/* Statistiques avancées et Objectifs */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardStats missions={missions} selectedMonth={selectedMonthDate} />
-        <DashboardGoals missions={missions} selectedMonth={selectedMonthDate} />
+      {/* Statistiques avancées et Objectifs — ENHANCED GRID */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-6 animate-slide-in-up stagger-3">
+        <div className="glass-card rounded-xl p-4 md:p-5 border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all">
+          <DashboardStats missions={missions} selectedMonth={selectedMonthDate} />
+        </div>
+        <div className="glass-card rounded-xl p-4 md:p-5 border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all">
+          <DashboardGoals missions={missions} selectedMonth={selectedMonthDate} />
+        </div>
       </div>
 
       {/* Upcoming / Planned Missions List */}
-      <UpcomingMissionsList
-        upcomingMissions={upcomingMissions}
-        onEdit={onEdit}
-        onValidate={onValidate}
-        hidePrices={hidePrices}
-      />
+      <div className="animate-slide-in-up stagger-4">
+        <UpcomingMissionsList
+          upcomingMissions={upcomingMissions}
+          onEdit={onEdit}
+          onValidate={onValidate}
+          hidePrices={hidePrices}
+        />
+      </div>
 
 
       {/* Data Persistence Section */}
-      <DataPersistence
-        onImport={onImport}
-        onBackup={backupData}
-      />
+      <div className="animate-slide-in-up stagger-5">
+        <DataPersistence
+          onImport={onImport}
+          onBackup={backupData}
+        />
+      </div>
     </div>
   );
 };
