@@ -10,6 +10,30 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
+      build: {
+        // Optimisation des chunks pour réduire la taille
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              // Séparer les grosses dépendances
+              'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+              'date-vendor': ['date-fns'],
+              'pdf-vendor': ['jspdf', 'html2canvas'],
+              'ui-vendor': ['lucide-react', 'sonner'],
+            }
+          }
+        },
+        // Augmenter la limite de warning pour les chunks
+        chunkSizeWarningLimit: 1000,
+        // Optimisation de la minification
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_console: mode === 'production',
+            drop_debugger: mode === 'production',
+          }
+        }
+      },
       plugins: [
         react(),
         VitePWA({
@@ -66,12 +90,6 @@ export default defineConfig(({ mode }) => {
             globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
             // Ignorer les fichiers de développement Vite
             globIgnores: ['**/node_modules/**/*', '**/@vite/**/*', '**/@react-refresh/**/*'],
-            // Désactiver les warnings en développement
-            mode: mode === 'development' ? 'development' : 'production',
-            // Réduire les logs Workbox en développement
-            injectManifest: {
-              globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
-            },
             // Ne pas précacher les fichiers de développement
             navigateFallback: null,
             navigateFallbackDenylist: [/^\/@/, /^\/node_modules/],
