@@ -1,12 +1,11 @@
 @import "tailwindcss";
 
 /* ============================================
-   FONTS — Precision Instrument Trio
-   Syne     : display headings (geometric, bold character)
-   Figtree  : body copy (warm, readable alternative to Inter)
-   DM Mono  : numbers & financial data (precision feel)
+   FONTS — Minimal & Modern
+   Inter    : clean, modern sans-serif for everything
+   Mono     : system monospace for numbers
    ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ============================================
    DESIGN TOKENS — Single source of truth
@@ -15,38 +14,32 @@
    from these variables.
    ============================================ */
 :root {
-  /* — Glass surfaces — */
-  --glass-bg:           rgba(17, 20, 30, 0.75);
-  --glass-bg-light:     rgba(20, 24, 36, 0.65);
-  --glass-bg-strong:    rgba(10, 13, 22, 0.92);
-  --glass-bg-card:      rgba(15, 18, 28, 0.70);
-  --glass-border:       rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(255, 255, 255, 0.10);
-  --glass-border-focus: rgba(99, 102, 241, 0.50);
-  --glass-blur:         16px;
-  --glass-blur-sm:      12px;
-  --glass-blur-lg:      24px;
-  --glass-shadow:       0 4px 24px rgba(0, 0, 0, 0.25);
-  --glass-shadow-sm:    0 2px 12px rgba(0, 0, 0, 0.15);
-  --glass-shadow-lg:    0 8px 32px rgba(0, 0, 0, 0.40);
+  /* — Minimal surfaces — */
+  --bg-primary:         #0a0d14;
+  --bg-secondary:       #0f1218;
+  --bg-tertiary:        #14171f;
+  --bg-elevated:        #191c24;
+  --border-subtle:      rgba(255, 255, 255, 0.04);
+  --border-default:     rgba(255, 255, 255, 0.08);
+  --border-strong:      rgba(255, 255, 255, 0.12);
+  --text-primary:       #e8ecf4;
+  --text-secondary:     #9ca3af;
+  --text-tertiary:      #6b7280;
 
   /* — Animation timing — */
-  --dur-fast:        150ms;
-  --dur-normal:      250ms;
-  --dur-slow:        400ms;
-  --dur-slower:      600ms;
+  --dur-fast:        120ms;
+  --dur-normal:      200ms;
+  --dur-slow:        300ms;
   --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out:     cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
 
-  /* — Brand RGB channels (for rgba() glow composition) — */
-  --rgb-primary: 99, 102, 241;
-  --rgb-gold:    245, 158, 11;
-  --rgb-teal:    20, 184, 166;
-  --rgb-emerald: 16, 185, 129;
-  --rgb-danger:  239, 68, 68;
-  --rgb-pink:    236, 72, 153;
+  /* — Brand colors — */
+  --primary:         #6366f1;
+  --primary-hover:   #5558e3;
+  --primary-light:   rgba(99, 102, 241, 0.1);
+  --success:         #10b981;
+  --warning:         #f59e0b;
+  --danger:          #ef4444;
 }
 
 * {
@@ -59,10 +52,9 @@ html {
 }
 
 body {
-  background: #080b14;
-  color: #e8ecf4;
-  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
-  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
@@ -71,15 +63,14 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 /* ============================================
-   SCROLLBAR - Minimal & elegant
+   SCROLLBAR - Ultra minimal
    ============================================ */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -87,17 +78,17 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 /* ============================================
@@ -299,94 +290,74 @@ body {
 }
 
 /* ============================================
-   GLASSMORPHISM SYSTEM
-   All values derive from :root tokens above.
+   MINIMAL CARD SYSTEM - Flat design
    ============================================ */
 .glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
 .glass-light {
-  background: var(--glass-bg-light);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow-sm);
-  backdrop-filter: blur(var(--glass-blur-sm));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
 }
 
 .glass-strong {
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow-lg);
-  backdrop-filter: blur(var(--glass-blur-lg));
-  -webkit-backdrop-filter: blur(var(--glass-blur-lg));
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
 }
 
 .glass-card {
-  background: var(--glass-bg-card);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
   transition:
     border-color var(--dur-normal) var(--ease-in-out),
-    box-shadow   var(--dur-normal) var(--ease-in-out),
-    transform    var(--dur-normal) var(--ease-in-out);
+    background-color var(--dur-normal) var(--ease-in-out);
 }
 
 .glass-card:hover {
-  border-color: var(--glass-border-hover);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20);
+  border-color: var(--border-default);
+  background: var(--bg-tertiary);
 }
 
 .glass-premium {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--glass-shadow);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
 }
 
 /* ============================================
-   BUTTONS
+   BUTTONS - Minimal & flat
    ============================================ */
 .glass-button {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   transition:
     background-color var(--dur-fast) var(--ease-in-out),
-    border-color     var(--dur-fast) var(--ease-in-out),
-    transform        var(--dur-fast) var(--ease-in-out);
+    border-color     var(--dur-fast) var(--ease-in-out);
 }
 
 .glass-button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
 }
 
 .glass-button:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 /* ============================================
-   SHADOWS - Refined
+   SHADOWS - Minimal (removed most shadows)
    ============================================ */
 .glow-blue {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 .glow-blue:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
 
 .glow-blue-strong {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: none;
 }
 
 /* ============================================
@@ -423,24 +394,11 @@ textarea,
 }
 
 /* ============================================
-   AURORA BACKGROUND - Refined & subtle
+   MINIMAL BACKGROUND - Flat & clean
    ============================================ */
 .neo-aurora {
   position: relative;
-  background:
-    radial-gradient(ellipse 60% 50% at 15% 10%, rgba(99, 102, 241, 0.08), transparent),
-    radial-gradient(ellipse 50% 40% at 85% 5%, rgba(236, 72, 153, 0.04), transparent),
-    radial-gradient(ellipse 40% 45% at 70% 80%, rgba(45, 212, 191, 0.035), transparent),
-    #080b14;
-}
-
-.neo-aurora::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.02), transparent);
-  mix-blend-mode: soft-light;
+  background: var(--bg-primary);
 }
 
 .aurora-layer {
@@ -449,44 +407,43 @@ textarea,
   pointer-events: none;
   overflow: hidden;
   z-index: 0;
+  opacity: 0.3;
 }
 
 .aurora-blob {
   position: absolute;
-  width: 350px;
-  height: 350px;
+  width: 400px;
+  height: 400px;
   border-radius: 9999px;
-  filter: blur(100px);
-  opacity: 0.35;
-  mix-blend-mode: screen;
-  animation: float-soft 20s ease-in-out infinite;
-  will-change: transform;
+  filter: blur(120px);
+  opacity: 0.15;
+  animation: float-soft 25s ease-in-out infinite;
 }
 
 .aurora-blob.primary {
-  background: rgba(99, 102, 241, 0.5);
+  background: var(--primary);
 }
 
 .aurora-blob.pink {
-  background: rgba(236, 72, 153, 0.3);
-  animation-duration: 24s;
-  animation-delay: 3s;
+  background: #ec4899;
+  animation-duration: 30s;
+  animation-delay: 5s;
 }
 
 .aurora-blob.teal {
-  background: rgba(45, 212, 191, 0.25);
-  animation-duration: 28s;
-  animation-delay: 6s;
+  background: #14b8a6;
+  animation-duration: 35s;
+  animation-delay: 10s;
 }
 
 .aurora-blob.small {
-  width: 200px;
-  height: 200px;
-  filter: blur(80px);
+  width: 250px;
+  height: 250px;
+  filter: blur(100px);
 }
 
 /* ============================================
-   FORM INPUTS - Clean & modern
+   FORM INPUTS - Minimal & flat
    ============================================ */
 input[type="text"],
 input[type="email"],
@@ -496,12 +453,12 @@ input[type="time"],
 input[type="number"],
 select,
 textarea {
-  background: rgba(17, 20, 32, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e8ecf4;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
   font-weight: 400;
-  border-radius: 10px;
-  transition: all 0.15s ease;
+  border-radius: 6px;
+  transition: all var(--dur-fast) ease;
 }
 
 input[type="text"]:focus,
@@ -512,15 +469,14 @@ input[type="time"]:focus,
 input[type="number"]:focus,
 select:focus,
 textarea:focus {
-  background: rgba(22, 26, 40, 0.9);
-  border-color: var(--glass-border-focus);
-  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1);
+  background: var(--bg-elevated);
+  border-color: var(--primary);
   outline: none;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(148, 163, 184, 0.4);
+  color: var(--text-tertiary);
   font-weight: 400;
 }
 
@@ -533,71 +489,47 @@ textarea:disabled {
 
 /* Glass Input variant */
 .glass-input {
-  background: rgba(12, 16, 28, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #e8ecf4;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
   transition:
     border-color var(--dur-fast) var(--ease-in-out),
-    box-shadow   var(--dur-fast) var(--ease-in-out);
+    background-color var(--dur-fast) var(--ease-in-out);
 }
 
 .glass-input:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--border-strong);
 }
 
 .glass-input:focus {
-  border-color: var(--glass-border-focus);
-  box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary);
+  background: var(--bg-elevated);
   outline: none;
 }
 
 .glass-input::placeholder {
-  color: rgba(148, 163, 184, 0.35);
+  color: var(--text-tertiary);
 }
 
 /* ============================================
-   GLOW EFFECTS
+   MINIMAL EFFECTS - Removed glows
    ============================================ */
-.glow-primary {
-  box-shadow: 0 0 16px rgba(var(--rgb-primary), 0.2);
-}
-
-.glow-primary:hover {
-  box-shadow: 0 0 24px rgba(var(--rgb-primary), 0.35);
-}
-
-.glow-green {
-  box-shadow: 0 0 16px rgba(var(--rgb-emerald), 0.2);
-}
-
-.glow-green:hover {
-  box-shadow: 0 0 24px rgba(var(--rgb-emerald), 0.35);
-}
-
+.glow-primary,
+.glow-green,
 .glow-gold {
-  box-shadow: 0 0 16px rgba(var(--rgb-gold), 0.2);
+  box-shadow: none;
 }
 
+.glow-primary:hover,
+.glow-green:hover,
 .glow-gold:hover {
-  box-shadow: 0 0 24px rgba(var(--rgb-gold), 0.35);
+  box-shadow: none;
 }
 
-/* ============================================
-   TEXT EFFECTS
-   ============================================ */
-.text-glow-primary {
-  text-shadow: 0 0 12px rgba(var(--rgb-primary), 0.4);
-}
-
-.text-glow-emerald {
-  text-shadow: 0 0 12px rgba(var(--rgb-emerald), 0.4);
-}
-
+.text-glow-primary,
+.text-glow-emerald,
 .text-glow-gold {
-  text-shadow: 0 0 12px rgba(var(--rgb-gold), 0.45);
+  text-shadow: none;
 }
 
 /* ============================================
@@ -605,7 +537,7 @@ textarea:disabled {
    ============================================ */
 .glass-separator {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--glass-border-hover), transparent);
+  background: var(--border-subtle);
   border: none;
   margin: 1rem 0;
 }
@@ -613,23 +545,23 @@ textarea:disabled {
 /* Compact section title */
 .section-title {
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(148, 163, 184, 0.6);
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
 }
 
-/* Financial number — DM Mono + subtle gold warmth */
+/* Financial number — Monospace */
 .num-financial {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', monospace;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
-/* Display heading — Syne */
+/* Display heading */
 .font-display {
-  font-family: 'Syne', system-ui, sans-serif;
-  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
 }
 
 /* Stagger animation helpers */

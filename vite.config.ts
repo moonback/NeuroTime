@@ -68,6 +68,10 @@ export default defineConfig(({ mode }) => {
             globIgnores: ['**/node_modules/**/*', '**/@vite/**/*', '**/@react-refresh/**/*'],
             // Désactiver les warnings en développement
             mode: mode === 'development' ? 'development' : 'production',
+            // Réduire les logs Workbox en développement
+            injectManifest: {
+              globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+            },
             // Ne pas précacher les fichiers de développement
             navigateFallback: null,
             navigateFallbackDenylist: [/^\/@/, /^\/node_modules/],
