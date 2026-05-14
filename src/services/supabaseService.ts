@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { Mission, Payment } from '../types';
 import { getSupabase } from './authService';
 import { retry } from '../utils/retry';
@@ -183,7 +182,7 @@ export const addMissionToSupabase = async (mission: Mission): Promise<void> => {
       const missionDb = missionToDb(mission, userId);
       const { error } = await supabase
         .from('missions')
-        .insert([missionDb]);
+        .upsert(missionDb, { onConflict: 'id' });
 
       if (error) {
         throw error;
@@ -436,6 +435,19 @@ export const syncClientsWithMissionsInSupabase = async (missions: { client: stri
 
 // ==================== GESTION DES PAIEMENTS / VIREMENTS ====================
 
+
+export const dbToPayment = (row: any): Payment => ({
+  id: row.id,
+  date: row.date,
+  amount: row.amount,
+  client: row.client,
+  description: row.description,
+  reference: row.reference,
+  missionIds: row.mission_ids || [],
+  method: row.method || 'virement',
+  createdAt: row.created_at,
+});
+
 export const loadPaymentsFromSupabase = async (): Promise<Payment[]> => {
   const supabase = getSupabaseClient();
   if (!supabase) return [];
@@ -455,17 +467,7 @@ export const loadPaymentsFromSupabase = async (): Promise<Payment[]> => {
       return [];
     }
 
-    return (data || []).map(row => ({
-      id: row.id,
-      date: row.date,
-      amount: row.amount,
-      client: row.client,
-      description: row.description,
-      reference: row.reference,
-      missionIds: row.mission_ids || [],
-      method: row.method || 'virement',
-      createdAt: row.created_at,
-    }));
+    return (data || []).map(dbToPayment);
   } catch (error) {
     console.error('Erreur lors du chargement des paiements depuis Supabase:', error);
     return [];
@@ -479,19 +481,27 @@ export const savePaymentToSupabase = async (payment: Payment): Promise<void> => 
   const userId = await getCurrentUserId();
   if (!userId) return;
 
+  const paymentDb = {
+    id: payment.id,
+    user_id: userId,
+    date: payment.date,
+    amount: payment.amount,
+    client: payment.client,
+    description: payment.description,
+    reference: payment.reference,
+    mission_ids: payment.missionIds,
+    method: payment.method,
+    created_at: payment.createdAt,
+  };
+
   try {
-    const paymentDb = {
-      id: payment.id,
-      user_id: userId,
-      date: payment.date,
-      amount: payment.amount,
-      client: payment.client,
-      description: payment.description,
-      reference: payment.reference,
-      mission_ids: payment.missionIds,
-      method: payment.method,
-      created_at: payment.createdAt,
-    };
+    const { error: rpcError } = await supabase.rpc('save_payment_with_missions', {
+      payment_payload: payment,
+    });
+
+    if (!rpcError) return;
+
+    console.warn('RPC save_payment_with_missions indisponible, fallback client:', rpcError);
 
     const { error } = await supabase
       .from('payments')
@@ -503,7 +513,7 @@ export const savePaymentToSupabase = async (payment: Payment): Promise<void> => 
     if (payment.missionIds.length > 0) {
       const { error: updateError } = await supabase
         .from('missions')
-        .update({ payment_id: payment.id, is_paid: true })
+        .update({ payment_id: payment.id, is_paid: true, updated_at: new Date().toISOString() })
         .in('id', payment.missionIds)
         .eq('user_id', userId);
 
@@ -526,7 +536,7 @@ export const deletePaymentFromSupabase = async (paymentId: string): Promise<void
     // Retirer le paymentId des missions associées avant de supprimer le paiement
     const { error: updateError } = await supabase
       .from('missions')
-      .update({ payment_id: null, is_paid: false })
+      .update({ payment_id: null, is_paid: false, updated_at: new Date().toISOString() })
       .eq('payment_id', paymentId)
       .eq('user_id', userId);
 

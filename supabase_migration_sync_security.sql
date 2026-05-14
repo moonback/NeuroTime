@@ -1,18 +1,27 @@
 -- Migration de sécurité/synchronisation critique pour NeuroTime
 -- À exécuter dans Supabase avant de déployer les corrections frontend.
 
+-- Fonction générique utilisée par les triggers updated_at.
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- 1) Ne jamais exposer publiquement les missions terminées.
 DROP POLICY IF EXISTS "Public can view completed missions" ON missions;
 
--- 2) Renforcer l'ownership des tables principales.
+-- 2) Renforcer l'ownership des tables principales quand elles existent.
 -- Si des lignes legacy ont user_id NULL, rattachez-les manuellement avant ces ALTER.
-ALTER TABLE missions ALTER COLUMN user_id SET NOT NULL;
-ALTER TABLE goals ALTER COLUMN user_id SET NOT NULL;
-ALTER TABLE clients ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE IF EXISTS missions ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE IF EXISTS goals ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE IF EXISTS clients ALTER COLUMN user_id SET NOT NULL;
 
 -- 3) Colonnes nécessaires au suivi des paiements côté missions.
-ALTER TABLE missions ADD COLUMN IF NOT EXISTS payment_id UUID;
-ALTER TABLE missions ADD COLUMN IF NOT EXISTS is_paid BOOLEAN DEFAULT FALSE;
+ALTER TABLE IF EXISTS missions ADD COLUMN IF NOT EXISTS payment_id UUID;
+ALTER TABLE IF EXISTS missions ADD COLUMN IF NOT EXISTS is_paid BOOLEAN DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS idx_missions_user_payment ON missions(user_id, payment_id);
 CREATE INDEX IF NOT EXISTS idx_missions_user_status_paid ON missions(user_id, status, is_paid);
 
@@ -63,3 +72,63 @@ CREATE TRIGGER update_payments_updated_at
   BEFORE UPDATE ON payments
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- 5) RPC transactionnelle pour garantir la cohérence paiement <-> missions.
+CREATE OR REPLACE FUNCTION save_payment_with_missions(payment_payload jsonb)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  mission_ids uuid[];
+  payment_uuid uuid;
+BEGIN
+  payment_uuid := (payment_payload->>'id')::uuid;
+
+  SELECT COALESCE(array_agg(value::uuid), '{}')
+  INTO mission_ids
+  FROM jsonb_array_elements_text(COALESCE(payment_payload->'missionIds', '[]'::jsonb));
+
+  INSERT INTO payments (
+    id,
+    user_id,
+    date,
+    amount,
+    client,
+    description,
+    reference,
+    mission_ids,
+    method,
+    created_at,
+    updated_at
+  ) VALUES (
+    payment_uuid,
+    auth.uid(),
+    (payment_payload->>'date')::date,
+    (payment_payload->>'amount')::numeric,
+    payment_payload->>'client',
+    payment_payload->>'description',
+    payment_payload->>'reference',
+    mission_ids,
+    COALESCE(payment_payload->>'method', 'virement'),
+    COALESCE((payment_payload->>'createdAt')::timestamptz, NOW()),
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    date = EXCLUDED.date,
+    amount = EXCLUDED.amount,
+    client = EXCLUDED.client,
+    description = EXCLUDED.description,
+    reference = EXCLUDED.reference,
+    mission_ids = EXCLUDED.mission_ids,
+    method = EXCLUDED.method,
+    updated_at = NOW();
+
+  UPDATE missions
+  SET payment_id = payment_uuid,
+      is_paid = true,
+      updated_at = NOW()
+  WHERE user_id = auth.uid()
+    AND id = ANY(mission_ids);
+END;
+$$;

@@ -51,16 +51,6 @@ export const saveMissions = async (missions: Mission[], userId: string): Promise
     throw new Error('Impossible de sauvegarder les données localement');
   }
 
-  // Essayer ensuite Supabase (non bloquant pour les erreurs réseau)
-  try {
-    await saveMissionsToSupabase(missions);
-  } catch (error) {
-    if (isNetworkError(error)) {
-      console.warn('Erreur réseau lors de la sauvegarde Supabase, données sauvegardées localement:', error);
-      return;
-    }
-    console.error('Erreur lors de la sauvegarde dans Supabase:', error);
-  }
 };
 
 /**
@@ -108,15 +98,18 @@ export const loadMissions = async (userId: string): Promise<Mission[]> => {
       const resolvedMissions = resolveConflicts(localMissions, supabaseMissions);
       writeJsonArray(storageKey, resolvedMissions);
 
-      const offlineOnlyMissions = resolvedMissions.filter(
-        mission => !supabaseMissions.some(remoteMission => remoteMission.id === mission.id)
-      );
+      const missionsToPush = resolvedMissions.filter(mission => {
+        const remoteMission = supabaseMissions.find(candidate => candidate.id === mission.id);
+        if (!remoteMission) return true;
+        if (!mission.updatedAt || !remoteMission.updatedAt) return false;
+        return new Date(mission.updatedAt) > new Date(remoteMission.updatedAt);
+      });
 
-      if (offlineOnlyMissions.length > 0) {
+      if (missionsToPush.length > 0) {
         try {
-          await saveMissionsToSupabase(offlineOnlyMissions);
+          await saveMissionsToSupabase(missionsToPush);
         } catch (error) {
-          console.warn('Impossible de sauvegarder les missions offline dans Supabase:', error);
+          console.warn('Impossible de sauvegarder les missions locales en attente dans Supabase:', error);
         }
       }
 

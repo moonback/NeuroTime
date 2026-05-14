@@ -2,7 +2,14 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { Mission, Payment } from '../types';
 import { loadMissions, saveMissions, loadPayments, savePayment as savePaymentToStorage, deletePayment as deletePaymentFromStorage } from '../services/storageService';
 import { useAuth } from './AuthContext';
-import { dbToMission, deleteMissionFromSupabase } from '../services/supabaseService';
+import {
+  addMissionToSupabase,
+  dbToMission,
+  dbToPayment,
+  deleteMissionFromSupabase,
+  saveMissionsToSupabase,
+  updateMissionInSupabase,
+} from '../services/supabaseService';
 import { getSupabase } from '../services/authService';
 import { toast } from 'sonner';
 
@@ -67,7 +74,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const supabase = getSupabase();
     if (!supabase) return;
 
-    const channel = supabase
+    const missionsChannel = supabase
       .channel(`missions:user:${user.id}`)
       .on(
         'postgres_changes',
@@ -100,8 +107,34 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       )
       .subscribe();
 
+    const paymentsChannel = supabase
+      .channel(`payments:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'payments', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            const deletedId = (payload.old as { id?: string }).id;
+            if (deletedId) {
+              setPayments(current => current.filter(payment => payment.id !== deletedId));
+            }
+            return;
+          }
+
+          const remotePayment = dbToPayment(payload.new);
+          setPayments(current => {
+            const exists = current.some(payment => payment.id === remotePayment.id);
+            return exists
+              ? current.map(payment => payment.id === remotePayment.id ? remotePayment : payment)
+              : [remotePayment, ...current];
+          });
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(missionsChannel);
+      supabase.removeChannel(paymentsChannel);
     };
   }, [user?.id]);
 
@@ -127,12 +160,20 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addMission = useCallback((mission: Mission) => {
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
     setMissions(prev => [...prev, missionWithTimestamp]);
+    addMissionToSupabase(missionWithTimestamp).catch(error => {
+      console.error('Erreur lors de la création distante:', error);
+      toast.error('Mission sauvegardée localement, synchronisation distante en échec');
+    });
     toast.success('Mission ajoutée');
   }, []);
 
   const updateMission = useCallback((mission: Mission) => {
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
     setMissions(prev => prev.map(m => m.id === mission.id ? missionWithTimestamp : m));
+    updateMissionInSupabase(missionWithTimestamp).catch(error => {
+      console.error('Erreur lors de la mise à jour distante:', error);
+      toast.error('Mission mise à jour localement, synchronisation distante en échec');
+    });
     toast.success('Mission mise à jour');
   }, []);
 
@@ -147,7 +188,15 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const importMissions = useCallback((importedMissions: Mission[]) => {
     const now = new Date().toISOString();
-    setMissions(importedMissions.map(mission => ({ ...mission, updatedAt: mission.updatedAt || now })));
+    const missionsWithTimestamp = importedMissions.map(mission => ({
+      ...mission,
+      updatedAt: mission.updatedAt || now,
+    }));
+    setMissions(missionsWithTimestamp);
+    saveMissionsToSupabase(missionsWithTimestamp).catch(error => {
+      console.error("Erreur lors de la synchronisation de l'import:", error);
+      toast.error('Import local effectué, synchronisation distante en échec');
+    });
     toast.success(`${importedMissions.length} missions importées`);
   }, []);
 

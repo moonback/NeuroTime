@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Mission } from '../types';
 import { Clock, CheckCircle, Calendar, Plus, Edit } from 'lucide-react';
 import { format, isToday, isYesterday, differenceInHours } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 
 interface DashboardActivityProps {
   missions: Mission[];
