@@ -4,15 +4,30 @@ import {
   syncClientsWithMissionsInSupabase,
   Client
 } from './supabaseService';
+import { getSupabase } from './authService';
 
 export type { Client };
 
-const STORAGE_KEY = 'neurotime_clients_v1';
+const LEGACY_STORAGE_KEY = 'neurotime_clients_v1';
+const STORAGE_VERSION = 'v2';
+
+const getCurrentUserId = async (): Promise<string | null> => {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id || null;
+};
+
+const getStorageKey = (userId: string | null): string => (
+  userId ? `neurotime_clients_${userId}_${STORAGE_VERSION}` : LEGACY_STORAGE_KEY
+);
 
 // Charger les clients depuis le localStorage (fallback)
-const loadClientsFromLocal = (): Client[] => {
+const loadClientsFromLocal = (userId: string | null): Client[] => {
+  const storageKey = getStorageKey(userId);
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(storageKey);
     if (data) {
       return JSON.parse(data);
     }
@@ -23,9 +38,10 @@ const loadClientsFromLocal = (): Client[] => {
 };
 
 // Sauvegarder les clients dans le localStorage (fallback)
-const saveClientsToLocal = (clients: Client[]): void => {
+const saveClientsToLocal = (clients: Client[], userId: string | null): void => {
+  const storageKey = getStorageKey(userId);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+    localStorage.setItem(storageKey, JSON.stringify(clients));
   } catch (error) {
     console.error('Erreur lors de la sauvegarde des clients dans localStorage:', error);
   }
@@ -50,12 +66,14 @@ export const extractClientsFromMissions = (missions: { client: string }[]): Clie
 
 // Obtenir tous les clients (depuis Supabase avec fallback localStorage + extraction depuis missions)
 export const getAllClients = async (missions: { client: string }[] = []): Promise<Client[]> => {
+  const userId = await getCurrentUserId();
+
   // Essayer d'abord Supabase
   try {
     const supabaseClients = await loadClientsFromSupabase();
     if (supabaseClients.length > 0) {
       // Synchroniser avec localStorage pour le fallback
-      saveClientsToLocal(supabaseClients);
+      saveClientsToLocal(supabaseClients, userId);
       return supabaseClients.sort((a, b) => 
         a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
       );
@@ -70,7 +88,7 @@ export const getAllClients = async (missions: { client: string }[] = []): Promis
   }
   
   // Fallback sur localStorage
-  const localClients = loadClientsFromLocal();
+  const localClients = loadClientsFromLocal(userId);
   const extractedClients = extractClientsFromMissions(missions);
   
   // Créer un Map pour éviter les doublons
@@ -96,6 +114,7 @@ export const getAllClients = async (missions: { client: string }[] = []): Promis
 
 // Ajouter un nouveau client (Supabase avec fallback localStorage)
 export const addClient = async (name: string): Promise<Client> => {
+  const userId = await getCurrentUserId();
   const trimmedName = name.trim();
   if (!trimmedName) {
     throw new Error('Le nom du client ne peut pas être vide');
@@ -105,16 +124,16 @@ export const addClient = async (name: string): Promise<Client> => {
   try {
     const newClient = await addClientToSupabase(trimmedName);
     // Sauvegarder aussi dans localStorage pour le fallback
-    const localClients = loadClientsFromLocal();
+    const localClients = loadClientsFromLocal(userId);
     localClients.push(newClient);
-    saveClientsToLocal(localClients);
+    saveClientsToLocal(localClients, userId);
     return newClient;
   } catch (error: any) {
     const errorMessage = error?.message || 'Erreur inconnue';
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
       console.warn('Erreur réseau lors de l\'ajout du client dans Supabase, utilisation du localStorage:', error);
       // Fallback sur localStorage
-      return addClientToLocal(trimmedName);
+      return addClientToLocal(trimmedName, userId);
     } else {
       // Si c'est une erreur de validation (client existe déjà), la propager
       throw error;
@@ -123,8 +142,8 @@ export const addClient = async (name: string): Promise<Client> => {
 };
 
 // Ajouter un client dans localStorage (fallback)
-const addClientToLocal = (name: string): Client => {
-  const existingClients = loadClientsFromLocal();
+const addClientToLocal = (name: string, userId: string | null): Client => {
+  const existingClients = loadClientsFromLocal(userId);
   
   // Vérifier si le client existe déjà (insensible à la casse)
   const exists = existingClients.some(
@@ -142,38 +161,40 @@ const addClientToLocal = (name: string): Client => {
   };
   
   existingClients.push(newClient);
-  saveClientsToLocal(existingClients);
+  saveClientsToLocal(existingClients, userId);
   
   return newClient;
 };
 
 // Synchroniser les clients avec les missions (ajouter les nouveaux clients trouvés dans les missions)
 export const syncClientsWithMissions = async (missions: { client: string }[]): Promise<void> => {
+  const userId = await getCurrentUserId();
+
   // Essayer d'abord Supabase
   try {
     await syncClientsWithMissionsInSupabase(missions);
     // Recharger les clients depuis Supabase pour mettre à jour le localStorage
     const supabaseClients = await loadClientsFromSupabase();
     if (supabaseClients.length > 0) {
-      saveClientsToLocal(supabaseClients);
+      saveClientsToLocal(supabaseClients, userId);
     }
   } catch (error: any) {
     const errorMessage = error?.message || 'Erreur inconnue';
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
       console.warn('Erreur réseau lors de la synchronisation des clients avec Supabase, utilisation du localStorage:', error);
       // Fallback sur localStorage
-      syncClientsWithMissionsLocal(missions);
+      syncClientsWithMissionsLocal(missions, userId);
     } else {
       console.error('Erreur lors de la synchronisation des clients avec les missions:', error);
       // Fallback sur localStorage en cas d'erreur
-      syncClientsWithMissionsLocal(missions);
+      syncClientsWithMissionsLocal(missions, userId);
     }
   }
 };
 
 // Synchroniser les clients avec les missions dans localStorage (fallback)
-const syncClientsWithMissionsLocal = (missions: { client: string }[]): void => {
-  const existingClients = loadClientsFromLocal();
+const syncClientsWithMissionsLocal = (missions: { client: string }[], userId: string | null): void => {
+  const existingClients = loadClientsFromLocal(userId);
   const clientNames = new Set(existingClients.map(c => c.name.toLowerCase()));
   
   missions.forEach(mission => {
@@ -191,8 +212,8 @@ const syncClientsWithMissionsLocal = (missions: { client: string }[]): void => {
     }
   });
   
-  if (existingClients.length > loadClientsFromLocal().length) {
-    saveClientsToLocal(existingClients);
+  if (existingClients.length > loadClientsFromLocal(userId).length) {
+    saveClientsToLocal(existingClients, userId);
   }
 };
 

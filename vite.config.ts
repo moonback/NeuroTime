@@ -123,18 +123,6 @@ export default defineConfig(({ mode }) => {
                 }
               },
               {
-                urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-                handler: 'NetworkFirst',
-                options: {
-                  cacheName: 'supabase-cache',
-                  expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60 // 1 heure
-                  },
-                  networkTimeoutSeconds: 10
-                }
-              },
-              {
                 urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
                 handler: 'NetworkFirst',
                 options: {
