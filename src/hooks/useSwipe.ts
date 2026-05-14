@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import type React from 'react';
 
 interface UseSwipeOptions {
   onSwipeLeft?: () => void;

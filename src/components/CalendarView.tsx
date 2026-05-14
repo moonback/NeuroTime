@@ -11,12 +11,12 @@ import {
   endOfWeek, 
   isSameMonth, 
   isToday,
-  isSameWeek
+  isSameWeek,
+  startOfMonth,
+  startOfWeek,
+  subMonths
 } from 'date-fns';
-import startOfMonth from 'date-fns/startOfMonth';
-import startOfWeek from 'date-fns/startOfWeek';
-import subMonths from 'date-fns/subMonths';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 import { ChevronLeft, ChevronRight, MapPin, Trash2, Edit, Calendar, CheckCircle, Plus, Briefcase, Clock, Euro, Search, X, Grid3x3, CalendarDays, List, DollarSign } from 'lucide-react';
 import { formatTimeSlots, getMissionTimeSlots } from '../utils/timeSlots';
 

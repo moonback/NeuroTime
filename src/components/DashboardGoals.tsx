@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Mission } from '../types';
 import { Target, TrendingUp, Award, Edit2, X } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { fr } from 'date-fns/locale/fr';
 import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, Goal } from '../services/goalsService';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
