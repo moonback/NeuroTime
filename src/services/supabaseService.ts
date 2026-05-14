@@ -26,6 +26,10 @@ const missionToDb = (mission: Mission, userId?: string) => {
     details: mission.details,
   };
 
+  if (mission.updatedAt !== undefined) {
+    dbRow.updated_at = mission.updatedAt;
+  }
+
   // Ajouter is_paid (par défaut false si non défini)
   if (mission.isPaid !== undefined) {
     dbRow.is_paid = mission.isPaid;
@@ -49,7 +53,7 @@ const missionToDb = (mission: Mission, userId?: string) => {
   return dbRow;
 };
 
-const dbToMission = (dbRow: any): Mission => ({
+export const dbToMission = (dbRow: any): Mission => ({
   id: dbRow.id,
   title: dbRow.title,
   client: dbRow.client,
@@ -94,33 +98,6 @@ export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void>
 
   try {
     await retry(async () => {
-      // Récupérer les IDs existants pour cet utilisateur
-      const { data: existingData, error: selectError } = await supabase
-        .from('missions')
-        .select('id')
-        .eq('user_id', userId);
-
-      if (selectError) {
-        throw selectError;
-      }
-
-      const existingIds = new Set((existingData || []).map(row => row.id));
-      const missionIds = new Set(missions.map(m => m.id));
-
-      // Supprimer les missions qui n'existent plus dans la nouvelle liste
-      const idsToDelete = Array.from(existingIds).filter(id => !missionIds.has(id));
-      if (idsToDelete.length > 0) {
-        const { error: deleteError } = await supabase
-          .from('missions')
-          .delete()
-          .in('id', idsToDelete)
-          .eq('user_id', userId);
-
-        if (deleteError) {
-          throw deleteError;
-        }
-      }
-
       // Utiliser upsert pour insérer ou mettre à jour les missions
       if (missions.length > 0) {
         const missionsDb = missions.map(m => missionToDb(m, userId));

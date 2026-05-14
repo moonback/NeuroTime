@@ -215,7 +215,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         setComputedTotal(0);
       }
     }
-  }, [timeSlots, date, calculationMode]);
+  }, [timeSlots, date, calculationMode, prefDayRate, prefNightRate]);
 
   // Détection de doublons (date/heure)
   useEffect(() => {
@@ -435,7 +435,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       details: {
         dayHours,
         nightHours
-      }
+      },
+      isPaid: initialData?.isPaid ?? false,
+      paymentId: initialData?.paymentId,
+      updatedAt: new Date().toISOString(),
     };
 
     onSave(newMission);
