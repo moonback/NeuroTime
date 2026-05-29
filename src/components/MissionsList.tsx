@@ -332,7 +332,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
   }, [missions]);
 
   const filteredMissions = useMemo(() => {
-    return missions
+    return [...missions]
       .filter(m => {
         const matchesSearch =
           m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

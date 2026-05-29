@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { Mission, Payment } from '../types';
 import { loadMissions, saveMissions, loadPayments, savePayment as savePaymentToStorage, deletePayment as deletePaymentFromStorage } from '../services/storageService';
 import { useAuth } from './AuthContext';
@@ -6,10 +7,9 @@ import {
   saveMissionMutation,
   dbToMission,
   dbToPayment,
-  deleteMissionFromSupabase,
-  saveMissionsToSupabase,
+  deleteMissionMutation,
+  getSupabaseClient,
 } from '../services/supabaseService';
-import { getSupabase } from '../services/authService';
 import { toast } from 'sonner';
 
 interface MissionContextType {
@@ -29,20 +29,62 @@ interface MissionContextType {
 
 const MissionContext = createContext<MissionContextType | undefined>(undefined);
 
+type MissionDbInput = Parameters<typeof dbToMission>[0];
+type PaymentDbInput = Parameters<typeof dbToPayment>[0];
+
+function applyMissionEvent(
+  current: Mission[],
+  payload: RealtimePostgresChangesPayload<Record<string, unknown>>
+): Mission[] {
+  const { eventType } = payload;
+  if (eventType === 'INSERT') {
+    const newRecord = payload.new;
+    const exists = current.find(m => m.id === newRecord.id);
+    return exists ? current : [dbToMission(newRecord as MissionDbInput), ...current];
+  }
+  if (eventType === 'UPDATE') {
+    const newRecord = payload.new;
+    return current.map(m => m.id === newRecord.id ? dbToMission(newRecord as MissionDbInput) : m);
+  }
+  if (eventType === 'DELETE') {
+    const oldRecord = payload.old;
+    return current.filter(m => m.id !== oldRecord.id);
+  }
+  return current;
+}
+
+function applyPaymentEvent(
+  current: Payment[],
+  payload: RealtimePostgresChangesPayload<Record<string, unknown>>
+): Payment[] {
+  const { eventType } = payload;
+  if (eventType === 'INSERT') {
+    const newRecord = payload.new;
+    const exists = current.find(p => p.id === newRecord.id);
+    return exists ? current : [dbToPayment(newRecord as PaymentDbInput), ...current];
+  }
+  if (eventType === 'UPDATE') {
+    const newRecord = payload.new;
+    return current.map(p => p.id === newRecord.id ? dbToPayment(newRecord as PaymentDbInput) : p);
+  }
+  if (eventType === 'DELETE') {
+    const oldRecord = payload.old;
+    return current.filter(p => p.id !== oldRecord.id);
+  }
+  return current;
+}
+
 export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load data
   const loadData = useCallback(async () => {
-    if (!user) {
+    if (!user?.id) {
       setMissions([]);
       setPayments([]);
-      setIsLoaded(false);
       return;
     }
 
@@ -54,7 +96,6 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ]);
       setMissions(missionsData);
       setPayments(paymentsData);
-      setIsLoaded(true);
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       toast.error('Erreur lors du chargement des données');
@@ -68,9 +109,8 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [loadData]);
 
   useEffect(() => {
-    if (!user) return;
-
-    const supabase = getSupabase();
+    if (!user?.id) return;
+    const supabase = getSupabaseClient();
     if (!supabase) return;
 
     const missionsChannel = supabase
@@ -78,31 +118,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'missions', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'DELETE') {
-            const deletedId = (payload.old as { id?: string }).id;
-            if (deletedId) {
-              setMissions(current => current.filter(mission => mission.id !== deletedId));
-            }
-            return;
-          }
-
-          const remoteMission = dbToMission(payload.new);
-          setMissions(current => {
-            const existing = current.find(mission => mission.id === remoteMission.id);
-            if (!existing) return [...current, remoteMission];
-
-            if (
-              existing.updatedAt &&
-              remoteMission.updatedAt &&
-              new Date(existing.updatedAt) > new Date(remoteMission.updatedAt)
-            ) {
-              return current;
-            }
-
-            return current.map(mission => mission.id === remoteMission.id ? remoteMission : mission);
-          });
-        }
+        (payload) => setMissions(current => applyMissionEvent(current, payload))
       )
       .subscribe();
 
@@ -111,23 +127,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'payments', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'DELETE') {
-            const deletedId = (payload.old as { id?: string }).id;
-            if (deletedId) {
-              setPayments(current => current.filter(payment => payment.id !== deletedId));
-            }
-            return;
-          }
-
-          const remotePayment = dbToPayment(payload.new);
-          setPayments(current => {
-            const exists = current.some(payment => payment.id === remotePayment.id);
-            return exists
-              ? current.map(payment => payment.id === remotePayment.id ? remotePayment : payment)
-              : [remotePayment, ...current];
-          });
-        }
+        (payload) => setPayments(current => applyPaymentEvent(current, payload))
       )
       .subscribe();
 
@@ -137,75 +137,76 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [user?.id]);
 
-  // Autosave a été supprimé pour éviter l'écrasement des données en multi-device.
-  // Les mutations sont gérées de manière explicite.
-
   const addMission = useCallback((mission: Mission) => {
-    if (!user) return;
-    const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
-    
-    // Optimistic update
-    setMissions(prev => {
-      const updated = [...prev, missionWithTimestamp];
-      saveMissions(updated, user.id).catch(console.error);
-      return updated;
-    });
+    if (!user?.id) return;
+    const newMission: Mission = {
+      ...mission,
+      id: mission.id || crypto.randomUUID(),
+      updatedAt: new Date().toISOString(),
+    };
 
-    saveMissionMutation(missionWithTimestamp)
+    setIsSaving(true);
+    setMissions(prev => [newMission, ...prev]);
+    saveMissions(user.id, [newMission, ...missions]).catch(console.error);
+
+    saveMissionMutation(newMission)
       .then(saved => {
-        // Remplacer par les données confirmées par Supabase
         setMissions(prev => prev.map(m => m.id === saved.id ? saved : m));
+        toast.success('Mission ajoutée');
       })
       .catch(error => {
+        setMissions(prev => prev.filter(m => m.id !== newMission.id));
         console.error('Erreur lors de la création distante:', error);
-        toast.error('Mission sauvegardée localement, synchronisation distante en échec');
-      });
-    toast.success('Mission ajoutée');
-  }, [user]);
+        toast.error('Échec de la création, modification annulée');
+      })
+      .finally(() => setIsSaving(false));
+  }, [missions, user?.id]);
 
   const updateMission = useCallback((mission: Mission) => {
-    if (!user) return;
-    const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
-    
-    // Garder l'ancienne version pour rollback
-    const previousMissions = missions;
+    if (!user?.id) return;
+    const previous = missions.find(m => m.id === mission.id);
+    const updated: Mission = { ...mission, updatedAt: new Date().toISOString() };
 
-    // Optimistic update
+    setIsSaving(true);
     setMissions(prev => {
-      const updated = prev.map(m => m.id === mission.id ? missionWithTimestamp : m);
-      saveMissions(updated, user.id).catch(console.error);
-      return updated;
+      const next = prev.map(m => m.id === mission.id ? updated : m);
+      saveMissions(user.id, next).catch(console.error);
+      return next;
     });
 
-    saveMissionMutation(missionWithTimestamp)
+    saveMissionMutation(updated)
       .then(saved => {
-        // Remplacer par les données confirmées par Supabase
         setMissions(prev => prev.map(m => m.id === saved.id ? saved : m));
+        toast.success('Mission mise à jour');
       })
       .catch(error => {
+        if (previous) setMissions(prev => prev.map(m => m.id === mission.id ? previous : m));
         console.error('Erreur lors de la mise à jour distante:', error);
-        // Rollback
-        setMissions(previousMissions);
-        saveMissions(previousMissions, user.id).catch(console.error);
         toast.error('Échec de la mise à jour, modification annulée');
-      });
-    toast.success('Mission mise à jour');
-  }, [user, missions]);
+      })
+      .finally(() => setIsSaving(false));
+  }, [missions, user?.id]);
 
   const deleteMission = useCallback((id: string) => {
-    if (!user) return;
+    if (!user?.id) return;
+    const previous = missions.find(m => m.id === id);
+
+    setIsSaving(true);
     setMissions(prev => {
-      const updated = prev.filter(m => m.id !== id);
-      saveMissions(updated, user.id).catch(console.error);
-      return updated;
+      const next = prev.filter(m => m.id !== id);
+      saveMissions(user.id, next).catch(console.error);
+      return next;
     });
-    
-    deleteMissionFromSupabase(id).catch(error => {
-      console.error('Erreur lors de la suppression distante:', error);
-      toast.error('Suppression locale effectuée, synchronisation distante en échec');
-    });
-    toast.success('Mission supprimée');
-  }, [user]);
+
+    deleteMissionMutation(id)
+      .then(() => toast.success('Mission supprimée'))
+      .catch(error => {
+        if (previous) setMissions(prev => [previous, ...prev]);
+        console.error('Erreur lors de la suppression distante:', error);
+        toast.error('Échec de la suppression, modification annulée');
+      })
+      .finally(() => setIsSaving(false));
+  }, [missions, user?.id]);
 
   const importMissions = useCallback((importedMissions: Mission[]) => {
     const now = new Date().toISOString();
@@ -214,7 +215,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedAt: mission.updatedAt || now,
     }));
     setMissions(missionsWithTimestamp);
-    saveMissionsToSupabase(missionsWithTimestamp).catch(error => {
+    Promise.all(missionsWithTimestamp.map(saveMissionMutation)).catch(error => {
       console.error("Erreur lors de la synchronisation de l'import:", error);
       toast.error('Import local effectué, synchronisation distante en échec');
     });
@@ -223,11 +224,10 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addPayment = useCallback(async (payment: Payment) => {
     try {
-      if (!user) throw new Error('Utilisateur non connecté');
-      await savePaymentToStorage(payment, user.id);
-      setPayments(prev => [...prev.filter(p => p.id !== payment.id), payment]);
+      if (!user?.id) throw new Error('Utilisateur non connecté');
+      await savePaymentToStorage(user.id, payment);
+      setPayments(prev => [payment, ...prev.filter(p => p.id !== payment.id)]);
 
-      // Mettre à jour les missions localement
       const now = new Date().toISOString();
       setMissions(prev => prev.map(m =>
         payment.missionIds.includes(m.id)
@@ -244,11 +244,10 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deletePayment = useCallback(async (id: string) => {
     try {
-      if (!user) throw new Error('Utilisateur non connecté');
-      await deletePaymentFromStorage(id, user.id);
+      if (!user?.id) throw new Error('Utilisateur non connecté');
+      await deletePaymentFromStorage(user.id, id);
       setPayments(prev => prev.filter(p => p.id !== id));
 
-      // Mettre à jour les missions localement (les marquer comme non payées)
       const now = new Date().toISOString();
       setMissions(prev => prev.map(m =>
         m.paymentId === id
@@ -263,21 +262,35 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [user?.id]);
 
+  const contextValue = useMemo(() => ({
+    missions,
+    isLoading,
+    isSaving,
+    addMission,
+    updateMission,
+    deleteMission,
+    refreshMissions: loadData,
+    importMissions,
+    payments,
+    addPayment,
+    deletePayment,
+    refreshPayments: loadData,
+  }), [
+    missions,
+    isLoading,
+    isSaving,
+    addMission,
+    updateMission,
+    deleteMission,
+    loadData,
+    importMissions,
+    payments,
+    addPayment,
+    deletePayment,
+  ]);
+
   return (
-    <MissionContext.Provider value={{
-      missions,
-      isLoading,
-      isSaving,
-      addMission,
-      updateMission,
-      deleteMission,
-      refreshMissions: loadData,
-      importMissions,
-      payments,
-      addPayment,
-      deletePayment,
-      refreshPayments: loadData
-    }}>
+    <MissionContext.Provider value={contextValue}>
       {children}
     </MissionContext.Provider>
   );
@@ -290,4 +303,3 @@ export const useMissions = () => {
   }
   return context;
 };
-

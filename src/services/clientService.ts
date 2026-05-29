@@ -8,7 +8,6 @@ import { getSupabase } from './authService';
 
 export type { Client };
 
-const STORAGE_VERSION = 'v2';
 
 const getCurrentUserId = async (): Promise<string | null> => {
   const supabase = getSupabase();
@@ -18,9 +17,8 @@ const getCurrentUserId = async (): Promise<string | null> => {
   return user?.id || null;
 };
 
-const getStorageKey = (userId: string): string => (
-  `neurotime_clients_${userId}_${STORAGE_VERSION}`
-);
+const getStorageKey = (userId: string): string =>
+  `neurotime:${import.meta.env.VITE_SUPABASE_URL}:user:${userId}:clients:v2`;
 
 // Charger les clients depuis le localStorage (fallback)
 const loadClientsFromLocal = (userId: string | null): Client[] => {
@@ -72,15 +70,15 @@ export const getAllClients = async (missions: { client: string }[] = []): Promis
   // Essayer d'abord Supabase
   try {
     const supabaseClients = await loadClientsFromSupabase();
-    if (supabaseClients.length > 0) {
-      // Synchroniser avec localStorage pour le fallback
-      saveClientsToLocal(supabaseClients, userId);
-      return supabaseClients.sort((a, b) => 
-        a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
-      );
+    if (supabaseClients.ok === false) {
+      throw new Error(supabaseClients.error.message);
     }
-  } catch (error: any) {
-    const errorMessage = error?.message || 'Erreur inconnue';
+    saveClientsToLocal(supabaseClients.data, userId);
+    return [...supabaseClients.data].sort((a, b) =>
+      a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
       console.warn('Erreur réseau lors du chargement des clients depuis Supabase, utilisation du localStorage:', error);
     } else {
@@ -129,8 +127,8 @@ export const addClient = async (name: string): Promise<Client> => {
     localClients.push(newClient);
     saveClientsToLocal(localClients, userId);
     return newClient;
-  } catch (error: any) {
-    const errorMessage = error?.message || 'Erreur inconnue';
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
       console.warn('Erreur réseau lors de l\'ajout du client dans Supabase, utilisation du localStorage:', error);
       // Fallback sur localStorage
@@ -176,11 +174,12 @@ export const syncClientsWithMissions = async (missions: { client: string }[]): P
     await syncClientsWithMissionsInSupabase(missions);
     // Recharger les clients depuis Supabase pour mettre à jour le localStorage
     const supabaseClients = await loadClientsFromSupabase();
-    if (supabaseClients.length > 0) {
-      saveClientsToLocal(supabaseClients, userId);
+    if (supabaseClients.ok === false) {
+      throw new Error(supabaseClients.error.message);
     }
-  } catch (error: any) {
-    const errorMessage = error?.message || 'Erreur inconnue';
+    saveClientsToLocal(supabaseClients.data, userId);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
       console.warn('Erreur réseau lors de la synchronisation des clients avec Supabase, utilisation du localStorage:', error);
       // Fallback sur localStorage

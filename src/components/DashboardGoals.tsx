@@ -3,7 +3,8 @@ import { Mission } from '../types';
 import { Target, TrendingUp, Award, Edit2, X } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, ensureDefaultGoals, Goal } from '../services/goalsService';
+import { saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, ensureDefaultGoals, Goal } from '../services/goalsService';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
@@ -24,30 +25,25 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
   const [isEditing, setIsEditing] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
+  const { user } = useAuth();
 
-  // Charger les objectifs depuis Supabase
+  // Charger et initialiser les objectifs par défaut de façon idempotente.
   useEffect(() => {
-    const loadGoals = async () => {
-      setIsLoading(true);
-      try {
-        const loadedGoals = await loadGoalsFromSupabase();
-        if (loadedGoals.length > 0) {
-          setGoals(loadedGoals);
-        } else {
-          // Aucun objectif existant, créer les objectifs par défaut de façon idempotente
-          await ensureDefaultGoals();
-          const refreshed = await loadGoalsFromSupabase();
-          setGoals(refreshed);
-        }
-      } catch (e) {
-        console.error('Erreur lors du chargement des objectifs:', e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadGoals();
-  }, []);
+    if (!user?.id) {
+      setGoals([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    ensureDefaultGoals()
+      .then(setGoals)
+      .catch(err => {
+        console.error('Erreur initialisation objectifs:', err);
+        toast.error('Erreur lors du chargement des objectifs');
+      })
+      .finally(() => setIsLoading(false));
+  }, [user?.id]);
 
   // Calculer les valeurs actuelles pour le mois sélectionné (optimisé)
   const goalsWithProgress = useMemo((): GoalWithProgress[] => {

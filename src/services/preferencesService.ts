@@ -1,4 +1,6 @@
-export const getPreferencesKey = (userId?: string | null) => userId ? `neurotime_preferences_${userId}_v2` : 'neurotime_preferences_anonymous_v2';
+export const getPreferencesKey = (userId?: string | null) => userId
+  ? `neurotime:${import.meta.env.VITE_SUPABASE_URL}:user:${userId}:preferences:v2`
+  : `neurotime:${import.meta.env.VITE_SUPABASE_URL}:anonymous:preferences:v2`;
 
 export interface UserPreferences {
   hidePrices: boolean;

@@ -21,11 +21,19 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
 /**
  * Vérifie si une erreur est réessayable
  */
-const isRetryableError = (error: any, retryableErrors: string[]): boolean => {
+const getErrorField = (error: unknown, field: 'message' | 'code'): string => {
+  if (typeof error === 'object' && error !== null && field in error) {
+    const value = (error as Record<typeof field, unknown>)[field];
+    return typeof value === 'string' ? value : '';
+  }
+  return '';
+};
+
+const isRetryableError = (error: unknown, retryableErrors: string[]): boolean => {
   if (!error) return false;
-  
-  const errorMessage = (error?.message || String(error) || '').toLowerCase();
-  const errorCode = error?.code || '';
+
+  const errorMessage = (getErrorField(error, 'message') || String(error) || '').toLowerCase();
+  const errorCode = getErrorField(error, 'code');
   
   return retryableErrors.some(retryableError => 
     errorMessage.includes(retryableError.toLowerCase()) ||
@@ -66,12 +74,12 @@ export async function retry<T>(
   options: RetryOptions = {}
 ): Promise<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error) {
       lastError = error;
       
       // Si c'est le dernier essai, on lance l'erreur

@@ -1,58 +1,77 @@
-import { Mission, Payment } from '../types';
+import { LoadResult, Mission, Payment, TimeSlot } from '../types';
 import { getSupabase } from './authService';
 import { retry } from '../utils/retry';
 
-// Initialisation du client Supabase (utilise le même client que l'auth)
-const getSupabaseClient = () => {
-  return getSupabase();
+export interface Client {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+type MissionDbRow = {
+  id: string;
+  user_id?: string | null;
+  title: string;
+  client: string;
+  location: string;
+  description: string;
+  start_time: string;
+  end_time: string;
+  status: Mission['status'];
+  rate_type: Mission['rateType'];
+  hourly_rate: number;
+  total_earnings: number;
+  details?: Mission['details'] | null;
+  logistics?: Mission['logistics'] | null;
+  time_slots?: TimeSlot[] | null;
+  is_paid?: boolean | null;
+  updated_at?: string | null;
+  payment_id?: string | null;
 };
 
-// Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL)
-const missionToDb = (mission: Mission, userId?: string) => {
-  const dbRow: any = {
-    id: mission.id,
-    user_id: userId || null,
-    title: mission.title,
-    client: mission.client,
-    location: mission.location,
-    description: mission.description,
-    start_time: mission.startTime,
-    end_time: mission.endTime,
-    status: mission.status,
-    rate_type: mission.rateType,
-    hourly_rate: mission.hourlyRate,
-    total_earnings: mission.totalEarnings,
-    details: mission.details,
-  };
-
-  if (mission.updatedAt !== undefined) {
-    dbRow.updated_at = mission.updatedAt;
-  }
-
-  // Ajouter is_paid (par défaut false si non défini)
-  if (mission.isPaid !== undefined) {
-    dbRow.is_paid = mission.isPaid;
-  }
-
-  // Ajouter logistics seulement s'il existe (pour compatibilité avec anciennes bases)
-  if (mission.logistics !== undefined) {
-    dbRow.logistics = mission.logistics;
-  }
-
-  // Ajouter time_slots seulement s'il existe (pour compatibilité avec anciennes bases)
-  if (mission.timeSlots !== undefined) {
-    dbRow.time_slots = mission.timeSlots.length > 1 ? mission.timeSlots : null;
-  }
-
-  // Ajouter payment_id seulement s'il existe
-  if (mission.paymentId !== undefined) {
-    dbRow.payment_id = mission.paymentId;
-  }
-
-  return dbRow;
+type PaymentDbRow = {
+  id: string;
+  date: string;
+  amount: number;
+  client: string;
+  description?: string | null;
+  reference?: string | null;
+  mission_ids?: string[] | null;
+  method?: Payment['method'] | null;
+  created_at: string;
 };
 
-export const dbToMission = (dbRow: any): Mission => ({
+type ClientDbRow = {
+  id: string;
+  user_id?: string;
+  name: string;
+  created_at: string;
+};
+
+export const getSupabaseClient = () => getSupabase();
+
+const missionToDb = (mission: Mission, userId: string): MissionDbRow => ({
+  id: mission.id,
+  user_id: userId,
+  title: mission.title,
+  client: mission.client,
+  location: mission.location,
+  description: mission.description,
+  start_time: mission.startTime,
+  end_time: mission.endTime,
+  status: mission.status,
+  rate_type: mission.rateType,
+  hourly_rate: mission.hourlyRate,
+  total_earnings: mission.totalEarnings,
+  details: mission.details ?? null,
+  updated_at: mission.updatedAt ?? new Date().toISOString(),
+  is_paid: mission.isPaid ?? false,
+  logistics: mission.logistics ?? null,
+  time_slots: mission.timeSlots && mission.timeSlots.length > 1 ? mission.timeSlots : null,
+  payment_id: mission.paymentId ?? null,
+});
+
+export const dbToMission = (dbRow: MissionDbRow): Mission => ({
   id: dbRow.id,
   title: dbRow.title,
   client: dbRow.client,
@@ -64,454 +83,276 @@ export const dbToMission = (dbRow: any): Mission => ({
   rateType: dbRow.rate_type,
   hourlyRate: dbRow.hourly_rate,
   totalEarnings: dbRow.total_earnings,
-  details: dbRow.details,
-  logistics: dbRow.logistics,
-  timeSlots: dbRow.time_slots || undefined, // Récupérer les créneaux horaires multiples
-  isPaid: dbRow.is_paid || false, // Récupérer le statut de paiement (par défaut false)
-  updatedAt: dbRow.updated_at || undefined, // Récupérer la date de mise à jour
-  paymentId: dbRow.payment_id || undefined, // Récupérer l'ID du virement
+  details: dbRow.details ?? undefined,
+  logistics: dbRow.logistics ?? undefined,
+  timeSlots: dbRow.time_slots ?? undefined,
+  isPaid: dbRow.is_paid ?? false,
+  updatedAt: dbRow.updated_at ?? undefined,
+  paymentId: dbRow.payment_id ?? undefined,
 });
 
-// Obtenir l'ID de l'utilisateur connecté
 const getCurrentUserId = async (): Promise<string | null> => {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
-
   const { data: { user } } = await supabase.auth.getUser();
   return user?.id || null;
 };
 
-// Sauvegarder toutes les missions (synchronise avec la base de données)
 export const saveMissionsToSupabase = async (missions: Mission[]): Promise<void> => {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return;
-  }
-
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return;
-  }
-
-  try {
-    await retry(async () => {
-      // Utiliser upsert pour insérer ou mettre à jour les missions
-      if (missions.length > 0) {
-        const missionsDb = missions.map(m => missionToDb(m, userId));
-
-        // Filtrer les colonnes undefined pour éviter les erreurs si les colonnes n'existent pas encore
-        const missionsDbFiltered = missionsDb.map(mission => {
-          const filtered: any = {};
-          Object.keys(mission).forEach(key => {
-            if (mission[key] !== undefined) {
-              filtered[key] = mission[key];
-            }
-          });
-          return filtered;
-        });
-
-        const { error: upsertError } = await supabase
-          .from('missions')
-          .upsert(missionsDbFiltered, { onConflict: 'id' });
-
-        if (upsertError) {
-          throw upsertError;
-        }
-      }
-    });
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde dans Supabase:', error);
-    throw error;
-  }
-};
-
-// Charger toutes les missions
-export const loadMissionsFromSupabase = async (): Promise<Mission[]> => {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return [];
-  }
-
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return [];
-  }
-
-  try {
-    const { data, error } = await retry(async () => {
-      const result = await supabase
-        .from('missions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('start_time', { ascending: false });
-
-      if (result.error) {
-        throw result.error;
-      }
-
-      return result;
-    });
-
-    return (data || []).map(dbToMission);
-  } catch (error) {
-    console.error('Erreur lors du chargement depuis Supabase:', error);
-    return [];
-  }
-};
-
-// Mutation unitaire idempotente : crée ou met à jour une mission
-export const saveMissionMutation = async (mission: Mission): Promise<Mission> => {
   const supabase = getSupabaseClient();
   if (!supabase) throw new Error('Supabase non configuré');
 
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Utilisateur non connecté');
 
+  if (missions.length === 0) return;
+  await retry(async () => {
+    const { error } = await supabase
+      .from('missions')
+      .upsert(missions.map(m => missionToDb(m, userId)), { onConflict: 'id' });
+    if (error) throw error;
+  });
+};
+
+export const loadMissionsFromSupabase = async (): Promise<LoadResult<Mission[]>> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { ok: false, error: new Error('Supabase non configuré') };
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError) return { ok: false, error: authError };
+  if (!user) return { ok: false, error: new Error('Non authentifié') };
+
   try {
-    return await retry(async () => {
-      const now = new Date().toISOString();
-      const payload = missionToDb({ ...mission, updatedAt: mission.updatedAt || now }, userId);
-
-      // Filtrer les valeurs undefined pour éviter les erreurs si les colonnes n'existent pas encore
-      const filtered: any = {};
-      Object.keys(payload).forEach(key => {
-        if (payload[key] !== undefined) {
-          filtered[key] = payload[key];
-        }
-      });
-
-      const { data, error } = await supabase
+    const { data, error } = await retry(async () => {
+      const result = await supabase
         .from('missions')
-        .upsert(filtered, { onConflict: 'id' })
         .select('*')
-        .single();
-
-      if (error) throw error;
-      if (!data) throw new Error('Aucune donnée retournée après upsert');
-
-      return dbToMission(data);
+        .eq('user_id', user.id)
+        .order('start_time', { ascending: false });
+      if (result.error) throw result.error;
+      return result;
     });
+    if (error) return { ok: false, error };
+    return { ok: true, data: ((data ?? []) as MissionDbRow[]).map(dbToMission) };
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde dans Supabase:', error);
-    throw error;
+    return { ok: false, error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
-// Aliases pour compatibilité
+export const saveMissionMutation = async (mission: Mission): Promise<Mission> => {
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error('Supabase non configuré');
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Utilisateur non connecté');
+
+  const now = new Date().toISOString();
+  const payload = missionToDb({ ...mission, updatedAt: now }, user.id);
+
+  const { data, error } = await supabase
+    .from('missions')
+    .upsert(payload, { onConflict: 'id' })
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return dbToMission(data as MissionDbRow);
+};
+
 export const addMissionToSupabase = saveMissionMutation;
 export const updateMissionInSupabase = saveMissionMutation;
 
-// Supprimer une mission
-export const deleteMissionFromSupabase = async (missionId: string): Promise<void> => {
+export const deleteMissionMutation = async (missionId: string): Promise<void> => {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return;
-  }
+  if (!supabase) throw new Error('Supabase non configuré');
 
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return;
-  }
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Utilisateur non connecté');
 
-  try {
-    await retry(async () => {
-      const { error } = await supabase
-        .from('missions')
-        .delete()
-        .eq('id', missionId)
-        .eq('user_id', userId);
+  const { error } = await supabase
+    .from('missions')
+    .delete()
+    .eq('id', missionId)
+    .eq('user_id', user.id);
 
-      if (error) {
-        throw error;
-      }
-    });
-  } catch (error) {
-    console.error('Erreur lors de la suppression dans Supabase:', error);
-    throw error;
-  }
+  if (error) throw error;
 };
 
-// ==================== GESTION DES CLIENTS ====================
+export const deleteMissionFromSupabase = deleteMissionMutation;
 
-export interface Client {
-  id: string;
-  name: string;
-  createdAt: string;
-}
-
-// Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL) pour les clients
-const clientToDb = (client: Client, userId: string) => ({
+const clientToDb = (client: Client, userId: string): ClientDbRow => ({
   id: client.id,
   user_id: userId,
   name: client.name,
   created_at: client.createdAt,
 });
 
-const dbToClient = (dbRow: any): Client => ({
+const dbToClient = (dbRow: ClientDbRow): Client => ({
   id: dbRow.id,
   name: dbRow.name,
   createdAt: dbRow.created_at,
 });
 
-// Charger tous les clients depuis Supabase
-export const loadClientsFromSupabase = async (): Promise<Client[]> => {
+export const loadClientsFromSupabase = async (): Promise<LoadResult<Client[]>> => {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return [];
-  }
+  if (!supabase) return { ok: false, error: new Error('Supabase non configuré') };
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return [];
-  }
+  if (!userId) return { ok: false, error: new Error('Non authentifié') };
 
-  try {
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('user_id', userId)
-      .order('name', { ascending: true });
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
 
-    if (error) {
-      console.error('Erreur lors du chargement des clients:', error);
-      return [];
-    }
-
-    return (data || []).map(dbToClient);
-  } catch (error) {
-    console.error('Erreur lors du chargement des clients depuis Supabase:', error);
-    return [];
-  }
+  if (error) return { ok: false, error };
+  return { ok: true, data: ((data ?? []) as ClientDbRow[]).map(dbToClient) };
 };
 
-// Ajouter un client dans Supabase
 export const addClientToSupabase = async (name: string): Promise<Client> => {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    throw new Error('Impossible de se connecter à Supabase');
-  }
+  if (!supabase) throw new Error('Impossible de se connecter à Supabase');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    throw new Error('Utilisateur non connecté');
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
   const trimmedName = name.trim();
-  if (!trimmedName) {
-    throw new Error('Le nom du client ne peut pas être vide');
-  }
+  if (!trimmedName) throw new Error('Le nom du client ne peut pas être vide');
 
-  try {
-    // Vérifier si le client existe déjà (insensible à la casse)
-    const { data: existing } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('user_id', userId)
-      .ilike('name', trimmedName)
-      .limit(1);
+  const { data: existing, error: existingError } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('user_id', userId)
+    .ilike('name', trimmedName)
+    .limit(1);
 
-    if (existing && existing.length > 0) {
-      throw new Error('Ce client existe déjà');
-    }
+  if (existingError) throw existingError;
+  if (existing && existing.length > 0) throw new Error('Ce client existe déjà');
 
-    const newClient: Client = {
-      id: crypto.randomUUID(),
-      name: trimmedName,
-      createdAt: new Date().toISOString(),
-    };
+  const newClient: Client = {
+    id: crypto.randomUUID(),
+    name: trimmedName,
+    createdAt: new Date().toISOString(),
+  };
 
-    const clientDb = clientToDb(newClient, userId);
-    const { data, error } = await supabase
-      .from('clients')
-      .insert([clientDb])
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('clients')
+    .insert([clientToDb(newClient, userId)])
+    .select()
+    .single();
 
-    if (error) {
-      // Si c'est une erreur de contrainte unique, c'est un doublon
-      if (error.code === '23505') {
-        throw new Error('Ce client existe déjà');
-      }
-      console.error('Erreur lors de l\'ajout du client:', error);
-      throw error;
-    }
-
-    return dbToClient(data);
-  } catch (error: any) {
-    console.error('Erreur lors de l\'ajout du client dans Supabase:', error);
+  if (error) {
+    if (error.code === '23505') throw new Error('Ce client existe déjà');
     throw error;
   }
+
+  return dbToClient(data as ClientDbRow);
 };
 
-// Synchroniser les clients avec les missions (ajouter les clients trouvés dans les missions)
 export const syncClientsWithMissionsInSupabase = async (missions: { client: string }[]): Promise<void> => {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return;
-  }
+  if (!supabase) throw new Error('Supabase non configuré');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return;
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
-  try {
-    // Récupérer les clients existants
-    const { data: existingClients } = await supabase
-      .from('clients')
-      .select('name')
-      .eq('user_id', userId);
+  const { data: existingClients, error: loadError } = await supabase
+    .from('clients')
+    .select('name')
+    .eq('user_id', userId);
+  if (loadError) throw loadError;
 
-    const existingNames = new Set(
-      (existingClients || []).map(c => c.name.toLowerCase())
-    );
+  const existingNames = new Set(
+    ((existingClients ?? []) as Pick<ClientDbRow, 'name'>[]).map(c => c.name.toLowerCase())
+  );
 
-    // Extraire les noms de clients uniques des missions
-    const clientNames = new Set<string>();
-    missions.forEach(mission => {
-      if (mission.client && mission.client.trim()) {
-        clientNames.add(mission.client.trim());
-      }
-    });
-
-    // Ajouter les nouveaux clients
-    const clientsToAdd: any[] = [];
-    clientNames.forEach(name => {
-      if (!existingNames.has(name.toLowerCase())) {
-        clientsToAdd.push({
-          id: crypto.randomUUID(),
-          user_id: userId,
-          name: name,
-          created_at: new Date().toISOString(),
-        });
-      }
-    });
-
-    if (clientsToAdd.length > 0) {
-      const { error } = await supabase
-        .from('clients')
-        .insert(clientsToAdd);
-
-      if (error) {
-        console.error('Erreur lors de la synchronisation des clients:', error);
-      }
+  const clientsToAdd: ClientDbRow[] = [];
+  new Set(missions.map(m => m.client.trim()).filter(Boolean)).forEach(name => {
+    if (!existingNames.has(name.toLowerCase())) {
+      clientsToAdd.push({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        name,
+        created_at: new Date().toISOString(),
+      });
     }
-  } catch (error) {
-    console.error('Erreur lors de la synchronisation des clients avec les missions:', error);
-  }
+  });
+
+  if (clientsToAdd.length === 0) return;
+  const { error } = await supabase.from('clients').insert(clientsToAdd);
+  if (error) throw error;
 };
 
-// ==================== GESTION DES PAIEMENTS / VIREMENTS ====================
-
-
-export const dbToPayment = (row: any): Payment => ({
+export const dbToPayment = (row: PaymentDbRow): Payment => ({
   id: row.id,
   date: row.date,
   amount: row.amount,
   client: row.client,
-  description: row.description,
-  reference: row.reference,
-  missionIds: row.mission_ids || [],
-  method: row.method || 'virement',
+  description: row.description ?? undefined,
+  reference: row.reference ?? undefined,
+  missionIds: row.mission_ids ?? [],
+  method: row.method ?? 'virement',
   createdAt: row.created_at,
 });
 
-export const loadPaymentsFromSupabase = async (): Promise<Payment[]> => {
+export const loadPaymentsFromSupabase = async (): Promise<LoadResult<Payment[]>> => {
   const supabase = getSupabaseClient();
-  if (!supabase) return [];
+  if (!supabase) return { ok: false, error: new Error('Supabase non configuré') };
 
   const userId = await getCurrentUserId();
-  if (!userId) return [];
+  if (!userId) return { ok: false, error: new Error('Non authentifié') };
 
-  try {
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: false });
+  const { data, error } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('user_id', userId)
+    .order('date', { ascending: false });
 
-    if (error) {
-      console.error('Erreur lors du chargement des paiements:', error);
-      return [];
-    }
-
-    return (data || []).map(dbToPayment);
-  } catch (error) {
-    console.error('Erreur lors du chargement des paiements depuis Supabase:', error);
-    return [];
-  }
+  if (error) return { ok: false, error };
+  return { ok: true, data: ((data ?? []) as PaymentDbRow[]).map(dbToPayment) };
 };
 
 export const savePaymentToSupabase = async (payment: Payment): Promise<void> => {
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) throw new Error('Supabase non configuré');
 
-  const userId = await getCurrentUserId();
-  if (!userId) return;
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Utilisateur non connecté');
 
-  const paymentDb = {
-    id: payment.id,
-    user_id: userId,
-    date: payment.date,
-    amount: payment.amount,
-    client: payment.client,
-    description: payment.description,
-    reference: payment.reference,
-    mission_ids: payment.missionIds,
-    method: payment.method,
-    created_at: payment.createdAt,
-  };
+  const { error } = await supabase.rpc('save_payment_with_missions', {
+    p_payment_id: payment.id,
+    p_user_id: user.id,
+    p_date: payment.date,
+    p_amount: payment.amount,
+    p_client: payment.client,
+    p_description: payment.description ?? '',
+    p_reference: payment.reference ?? '',
+    p_mission_ids: payment.missionIds,
+    p_method: payment.method,
+  });
 
-  try {
-    const { error: rpcError } = await supabase.rpc('save_payment_with_missions', {
-      payment_payload: payment,
-    });
-
-    if (rpcError) throw rpcError;
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde du paiement:', error);
-    throw error;
-  }
+  if (error) throw error;
 };
 
 export const deletePaymentFromSupabase = async (paymentId: string): Promise<void> => {
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) throw new Error('Supabase non configuré');
 
   const userId = await getCurrentUserId();
-  if (!userId) return;
+  if (!userId) throw new Error('Utilisateur non connecté');
 
-  try {
-    // Retirer le paymentId des missions associées avant de supprimer le paiement
-    const { error: updateError } = await supabase
-      .from('missions')
-      .update({ payment_id: null, is_paid: false, updated_at: new Date().toISOString() })
-      .eq('payment_id', paymentId)
-      .eq('user_id', userId);
+  const { error: updateError } = await supabase
+    .from('missions')
+    .update({ payment_id: null, is_paid: false, updated_at: new Date().toISOString() })
+    .eq('payment_id', paymentId)
+    .eq('user_id', userId);
+  if (updateError) throw updateError;
 
-    if (updateError) throw updateError;
-
-    const { error } = await supabase
-      .from('payments')
-      .delete()
-      .eq('id', paymentId)
-      .eq('user_id', userId);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Erreur lors de la suppression du paiement:', error);
-    throw error;
-  }
+  const { error } = await supabase
+    .from('payments')
+    .delete()
+    .eq('id', paymentId)
+    .eq('user_id', userId);
+  if (error) throw error;
 };
-
-

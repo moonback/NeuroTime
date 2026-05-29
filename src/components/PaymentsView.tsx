@@ -428,7 +428,7 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
 
           {payments.length > 0 ? (
             <div className="grid gap-3">
-              {payments
+              {[...payments]
                 .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                 .map(payment => {
                   const isExpanded = expandedPaymentId === payment.id;
@@ -516,8 +516,19 @@ const PaymentsView: React.FC<PaymentsViewProps> = ({
 
 /* --- Helpers Components --- */
 
-const StatCard = ({ label, value, subValue, icon, progress, color }: any) => {
-  const colors: any = {
+type StatCardColor = 'emerald' | 'orange' | 'indigo' | 'blue';
+
+interface StatCardProps {
+  label: string;
+  value: string;
+  subValue?: React.ReactNode;
+  icon: React.ReactElement<{ size?: number; strokeWidth?: number }>;
+  progress?: number;
+  color: StatCardColor;
+}
+
+const StatCard = ({ label, value, subValue, icon, progress, color }: StatCardProps) => {
+  const colors: Record<StatCardColor, string> = {
     emerald: "from-emerald-500/10 border-emerald-500/20 text-emerald-400",
     orange: "from-orange-500/10 border-orange-500/20 text-orange-400",
     indigo: "from-indigo-500/10 border-indigo-500/20 text-indigo-400",

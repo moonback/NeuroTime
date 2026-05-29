@@ -123,7 +123,7 @@ export const useDashboardExports = (missions: Mission[], allCompletedMissions: M
     mdContent += `| Date | Créneaux | Mission | Client | Lieu | Type | Taux/h | Total | H. jour | H. nuit |\n`;
     mdContent += `|:-----|:---------|:--------|:-------|:-----|:-----|:------:|:-----:|:------:|:-------:|\n`;
 
-    currentMonthMissions
+    [...currentMonthMissions]
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
       .forEach((m, index) => {
         const date = format(new Date(m.startTime), 'dd/MM/yyyy', { locale: fr });

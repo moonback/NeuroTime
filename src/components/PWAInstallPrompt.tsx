@@ -6,6 +6,10 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 // How long (ms) before the banner re-appears after dismissal
 const REDISPLAY_DELAY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -18,7 +22,7 @@ const PWAInstallPrompt: React.FC = () => {
     // Already running as a standalone PWA — never show
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true ||
+      (window.navigator as NavigatorWithStandalone).standalone === true ||
       document.referrer.includes('android-app://')
     ) {
       setIsInstalled(true);

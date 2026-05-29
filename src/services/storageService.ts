@@ -1,22 +1,23 @@
 import { Mission, Payment } from '../types';
 import {
-  saveMissionsToSupabase,
   loadMissionsFromSupabase,
   loadPaymentsFromSupabase,
   savePaymentToSupabase,
   deletePaymentFromSupabase
 } from './supabaseService';
 
-const STORAGE_VERSION = 'v2';
+const storageKey = (userId: string, namespace: string): string =>
+  `neurotime:${import.meta.env.VITE_SUPABASE_URL}:user:${userId}:${namespace}:v2`;
 
-const getEnvironmentKey = (): string => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'local';
-  return supabaseUrl.replace(/[^a-zA-Z0-9]/g, '_');
+export const clearLegacyStorage = (): void => {
+  const legacyKeys = [
+    'NeuroTime_missions_v1',
+    'NeuroTime_payments_v1',
+    'neurotime_clients_v1',
+    'neurotime_preferences_v1',
+  ];
+  legacyKeys.forEach(k => localStorage.removeItem(k));
 };
-
-const getScopedStorageKey = (userId: string, namespace: 'missions' | 'payments') => (
-  `NeuroTime_${getEnvironmentKey()}_${userId}_${namespace}_${STORAGE_VERSION}`
-);
 
 const isNetworkError = (error: unknown): boolean => {
   const errorMessage = error instanceof Error ? error.message : String(error || '');
@@ -39,75 +40,56 @@ const writeJsonArray = <T,>(key: string, value: T[]): void => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-// Fonction de sauvegarde avec fallback sur localStorage scoped utilisateur
-export const saveMissions = async (missions: Mission[], userId: string): Promise<void> => {
-  const storageKey = getScopedStorageKey(userId, 'missions');
-
-  // Toujours sauvegarder dans localStorage scoped d'abord pour garantir la persistance locale
+export const saveMissions = async (userId: string, missions: Mission[]): Promise<void> => {
   try {
-    writeJsonArray(storageKey, missions);
+    writeJsonArray(storageKey(userId, 'missions'), missions);
   } catch (localError) {
     console.error('Failed to save missions to local storage', localError);
     throw new Error('Impossible de sauvegarder les données localement');
   }
-
 };
 
-
-
-// Fonction de chargement avec fallback sur localStorage scoped utilisateur et résolution de conflits non destructive
 export const loadMissions = async (userId: string): Promise<Mission[]> => {
-  const storageKey = getScopedStorageKey(userId, 'missions');
-  const localMissions = readJsonArray<Mission>(storageKey);
+  const key = storageKey(userId, 'missions');
+  const localMissions = readJsonArray<Mission>(key);
 
-  try {
-    const supabaseMissions = await loadMissionsFromSupabase();
-
-    if (supabaseMissions.length > 0) {
-      // Supabase est la source de vérité, on met à jour le cache local
-      writeJsonArray(storageKey, supabaseMissions);
-      return supabaseMissions;
-    }
-  } catch (error) {
-    if (isNetworkError(error)) {
-      console.warn('Erreur réseau lors du chargement Supabase, utilisation des données locales:', error);
-    } else {
-      console.error('Erreur lors du chargement depuis Supabase, utilisation du localStorage:', error);
-    }
+  const result = await loadMissionsFromSupabase();
+  if (result.ok === true) {
+    writeJsonArray(key, result.data);
+    return result.data;
   }
 
+  if (isNetworkError(result.error)) {
+    console.warn('Erreur réseau lors du chargement Supabase, utilisation des données locales:', result.error);
+  } else {
+    console.error('Erreur lors du chargement depuis Supabase, utilisation du localStorage:', result.error);
+  }
   return localMissions;
 };
 
-// ==================== GESTION DES PAIEMENTS ====================
-
 export const loadPayments = async (userId: string): Promise<Payment[]> => {
-  const storageKey = getScopedStorageKey(userId, 'payments');
-  const localPayments = readJsonArray<Payment>(storageKey);
+  const key = storageKey(userId, 'payments');
+  const localPayments = readJsonArray<Payment>(key);
 
-  try {
-    const supabasePayments = await loadPaymentsFromSupabase();
-    if (supabasePayments.length > 0) {
-      writeJsonArray(storageKey, supabasePayments);
-      return supabasePayments;
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des paiements depuis Supabase:', error);
+  const result = await loadPaymentsFromSupabase();
+  if (result.ok === true) {
+    writeJsonArray(key, result.data);
+    return result.data;
   }
 
+  console.error('Erreur lors du chargement des paiements depuis Supabase:', result.error);
   return localPayments;
 };
 
-export const savePayment = async (payment: Payment, userId: string): Promise<void> => {
-  const storageKey = getScopedStorageKey(userId, 'payments');
+export const savePayment = async (userId: string, payment: Payment): Promise<void> => {
+  const key = storageKey(userId, 'payments');
 
   try {
-    const current = readJsonArray<Payment>(storageKey);
-    const exists = current.find(p => p.id === payment.id);
-    const updated = exists
+    const current = readJsonArray<Payment>(key);
+    const updated = current.some(p => p.id === payment.id)
       ? current.map(p => p.id === payment.id ? payment : p)
       : [...current, payment];
-    writeJsonArray(storageKey, updated);
+    writeJsonArray(key, updated);
   } catch (error) {
     console.error('Failed to save payment locally', error);
   }
@@ -115,13 +97,12 @@ export const savePayment = async (payment: Payment, userId: string): Promise<voi
   await savePaymentToSupabase(payment);
 };
 
-export const deletePayment = async (id: string, userId: string): Promise<void> => {
-  const storageKey = getScopedStorageKey(userId, 'payments');
+export const deletePayment = async (userId: string, id: string): Promise<void> => {
+  const key = storageKey(userId, 'payments');
 
   try {
-    const current = readJsonArray<Payment>(storageKey);
-    const updated = current.filter(p => p.id !== id);
-    writeJsonArray(storageKey, updated);
+    const current = readJsonArray<Payment>(key);
+    writeJsonArray(key, current.filter(p => p.id !== id));
   } catch (error) {
     console.error('Failed to delete payment locally', error);
   }

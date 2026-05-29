@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AuthUser, getCurrentUser, onAuthStateChange, signOut as authSignOut } from '../services/authService';
-import { clearLegacyStorage } from '../services/legacyCleanup';
+import { AuthUser, signOut as authSignOut, getSupabase } from '../services/authService';
+import { clearLegacyStorage } from '../services/storageService';
+import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -10,42 +11,47 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const toAuthUser = (user: User | null): AuthUser | null => (
+  user ? { id: user.id, email: user.email } : null
+);
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-          clearLegacyStorage(); // Nettoyer les clés legacy au login
-        }
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Auth check failed", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    let cancelled = false;
+    const supabase = getSupabase();
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
 
-    checkAuth();
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (data.session) clearLegacyStorage();
+      setUser(toAuthUser(data.session?.user ?? null));
+      setLoading(false);
+    }).catch(error => {
+      if (cancelled) return;
+      console.error('Auth bootstrap failed', error);
+      setLoading(false);
+    });
 
-    const unsubscribe = onAuthStateChange((authUser) => {
-      if (authUser) {
-        clearLegacyStorage(); // Nettoyer les clés legacy à chaque changement d'auth
-      }
-      setUser(authUser);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      clearLegacyStorage();
+      setUser(toAuthUser(session?.user ?? null));
       setLoading(false);
     });
 
     return () => {
-      unsubscribe();
+      cancelled = true;
+      subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
-    clearLegacyStorage(); // Nettoyer les clés legacy au logout
+    clearLegacyStorage();
     await authSignOut();
     setUser(null);
   };
@@ -64,4 +70,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

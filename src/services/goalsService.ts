@@ -1,3 +1,4 @@
+import { LoadResult } from '../types';
 import { getSupabase } from './authService';
 
 export interface Goal {
@@ -9,233 +10,150 @@ export interface Goal {
   updatedAt?: string;
 }
 
-// Obtenir l'ID de l'utilisateur connecté
+type GoalDbRow = {
+  id: string;
+  user_id: string;
+  type: Goal['type'];
+  target: number | string;
+  period: Goal['period'];
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 const getCurrentUserId = async (): Promise<string | null> => {
   const supabase = getSupabase();
   if (!supabase) return null;
-  
   const { data: { user } } = await supabase.auth.getUser();
   return user?.id || null;
 };
 
-// Conversion entre camelCase (TypeScript) et snake_case (PostgreSQL)
 const goalToDb = (goal: Goal, userId: string) => ({
   id: goal.id,
   user_id: userId,
   type: goal.type,
   target: goal.target,
   period: goal.period,
-  created_at: goal.createdAt || new Date().toISOString(),
-  updated_at: goal.updatedAt || new Date().toISOString(),
+  updated_at: new Date().toISOString(),
 });
 
-const dbToGoal = (dbRow: any): Goal => ({
+const dbToGoal = (dbRow: GoalDbRow): Goal => ({
   id: dbRow.id,
   type: dbRow.type,
-  target: parseFloat(dbRow.target),
+  target: typeof dbRow.target === 'number' ? dbRow.target : parseFloat(dbRow.target),
   period: dbRow.period,
-  createdAt: dbRow.created_at,
-  updatedAt: dbRow.updated_at,
+  createdAt: dbRow.created_at ?? undefined,
+  updatedAt: dbRow.updated_at ?? undefined,
 });
 
-// Charger tous les objectifs depuis Supabase
-export const loadGoalsFromSupabase = async (): Promise<Goal[]> => {
+export const loadGoalsFromSupabase = async (): Promise<LoadResult<Goal[]>> => {
   const supabase = getSupabase();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return [];
-  }
+  if (!supabase) return { ok: false, error: new Error('Supabase non configuré') };
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return [];
-  }
+  if (!userId) return { ok: false, error: new Error('Non authentifié') };
 
-  try {
-    const { data, error } = await supabase
-      .from('goals')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+  const { data, error } = await supabase
+    .from('goals')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Erreur lors du chargement des objectifs:', error);
-      return [];
-    }
-
-    return (data || []).map(dbToGoal);
-  } catch (error) {
-    console.error('Erreur lors du chargement des objectifs depuis Supabase:', error);
-    return [];
-  }
+  if (error) return { ok: false, error };
+  return { ok: true, data: ((data ?? []) as GoalDbRow[]).map(dbToGoal) };
 };
 
-// Ensure default goals exist (idempotent)
-export const ensureDefaultGoals = async (): Promise<void> => {
-  const existingGoals = await loadGoalsFromSupabase();
-  if (existingGoals.length > 0) {
-    // Goals already exist, nothing to do
-    return;
-  }
-  const defaultGoals: Goal[] = [
-    { id: crypto.randomUUID(), type: 'revenue', target: 5000, period: 'month' },
-    { id: crypto.randomUUID(), type: 'missions', target: 10, period: 'month' },
+export const ensureDefaultGoals = async (): Promise<Goal[]> => {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Supabase non configuré');
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Non authentifié');
+
+  const defaults = [
+    { user_id: user.id, type: 'revenue' as const, target: 5000, period: 'month' as const },
+    { user_id: user.id, type: 'missions' as const, target: 10, period: 'month' as const },
   ];
-  // Use upsert to insert default goals
-  await saveGoalsToSupabase(defaultGoals);
+
+  const { error } = await supabase
+    .from('goals')
+    .upsert(defaults, { onConflict: 'user_id,type,period', ignoreDuplicates: true });
+
+  if (error) throw error;
+
+  const { data, error: fetchError } = await supabase
+    .from('goals')
+    .select('*')
+    .eq('user_id', user.id);
+
+  if (fetchError) throw fetchError;
+  return ((data ?? []) as GoalDbRow[]).map(dbToGoal);
 };
 
-// Sauvegarder un objectif (créer ou mettre à jour)
 export const saveGoalToSupabase = async (goal: Goal): Promise<Goal> => {
   const supabase = getSupabase();
-  if (!supabase) {
-    throw new Error('Impossible de se connecter à Supabase');
-  }
+  if (!supabase) throw new Error('Impossible de se connecter à Supabase');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    throw new Error('Utilisateur non connecté');
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
-  try {
-    const goalDb = goalToDb(goal, userId);
-    
-    // Utiliser upsert pour créer ou mettre à jour
-    const { data, error } = await supabase
-      .from('goals')
-      .upsert(goalDb, { 
-        onConflict: 'id',
-        ignoreDuplicates: false 
-      })
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('goals')
+    .upsert(goalToDb(goal, userId), { onConflict: 'id', ignoreDuplicates: false })
+    .select()
+    .single();
 
-    if (error) {
-      // Si c'est une erreur de contrainte unique (type + period), mettre à jour l'existant
-      if (error.code === '23505') {
-        // Récupérer l'objectif existant
-        const { data: existing } = await supabase
-          .from('goals')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('type', goal.type)
-          .eq('period', goal.period)
-          .single();
-
-        if (existing) {
-          // Mettre à jour l'objectif existant
-          const updatedGoal = { ...goal, id: existing.id };
-          const updatedDb = goalToDb(updatedGoal, userId);
-          
-          const { data: updated, error: updateError } = await supabase
-            .from('goals')
-            .update(updatedDb)
-            .eq('id', existing.id)
-            .select()
-            .single();
-
-          if (updateError) {
-            console.error('Erreur lors de la mise à jour de l\'objectif:', updateError);
-            throw updateError;
-          }
-
-          return dbToGoal(updated);
-        }
-      }
-      
-      console.error('Erreur lors de la sauvegarde de l\'objectif:', error);
-      throw error;
+  if (error) {
+    if (error.code === '23505') {
+      const { data: existing, error: existingError } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('type', goal.type)
+        .eq('period', goal.period)
+        .single();
+      if (existingError) throw existingError;
+      const { data: updated, error: updateError } = await supabase
+        .from('goals')
+        .update(goalToDb({ ...goal, id: (existing as GoalDbRow).id }, userId))
+        .eq('id', (existing as GoalDbRow).id)
+        .select()
+        .single();
+      if (updateError) throw updateError;
+      return dbToGoal(updated as GoalDbRow);
     }
-
-    return dbToGoal(data);
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde de l\'objectif dans Supabase:', error);
     throw error;
   }
+
+  return dbToGoal(data as GoalDbRow);
 };
 
-// Supprimer un objectif
 export const deleteGoalFromSupabase = async (goalId: string): Promise<void> => {
   const supabase = getSupabase();
-  if (!supabase) {
-    throw new Error('Impossible de se connecter à Supabase');
-  }
+  if (!supabase) throw new Error('Impossible de se connecter à Supabase');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    throw new Error('Utilisateur non connecté');
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
-  try {
-    const { error } = await supabase
-      .from('goals')
-      .delete()
-      .eq('id', goalId)
-      .eq('user_id', userId);
+  const { error } = await supabase
+    .from('goals')
+    .delete()
+    .eq('id', goalId)
+    .eq('user_id', userId);
 
-    if (error) {
-      console.error('Erreur lors de la suppression de l\'objectif:', error);
-      throw error;
-    }
-  } catch (error) {
-    console.error('Erreur lors de la suppression de l\'objectif dans Supabase:', error);
-    throw error;
-  }
+  if (error) throw error;
 };
 
-// Sauvegarder plusieurs objectifs (synchronisation)
 export const saveGoalsToSupabase = async (goals: Goal[]): Promise<void> => {
   const supabase = getSupabase();
-  if (!supabase) {
-    throw new Error('Impossible de se connecter à Supabase');
-  }
+  if (!supabase) throw new Error('Impossible de se connecter à Supabase');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    throw new Error('Utilisateur non connecté');
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
-  try {
-    // Récupérer les IDs existants pour cet utilisateur
-    const { data: existingData } = await supabase
-      .from('goals')
-      .select('id')
-      .eq('user_id', userId);
-    
-    const existingIds = new Set((existingData || []).map(row => row.id));
-    const goalIds = new Set(goals.map(g => g.id));
+  if (goals.length === 0) return;
+  const { error } = await supabase
+    .from('goals')
+    .upsert(goals.map(g => goalToDb(g, userId)), { onConflict: 'id' });
 
-    // Supprimer les objectifs qui n'existent plus dans la nouvelle liste
-    const idsToDelete = Array.from(existingIds).filter(id => !goalIds.has(id));
-    if (idsToDelete.length > 0) {
-      const { error: deleteError } = await supabase
-        .from('goals')
-        .delete()
-        .in('id', idsToDelete)
-        .eq('user_id', userId);
-
-      if (deleteError) {
-        console.error('Erreur lors de la suppression des objectifs:', deleteError);
-      }
-    }
-
-    // Utiliser upsert pour insérer ou mettre à jour les objectifs
-    if (goals.length > 0) {
-      const goalsDb = goals.map(g => goalToDb(g, userId));
-      
-      const { error: upsertError } = await supabase
-        .from('goals')
-        .upsert(goalsDb, { onConflict: 'id' });
-
-      if (upsertError) {
-        console.error('Erreur lors de la sauvegarde des objectifs:', upsertError);
-        throw upsertError;
-      }
-    }
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde dans Supabase:', error);
-    throw error;
-  }
+  if (error) throw error;
 };
-

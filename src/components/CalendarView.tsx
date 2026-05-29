@@ -114,8 +114,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
     });
     
     // Sort missions by time for each day
-    map.forEach((dayMissions) => {
-      dayMissions.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    map.forEach((dayMissions, dateKey) => {
+      map.set(dateKey, [...dayMissions].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()));
     });
     
     return map;
@@ -142,7 +142,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ missions, onEdit, onDelete,
 
   // Generate list view missions (sorted chronologically)
   const listViewMissions = useMemo(() => {
-    return filteredMissions
+    return [...filteredMissions]
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
       .slice(0, 50); // Limit to 50 for performance
   }, [filteredMissions]);

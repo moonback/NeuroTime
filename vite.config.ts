@@ -91,16 +91,9 @@ export default defineConfig(({ mode }) => {
             // Ignorer les fichiers de développement Vite
             globIgnores: ['**/node_modules/**/*', '**/@vite/**/*', '**/@react-refresh/**/*'],
             // Ne pas précacher les fichiers de développement
-            navigateFallback: null,
+            navigateFallback: '/index.html',
             navigateFallbackDenylist: [/^\/@/, /^\/node_modules/, /supabase\.co/],
             runtimeCaching: [
-              {
-                urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-                handler: 'NetworkOnly',
-                options: {
-                  cacheName: 'supabase-api',
-                }
-              },
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                 handler: 'CacheFirst',
@@ -127,18 +120,6 @@ export default defineConfig(({ mode }) => {
                   cacheableResponse: {
                     statuses: [0, 200]
                   }
-                }
-              },
-              {
-                urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
-                handler: 'NetworkFirst',
-                options: {
-                  cacheName: 'nominatim-cache',
-                  expiration: {
-                    maxEntries: 30,
-                    maxAgeSeconds: 60 * 60 * 24 // 1 jour
-                  },
-                  networkTimeoutSeconds: 5
                 }
               }
             ]

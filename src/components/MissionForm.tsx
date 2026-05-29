@@ -308,8 +308,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
         delete newErrors.newClient;
         return newErrors;
       });
-    } catch (error: any) {
-      setErrors(prev => ({ ...prev, newClient: error.message || 'Erreur lors de l\'ajout du client' }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur lors de l\'ajout du client';
+      setErrors(prev => ({ ...prev, newClient: message }));
     }
   };
 

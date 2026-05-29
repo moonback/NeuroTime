@@ -55,6 +55,10 @@ export interface Payment {
   createdAt: string;
 }
 
+export type LoadResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: Error | { message: string } };
+
 export type ViewState = 'dashboard' | 'calendar' | 'missions' | 'payments';
 
 export interface DayStats {
