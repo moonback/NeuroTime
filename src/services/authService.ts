@@ -17,7 +17,17 @@ const getSupabaseClient = (): SupabaseClient | null => {
     return null;
   }
 
-  supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      // Bypasses the Web Locks API to prevent deadlocks (especially in React StrictMode)
+      lock: async (_name, _acquireTimeout, fn) => {
+        return await fn();
+      },
+    },
+  });
   return supabaseClient;
 };
 

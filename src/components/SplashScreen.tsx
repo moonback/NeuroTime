@@ -32,12 +32,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
     }, FADE_OUT_DURATION);
   }, [onFinish]);
 
+  // Simuler la progression du chargement
   useEffect(() => {
-    if (!ready) return;
-
-    // Simuler une progression
     const progressInterval = setInterval(() => {
       setProgress(prev => {
+        if (prev >= 90 && !ready) {
+          return prev; // Bloquer à 90% jusqu'à ce que l'auth soit prête
+        }
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
@@ -46,34 +47,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       });
     }, 100);
 
-    const checkFinish = () => {
-      const elapsed = Date.now() - startTimeRef.current;
-      const remaining = Math.max(0, minDisplayTime - elapsed);
+    return () => clearInterval(progressInterval);
+  }, [ready]);
 
-      timeoutRef.current = setTimeout(() => {
-        setProgress(100);
-        setTimeout(handleFinish, 200);
-      }, remaining);
-    };
+  // Gérer la fin de l'affichage du splash screen une fois prêt
+  useEffect(() => {
+    if (!ready) return;
 
-    if (document.readyState === 'complete') {
-      checkFinish();
-    } else {
-      window.addEventListener('load', checkFinish);
-      return () => {
-        window.removeEventListener('load', checkFinish);
-        clearInterval(progressInterval);
-      };
-    }
+    const elapsed = Date.now() - startTimeRef.current;
+    const remaining = Math.max(0, minDisplayTime - elapsed);
+
+    const timeout = setTimeout(() => {
+      setProgress(100);
+      const fadeTimeout = setTimeout(handleFinish, 200);
+      return () => clearTimeout(fadeTimeout);
+    }, remaining);
 
     return () => {
-      clearInterval(progressInterval);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (fadeTimeoutRef.current) {
-        clearTimeout(fadeTimeoutRef.current);
-      }
+      clearTimeout(timeout);
     };
   }, [ready, minDisplayTime, handleFinish]);
 

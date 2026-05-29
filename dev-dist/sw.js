@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-ad1c1642'], (function (workbox) { 'use strict';
+define(['./workbox-ca84f546'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
@@ -80,12 +80,15 @@ define(['./workbox-ad1c1642'], (function (workbox) { 'use strict';
   workbox.precacheAndRoute([{
     "url": "suppress-warnings.js",
     "revision": "d41d8cd98f00b204e9800998ecf8427e"
+  }, {
+    "url": "/index.html",
+    "revision": "0.9ntkvbv14sk"
   }], {});
   workbox.cleanupOutdatedCaches();
-  workbox.registerRoute(/^https:\/\/.*\.supabase\.co\/.*/i, new workbox.NetworkOnly({
-    "cacheName": "supabase-api",
-    plugins: []
-  }), 'GET');
+  workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/index.html"), {
+    allowlist: [/^\/$/],
+    denylist: [/^\/@/, /^\/node_modules/, /supabase\.co/]
+  }));
   workbox.registerRoute(/^https:\/\/fonts\.googleapis\.com\/.*/i, new workbox.CacheFirst({
     "cacheName": "google-fonts-cache",
     plugins: [new workbox.ExpirationPlugin({
@@ -102,14 +105,6 @@ define(['./workbox-ad1c1642'], (function (workbox) { 'use strict';
       maxAgeSeconds: 31536000
     }), new workbox.CacheableResponsePlugin({
       statuses: [0, 200]
-    })]
-  }), 'GET');
-  workbox.registerRoute(/^https:\/\/nominatim\.openstreetmap\.org\/.*/i, new workbox.NetworkFirst({
-    "cacheName": "nominatim-cache",
-    "networkTimeoutSeconds": 5,
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 30,
-      maxAgeSeconds: 86400
     })]
   }), 'GET');
 
