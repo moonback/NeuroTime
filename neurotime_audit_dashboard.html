@@ -1,0 +1,496 @@
+
+<h2 class="sr-only">Tableau de bord d'audit NeuroTime — 15 problèmes classifiés par gravité avec corrections</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.header { padding: 1.5rem 0 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; }
+.scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.score-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; }
+.score-card .label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.score-card .val { font-size: 22px; font-weight: 500; }
+.val.red { color: #D85A30; }
+.val.amber { color: #BA7517; }
+.val.ok { color: #3B6D11; }
+.filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.filter-btn { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; padding: 5px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); transition: all 0.15s; }
+.filter-btn:hover, .filter-btn.active { background: var(--color-background-primary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+.filter-btn.f-critique.active { background: #FAECE7; color: #993C1D; border-color: #D85A30; }
+.filter-btn.f-eleve.active { background: #FAEEDA; color: #854F0B; border-color: #BA7517; }
+.filter-btn.f-moyen.active { background: #E6F1FB; color: #185FA5; border-color: #378ADD; }
+.section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); margin: 1.25rem 0 0.5rem; }
+.issue-list { display: flex; flex-direction: column; gap: 8px; }
+.issue { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.issue-header { display: flex; align-items: center; gap: 10px; padding: 0.75rem 1rem; cursor: pointer; user-select: none; }
+.issue-header:hover { background: var(--color-background-secondary); }
+.badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.badge.critique { background: #FAECE7; color: #993C1D; }
+.badge.eleve { background: #FAEEDA; color: #854F0B; }
+.badge.moyen { background: #E6F1FB; color: #185FA5; }
+.badge.faible { background: #EAF3DE; color: #3B6D11; }
+.issue-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.issue-file { font-size: 11px; color: var(--color-text-tertiary); font-family: var(--font-mono); }
+.chevron { font-size: 14px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+.issue-body { display: none; padding: 0 1rem 1rem; border-top: 0.5px solid var(--color-border-tertiary); }
+.issue-body.open { display: block; }
+.desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin: 0.75rem 0; }
+.code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem; font-family: var(--font-mono); font-size: 11px; color: var(--color-text-primary); overflow-x: auto; white-space: pre; margin: 0.5rem 0; }
+.code-block.bad { border-left: 2px solid #D85A30; }
+.code-block.good { border-left: 2px solid #639922; }
+.code-label { font-size: 11px; color: var(--color-text-tertiary); margin-top: 0.75rem; margin-bottom: 2px; }
+.priority-section { margin-bottom: 1.5rem; }
+.sprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.sprint-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+.sprint-card h3 { font-size: 13px; font-weight: 500; margin-bottom: 0.75rem; }
+.sprint-card ul { list-style: none; font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; }
+.sprint-card ul li::before { content: "→ "; color: var(--color-text-tertiary); }
+.progress-bar { height: 4px; background: var(--color-background-secondary); border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; }
+.tab-bar { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.25rem; }
+.tab { padding: 0.6rem 1.25rem; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+.tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.checklist { list-style: none; }
+.checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 0.5rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; color: var(--color-text-secondary); }
+.checklist li:last-child { border-bottom: none; }
+.checkbox { width: 16px; height: 16px; border: 1.5px solid var(--color-border-secondary); border-radius: 3px; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.checkbox.done { background: #639922; border-color: #639922; color: white; font-size: 10px; }
+</style>
+
+<div class="header">
+  <p style="font-size:12px; color:var(--color-text-tertiary); margin-bottom:4px;">NeuroTime — Audit technique complet</p>
+  <p style="font-size:11px; color:var(--color-text-tertiary);">29 mai 2026 · React 19 · TypeScript · Supabase · PWA</p>
+</div>
+
+<div class="scores">
+  <div class="score-card"><div class="label">Fiabilité</div><div class="val red">3/10</div></div>
+  <div class="score-card"><div class="label">Sécurité</div><div class="val red">4/10</div></div>
+  <div class="score-card"><div class="label">Realtime</div><div class="val red">1/10</div></div>
+  <div class="score-card"><div class="label">Offline</div><div class="val red">2/10</div></div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('bugs')">Bugs & failles</div>
+  <div class="tab" onclick="switchTab('plan')">Plan de correction</div>
+  <div class="tab" onclick="switchTab('checklist')">Checklist</div>
+</div>
+
+<div id="tab-bugs" class="tab-panel active">
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterIssues('all', this)">Tous (15)</button>
+    <button class="filter-btn f-critique" onclick="filterIssues('critique', this)">❌ Critique (5)</button>
+    <button class="filter-btn f-eleve" onclick="filterIssues('eleve', this)">⚠️ Élevé (6)</button>
+    <button class="filter-btn f-moyen" onclick="filterIssues('moyen', this)">🔵 Moyen (4)</button>
+  </div>
+  <div class="issue-list" id="issue-list"></div>
+</div>
+
+<div id="tab-plan" class="tab-panel">
+  <div class="sprint-grid">
+    <div class="sprint-card">
+      <h3 style="color:#D85A30;">🔴 Immédiat — avant prod</h3>
+      <ul>
+        <li>Supprimer cache Workbox Supabase</li>
+        <li>Supprimer RLS publique missions</li>
+        <li>Désactiver autosave snapshot</li>
+        <li>Partitionner localStorage par userId</li>
+        <li>Migration payments + RLS</li>
+        <li>Faire remonter erreurs Supabase</li>
+      </ul>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#D85A30;"></div></div>
+    </div>
+    <div class="sprint-card">
+      <h3 style="color:#BA7517;">🟡 Sprint suivant</h3>
+      <ul>
+        <li>Mutations unitaires missions</li>
+        <li>Realtime Supabase + cleanup</li>
+        <li>updatedAt dans MissionForm</li>
+        <li>Dépendances useEffect</li>
+        <li>ensureDefaultGoals() idempotent</li>
+        <li>RPC transactionnelle paiements</li>
+        <li>Refactorer AuthContext</li>
+      </ul>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#BA7517;"></div></div>
+    </div>
+    <div class="sprint-card">
+      <h3 style="color:#185FA5;">🔵 Moyen terme</h3>
+      <ul>
+        <li>IndexedDB + mutation queue</li>
+        <li>Timezone IANA sur missions</li>
+        <li>Gemini → Edge Function</li>
+        <li>Versioning DB / conflits</li>
+        <li>Sentry + observabilité</li>
+        <li>Tests DST/timezone/concurrence</li>
+      </ul>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#185FA5;"></div></div>
+    </div>
+  </div>
+  <div style="background:var(--color-background-secondary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem; font-size:13px; color:var(--color-text-secondary); line-height:1.7;">
+    <p style="font-weight:500; color:var(--color-text-primary); margin-bottom:0.5rem;">Architecture cible recommandée</p>
+    <p>Supabase = source de vérité online · IndexedDB = cache durable + queue offline · React Context = orchestration légère · Mutations explicites, jamais snapshot implicite · Realtime pour convergence · RPC pour opérations multi-tables</p>
+  </div>
+</div>
+
+<div id="tab-checklist" class="tab-panel">
+  <p class="section-label">Sécurité</p>
+  <ul class="checklist" id="checklist-sec"></ul>
+  <p class="section-label">Synchronisation</p>
+  <ul class="checklist" id="checklist-sync"></ul>
+  <p class="section-label">PWA / Offline</p>
+  <ul class="checklist" id="checklist-pwa"></ul>
+  <p class="section-label">Auth</p>
+  <ul class="checklist" id="checklist-auth"></ul>
+</div>
+
+<script>
+const issues = [
+  {
+    id: 'P1', severity: 'critique', title: 'Sauvegarde destructive par snapshot complet',
+    file: 'supabaseService.ts · MissionContext.tsx',
+    desc: "Chaque modification déclenche une sauvegarde de toute la liste. Les IDs absents du tableau React sont supprimés de Supabase. Un device ancien peut supprimer des missions créées sur un autre device.",
+    bad: `// ❌ Supprime des missions existantes si absentes en local
+const idsToDelete = existingIds.filter(id => !missionIds.has(id));
+await supabase.from('missions').delete().in('id', idsToDelete);`,
+    good: `// ✅ Mutation unitaire idempotente
+export const saveMissionMutation = async (mission: Mission) => {
+  const payload = missionToDb({ ...mission, updatedAt: new Date().toISOString() });
+  const { data, error } = await supabase
+    .from('missions').upsert(payload, { onConflict: 'id' })
+    .select('*').single();
+  if (error) throw error;
+  return dbToMission(data);
+};`
+  },
+  {
+    id: 'P2', severity: 'critique', title: 'localStorage non partitionné par utilisateur',
+    file: 'storageService.ts · clientService.ts · preferencesService.ts',
+    desc: "Les clés localStorage sont globales. Après logout/login ou changement de compte dans le même navigateur, les données d'un compte peuvent être poussées vers Supabase d'un autre compte.",
+    bad: `// ❌ Clés globales — partagées entre tous les utilisateurs
+const STORAGE_KEY = 'NeuroTime_missions_v1';
+localStorage.setItem(STORAGE_KEY, JSON.stringify(missions));`,
+    good: `// ✅ Clés scopées par userId + environnement
+const storageKey = (userId: string, ns: string) =>
+  \`neurotime:\${import.meta.env.VITE_SUPABASE_URL}:user:\${userId}:\${ns}:v2\`;
+
+export const clearLegacyStorage = () => {
+  ['NeuroTime_missions_v1','NeuroTime_payments_v1',
+   'neurotime_clients_v1'].forEach(k => localStorage.removeItem(k));
+};`
+  },
+  {
+    id: 'P3', severity: 'critique', title: 'Cache PWA sur les APIs Supabase',
+    file: 'vite.config.ts',
+    desc: "Workbox met en cache toutes les URLs *.supabase.co avec NetworkFirst pendant 1h. Des réponses obsolètes peuvent être servies, causant des incohérences multi-device et un risque de caching de données sensibles.",
+    bad: `// ❌ Cache les données utilisateur — DANGEREUX
+{ urlPattern: /^https:\\/\\/.*\\.supabase\\.co\\/.*/i,
+  handler: 'NetworkFirst',
+  options: { cacheName: 'supabase-cache',
+    expiration: { maxAgeSeconds: 60 * 60 } } }`,
+    good: `// ✅ Supprimer toute règle Supabase dans runtimeCaching
+// Garder uniquement les fonts statiques
+runtimeCaching: [{
+  urlPattern: /^https:\\/\\/fonts\\.googleapis\\.com\\/.*/i,
+  handler: 'CacheFirst',
+  options: { cacheName: 'google-fonts-cache' }
+}]`
+  },
+  {
+    id: 'P8', severity: 'critique', title: 'RLS publique — missions terminées lisibles par tous',
+    file: 'supabase_public_missions.sql',
+    desc: "Une policy permet à n'importe qui, même non authentifié, de lire toutes les missions 'completed'. Cela expose clients, lieux, revenus et horaires de tous les utilisateurs via la clé anon.",
+    bad: `-- ❌ CRITIQUE : exposition publique des données privées
+CREATE POLICY "Public can view completed missions" ON missions
+  FOR SELECT USING (status = 'completed');`,
+    good: `-- ✅ Supprimer la policy publique immédiatement
+DROP POLICY IF EXISTS "Public can view completed missions" ON missions;
+
+-- Rendre user_id obligatoire
+ALTER TABLE missions ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE goals ALTER COLUMN user_id SET NOT NULL;`
+  },
+  {
+    id: 'P9', severity: 'critique', title: 'Migrations manquantes — payments et payment_id absents',
+    file: 'supabase/migrations/',
+    desc: "Le code TypeScript utilise une table 'payments' et une colonne 'payment_id' dans missions, mais aucun fichier SQL versionné ne les crée. Un environnement neuf échoue silencieusement.",
+    bad: `// ❌ Ces appels échouent sur un environnement sans migration
+await supabase.from('payments').select('*').eq('user_id', userId);
+await supabase.from('missions').update({ payment_id: payment.id })`,
+    good: `-- ✅ Migration complète avec RLS
+CREATE TABLE IF NOT EXISTS payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  amount NUMERIC(10,2) NOT NULL CHECK (amount >= 0),
+  method TEXT NOT NULL CHECK (method IN ('virement','cash','check','other')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;`
+  },
+  {
+    id: 'P4', severity: 'eleve', title: 'Absence totale de Realtime Supabase',
+    file: 'MissionContext.tsx',
+    desc: "Aucune subscription postgres_changes n'existe. Deux appareils ouverts simultanément divergent immédiatement. Les modifications distantes n'apparaissent qu'après reload manuel.",
+    bad: `// ❌ Chargement unique, aucune subscription realtime
+useEffect(() => { loadData(); }, [loadData]);`,
+    good: `// ✅ Subscription avec cleanup strict
+useEffect(() => {
+  if (!user?.id || !supabase) return;
+  const channel = supabase
+    .channel(\`missions:user:\${user.id}\`)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'missions', filter: \`user_id=eq.\${user.id}\` },
+      (payload) => setMissions(c => applyMissionEvent(c, payload)))
+    .subscribe();
+  return () => { supabase.removeChannel(channel); };
+}, [user?.id]);`
+  },
+  {
+    id: 'P5', severity: 'eleve', title: 'updatedAt absent lors des mutations locales',
+    file: 'MissionForm.tsx',
+    desc: "La résolution de conflits compare updatedAt, mais ce champ n'est jamais assigné lors d'une création/modification locale. La résolution retombe sur startTime (date métier), ce qui est incorrect.",
+    bad: `// ❌ updatedAt non assigné → conflit résolu sur date métier
+const localUpdatedAt = localMission.updatedAt || localMission.startTime;`,
+    good: `// ✅ Toujours assigner updatedAt à chaque mutation
+const newMission: Mission = {
+  ...otherFields,
+  updatedAt: new Date().toISOString(), // ← CRITIQUE
+  isPaid: initialData?.isPaid ?? false,
+  paymentId: initialData?.paymentId,   // préserver l'état de paiement
+};`
+  },
+  {
+    id: 'P10', severity: 'eleve', title: 'Paiements non transactionnels',
+    file: 'supabaseService.ts',
+    desc: "L'enregistrement d'un paiement effectue deux requêtes séparées. Si la seconde échoue, le paiement existe mais les missions ne sont pas marquées payées — divergence garantie.",
+    bad: `// ❌ Deux requêtes non atomiques
+await supabase.from('payments').upsert(paymentDb);
+await supabase.from('missions')
+  .update({ payment_id: payment.id, is_paid: true })
+  .in('id', payment.missionIds);`,
+    good: `-- ✅ RPC PostgreSQL atomique : tout ou rien
+CREATE OR REPLACE FUNCTION save_payment_with_missions(...)
+RETURNS void LANGUAGE plpgsql SECURITY INVOKER AS $$
+BEGIN
+  INSERT INTO payments (...) ON CONFLICT (id) DO UPDATE SET ...;
+  UPDATE missions SET payment_id = ..., is_paid = true
+  WHERE user_id = auth.uid() AND id = ANY(p_mission_ids);
+END; $$;`
+  },
+  {
+    id: 'P12', severity: 'eleve', title: 'Erreurs Supabase silencieuses → données vides',
+    file: 'supabaseService.ts · storageService.ts',
+    desc: "Plusieurs fonctions retournent [] en cas d'erreur. L'UI ne distingue pas 'aucune donnée' de 'erreur de chargement', ce qui peut déclencher des sauvegardes destructives sur un état vide.",
+    bad: `// ❌ Erreur ignorée, retourne [] → peut déclencher une sync destructive
+if (error) { console.error(error); return []; }`,
+    good: `// ✅ Type Result<T> — distingue erreur vs données vides
+type LoadResult<T> = { ok: true; data: T } | { ok: false; error: Error };
+
+const result = await loadMissionsFromSupabase();
+if (!result.ok) {
+  setError(result.error.message);
+  return; // NE PAS écraser les données locales
+}
+setMissions(result.data);`
+  },
+  {
+    id: 'P11', severity: 'eleve', title: 'Bootstrap Auth non déterministe',
+    file: 'AuthContext.tsx',
+    desc: "getCurrentUser() et onAuthStateChange() peuvent écrire user dans un ordre imprévisible. Sous StrictMode, cela vide momentanément l'état, causant un rechargement complet.",
+    bad: `// ❌ Deux écritures concurrentes au montage
+checkAuth();
+const unsubscribe = onAuthStateChange((authUser) => {
+  setUser(authUser); setLoading(false);
+});`,
+    good: `// ✅ getSession() comme bootstrap unique + garde d'annulation
+useEffect(() => {
+  let cancelled = false;
+  supabase.auth.getSession().then(({ data }) => {
+    if (cancelled) return;
+    setUser(toAuthUser(data.session?.user)); setLoading(false);
+  });
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    setUser(toAuthUser(s?.user)); setLoading(false);
+  });
+  return () => { cancelled = true; subscription.unsubscribe(); };
+}, []);`
+  },
+  {
+    id: 'P7', severity: 'eleve', title: 'Objectifs par défaut créés en double sous StrictMode',
+    file: 'DashboardGoals.tsx',
+    desc: "Au montage, si aucun objectif n'est trouvé, le composant génère deux UUIDs et appelle saveGoalsToSupabase. Sous React StrictMode (montage/démontage/remontage), des doublons peuvent être créés.",
+    bad: `// ❌ Création non idempotente dans un useEffect UI
+if (loadedGoals.length > 0) { setGoals(loadedGoals); }
+else {
+  const defaults = [{ id: crypto.randomUUID(), ... }]; // double sous StrictMode
+  setGoals(defaults);
+  await saveGoalsToSupabase(defaults);
+}`,
+    good: `// ✅ ignoreDuplicates: true → idempotent sur la contrainte unique DB
+export const ensureDefaultGoals = async () => {
+  const { error } = await supabase.from('goals')
+    .upsert(defaults, { onConflict: 'user_id,type,period', ignoreDuplicates: true });
+  if (error) throw error;
+  return loadGoalsFromSupabase();
+};`
+  },
+  {
+    id: 'P6', severity: 'moyen', title: 'Dépendances manquantes dans useEffect MissionForm',
+    file: 'MissionForm.tsx',
+    desc: "Le recalcul automatique des revenus dépend de prefDayRate et prefNightRate, mais ces valeurs sont absentes du tableau de dépendances. Le total peut être calculé avec d'anciens taux.",
+    bad: `// ❌ prefDayRate, prefNightRate manquent dans les dépendances
+useEffect(() => {
+  const result = calculateEarnings(date, timeSlots, prefDayRate, prefNightRate);
+  setComputedTotal(result.total);
+}, [timeSlots, date, calculationMode]); // ← incomplet`,
+    good: `// ✅ Dépendances complètes
+useEffect(() => {
+  if (calculationMode !== 'auto' || !date) return;
+  const result = calculateEarnings(date, timeSlots, prefDayRate, prefNightRate);
+  setDayHours(result.dayHours); setNightHours(result.nightHours);
+  setComputedTotal(result.total);
+}, [timeSlots, date, calculationMode, prefDayRate, prefNightRate]); // ✅`
+  },
+  {
+    id: 'P13', severity: 'moyen', title: 'Calculs de dates sans timezone IANA',
+    file: 'calculateEarnings.ts',
+    desc: "Les calculs utilisent new Date('YYYY-MM-DDTHH:mm') en timezone locale. Des devices dans deux fuseaux différents calculeront des revenus différents. Les transitions DST peuvent ajouter/enlever une heure.",
+    bad: `// ❌ Date locale non contrôlée → résultat variable selon le navigateur
+const start = new Date(\`\${dateStr}T\${startTime}\`);
+const h = current.getHours(); // timezone du navigateur`,
+    good: `// ✅ Sauvegarder le snapshot financier validé, ne pas recalculer
+const newMission = {
+  totalEarnings: computedTotal, // snapshot au moment de validation
+  details: { dayHours, nightHours }, // ne pas recalculer depuis l'historique
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone // stocker le fuseau
+};`
+  },
+  {
+    id: 'P14', severity: 'moyen', title: 'Tris in-place sur tableaux React',
+    file: 'Dashboard.tsx · StatsView.tsx',
+    desc: "Certains useMemo trient des tableaux sans copie préalable. Le risque est limité car filter() crée un nouveau tableau, mais le pattern est fragile si refactoré.",
+    bad: `// ❌ Mutation potentielle de l'état React
+const sorted = missions.sort((a, b) => ...);`,
+    good: `// ✅ Toujours copier avant de trier
+const recentMissions = useMemo(() =>
+  [...missions]
+    .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+    .slice(0, 5),
+  [missions]
+);`
+  },
+  {
+    id: 'P15', severity: 'moyen', title: 'Context Provider monolithique sans memoization',
+    file: 'MissionContext.tsx',
+    desc: "Le Provider recrée l'objet value à chaque render, forçant tous les consommateurs à re-rendre. Le context mélange missions, paiements, auth et sync — responsabilité excessive.",
+    bad: `// ❌ Objet value recréé à chaque render → rerenders globaux
+<MissionContext.Provider value={{ missions, payments, addMission, ... }}>`,
+    good: `// ✅ Mémoïser la valeur du Provider
+const contextValue = useMemo(() => ({
+  missions, payments, isLoading,
+  addMission, updateMission, deleteMission,
+}), [missions, payments, isLoading]);
+// Recommandé moyen terme : séparer MissionQueryContext + MissionMutationContext`
+  }
+];
+
+const checklistItems = {
+  sec: [
+    'Supprimer policy "Public can view completed missions"',
+    'RLS owner-only sur missions, payments, goals, clients',
+    'user_id NOT NULL sur toutes les tables owner-based',
+    'Migrer Gemini vers Supabase Edge Function',
+    'Pas de données Supabase dans Cache Storage',
+    'Tests RLS avec deux utilisateurs distincts',
+  ],
+  sync: [
+    'Supprimer la sauvegarde snapshot destructive (idsToDelete)',
+    'Implémenter saveMissionMutation() avec rollback optimiste',
+    'Ajouter subscriptions Realtime par table avec cleanup',
+    'Resync non destructif au reconnect',
+    'Détection de conflits par version/updatedAt',
+  ],
+  pwa: [
+    'Supprimer cache Workbox pour *.supabase.co',
+    'Service worker : assets statiques uniquement',
+    'IndexedDB partitionné par userId (remplacer localStorage)',
+    'Queue de mutations offline',
+    'Tombstones pour suppressions offline',
+    'UI état offline/pending/conflict',
+  ],
+  auth: [
+    'Bootstrap Auth via getSession() uniquement',
+    'Nettoyage localStorage au logout',
+    'clearLegacyStorage() au login et logout',
+    'Tests multi-account dans le même navigateur',
+    'Tests refresh token / reconnexion',
+  ]
+};
+
+let activeFilter = 'all';
+
+function renderIssues() {
+  const list = document.getElementById('issue-list');
+  const filtered = activeFilter === 'all' ? issues : issues.filter(i => i.severity === activeFilter);
+  list.innerHTML = filtered.map(i => `
+    <div class="issue" data-sev="${i.severity}">
+      <div class="issue-header" onclick="toggleIssue('${i.id}')">
+        <span class="badge ${i.severity}">${{critique:'❌ Critique',eleve:'⚠️ Élevé',moyen:'🔵 Moyen',faible:'✅ Faible'}[i.severity]}</span>
+        <span class="issue-title">${i.id} — ${i.title}</span>
+        <span class="issue-file">${i.file}</span>
+        <i class="ti ti-chevron-down chevron" id="chev-${i.id}" aria-hidden="true"></i>
+      </div>
+      <div class="issue-body" id="body-${i.id}">
+        <p class="desc">${i.desc}</p>
+        <p class="code-label">Code problématique</p>
+        <pre class="code-block bad">${i.bad}</pre>
+        <p class="code-label">Correction proposée</p>
+        <pre class="code-block good">${i.good}</pre>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleIssue(id) {
+  const body = document.getElementById(`body-${id}`);
+  const chev = document.getElementById(`chev-${id}`);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function filterIssues(sev, btn) {
+  activeFilter = sev;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIssues();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.querySelectorAll('.tab')[['bugs','plan','checklist'].indexOf(name)].classList.add('active');
+}
+
+function renderChecklist() {
+  const map = { sec:'checklist-sec', sync:'checklist-sync', pwa:'checklist-pwa', auth:'checklist-auth' };
+  const items = { sec: checklistItems.sec, sync: checklistItems.sync, pwa: checklistItems.pwa, auth: checklistItems.auth };
+  Object.entries(map).forEach(([k, id]) => {
+    document.getElementById(id).innerHTML = items[k].map((t, i) => `
+      <li>
+        <div class="checkbox" onclick="toggleCheck(this)" aria-label="Marquer comme fait"><i class="ti ti-check" style="display:none;font-size:10px" aria-hidden="true"></i></div>
+        <span>${t}</span>
+      </li>
+    `).join('');
+  });
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  const icon = el.querySelector('i');
+  icon.style.display = el.classList.contains('done') ? 'block' : 'none';
+}
+
+renderIssues();
+renderChecklist();
+</script>
