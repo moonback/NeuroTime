@@ -138,53 +138,58 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [user?.id]);
 
-  // Save data
-  useEffect(() => {
-    if (isLoaded && user) {
-      const saveData = async () => {
-        setIsSaving(true);
-        try {
-          await saveMissions(missions, user.id);
-        } catch (error) {
-          console.error('Erreur lors de la sauvegarde:', error);
-        } finally {
-          setIsSaving(false);
-        }
-      };
-
-      const timeoutId = setTimeout(saveData, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [missions, isLoaded, user?.id]);
+  // Autosave a été supprimé pour éviter l'écrasement des données en multi-device.
+  // Les mutations sont gérées de manière explicite.
 
   const addMission = useCallback((mission: Mission) => {
+    if (!user) return;
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
-    setMissions(prev => [...prev, missionWithTimestamp]);
+    
+    setMissions(prev => {
+      const updated = [...prev, missionWithTimestamp];
+      // Sauvegarde locale isolée en tâche de fond
+      saveMissions(updated, user.id).catch(console.error);
+      return updated;
+    });
+
     addMissionToSupabase(missionWithTimestamp).catch(error => {
       console.error('Erreur lors de la création distante:', error);
       toast.error('Mission sauvegardée localement, synchronisation distante en échec');
     });
     toast.success('Mission ajoutée');
-  }, []);
+  }, [user]);
 
   const updateMission = useCallback((mission: Mission) => {
+    if (!user) return;
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
-    setMissions(prev => prev.map(m => m.id === mission.id ? missionWithTimestamp : m));
+    
+    setMissions(prev => {
+      const updated = prev.map(m => m.id === mission.id ? missionWithTimestamp : m);
+      saveMissions(updated, user.id).catch(console.error);
+      return updated;
+    });
+
     updateMissionInSupabase(missionWithTimestamp).catch(error => {
       console.error('Erreur lors de la mise à jour distante:', error);
       toast.error('Mission mise à jour localement, synchronisation distante en échec');
     });
     toast.success('Mission mise à jour');
-  }, []);
+  }, [user]);
 
   const deleteMission = useCallback((id: string) => {
-    setMissions(prev => prev.filter(m => m.id !== id));
+    if (!user) return;
+    setMissions(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      saveMissions(updated, user.id).catch(console.error);
+      return updated;
+    });
+    
     deleteMissionFromSupabase(id).catch(error => {
       console.error('Erreur lors de la suppression distante:', error);
       toast.error('Suppression locale effectuée, synchronisation distante en échec');
     });
     toast.success('Mission supprimée');
-  }, []);
+  }, [user]);
 
   const importMissions = useCallback((importedMissions: Mission[]) => {
     const now = new Date().toISOString();

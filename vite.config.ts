@@ -92,8 +92,15 @@ export default defineConfig(({ mode }) => {
             globIgnores: ['**/node_modules/**/*', '**/@vite/**/*', '**/@react-refresh/**/*'],
             // Ne pas précacher les fichiers de développement
             navigateFallback: null,
-            navigateFallbackDenylist: [/^\/@/, /^\/node_modules/],
+            navigateFallbackDenylist: [/^\/@/, /^\/node_modules/, /supabase\.co/],
             runtimeCaching: [
+              {
+                urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+                handler: 'NetworkOnly',
+                options: {
+                  cacheName: 'supabase-api',
+                }
+              },
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                 handler: 'CacheFirst',
@@ -145,8 +152,8 @@ export default defineConfig(({ mode }) => {
         })
       ],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        // La clé Gemini a été retirée du frontend pour des raisons de sécurité.
+        // Utilisez Supabase Edge Functions.
       },
       envPrefix: 'VITE_',
       resolve: {
