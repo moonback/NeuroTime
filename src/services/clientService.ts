@@ -8,7 +8,6 @@ import { getSupabase } from './authService';
 
 export type { Client };
 
-const LEGACY_STORAGE_KEY = 'neurotime_clients_v1';
 const STORAGE_VERSION = 'v2';
 
 const getCurrentUserId = async (): Promise<string | null> => {
@@ -19,12 +18,13 @@ const getCurrentUserId = async (): Promise<string | null> => {
   return user?.id || null;
 };
 
-const getStorageKey = (userId: string | null): string => (
-  userId ? `neurotime_clients_${userId}_${STORAGE_VERSION}` : LEGACY_STORAGE_KEY
+const getStorageKey = (userId: string): string => (
+  `neurotime_clients_${userId}_${STORAGE_VERSION}`
 );
 
 // Charger les clients depuis le localStorage (fallback)
 const loadClientsFromLocal = (userId: string | null): Client[] => {
+  if (!userId) return [];
   const storageKey = getStorageKey(userId);
   try {
     const data = localStorage.getItem(storageKey);
@@ -39,6 +39,7 @@ const loadClientsFromLocal = (userId: string | null): Client[] => {
 
 // Sauvegarder les clients dans le localStorage (fallback)
 const saveClientsToLocal = (clients: Client[], userId: string | null): void => {
+  if (!userId) return;
   const storageKey = getStorageKey(userId);
   try {
     localStorage.setItem(storageKey, JSON.stringify(clients));

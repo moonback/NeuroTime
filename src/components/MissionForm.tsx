@@ -427,7 +427,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, onSave, init
       description,
       startTime: startIso,
       endTime: endIso,
-      timeSlots: timeSlots.length > 1 ? timeSlots : undefined,
+      timeSlots: timeSlots,
       status: status,
       rateType: finalRateType,
       hourlyRate: calculationMode === 'auto' ? prefDayRate : 0,

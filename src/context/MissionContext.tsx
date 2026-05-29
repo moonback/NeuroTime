@@ -3,12 +3,11 @@ import { Mission, Payment } from '../types';
 import { loadMissions, saveMissions, loadPayments, savePayment as savePaymentToStorage, deletePayment as deletePaymentFromStorage } from '../services/storageService';
 import { useAuth } from './AuthContext';
 import {
-  addMissionToSupabase,
+  saveMissionMutation,
   dbToMission,
   dbToPayment,
   deleteMissionFromSupabase,
   saveMissionsToSupabase,
-  updateMissionInSupabase,
 } from '../services/supabaseService';
 import { getSupabase } from '../services/authService';
 import { toast } from 'sonner';
@@ -145,17 +144,22 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!user) return;
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
     
+    // Optimistic update
     setMissions(prev => {
       const updated = [...prev, missionWithTimestamp];
-      // Sauvegarde locale isolée en tâche de fond
       saveMissions(updated, user.id).catch(console.error);
       return updated;
     });
 
-    addMissionToSupabase(missionWithTimestamp).catch(error => {
-      console.error('Erreur lors de la création distante:', error);
-      toast.error('Mission sauvegardée localement, synchronisation distante en échec');
-    });
+    saveMissionMutation(missionWithTimestamp)
+      .then(saved => {
+        // Remplacer par les données confirmées par Supabase
+        setMissions(prev => prev.map(m => m.id === saved.id ? saved : m));
+      })
+      .catch(error => {
+        console.error('Erreur lors de la création distante:', error);
+        toast.error('Mission sauvegardée localement, synchronisation distante en échec');
+      });
     toast.success('Mission ajoutée');
   }, [user]);
 
@@ -163,18 +167,30 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!user) return;
     const missionWithTimestamp = { ...mission, updatedAt: new Date().toISOString() };
     
+    // Garder l'ancienne version pour rollback
+    const previousMissions = missions;
+
+    // Optimistic update
     setMissions(prev => {
       const updated = prev.map(m => m.id === mission.id ? missionWithTimestamp : m);
       saveMissions(updated, user.id).catch(console.error);
       return updated;
     });
 
-    updateMissionInSupabase(missionWithTimestamp).catch(error => {
-      console.error('Erreur lors de la mise à jour distante:', error);
-      toast.error('Mission mise à jour localement, synchronisation distante en échec');
-    });
+    saveMissionMutation(missionWithTimestamp)
+      .then(saved => {
+        // Remplacer par les données confirmées par Supabase
+        setMissions(prev => prev.map(m => m.id === saved.id ? saved : m));
+      })
+      .catch(error => {
+        console.error('Erreur lors de la mise à jour distante:', error);
+        // Rollback
+        setMissions(previousMissions);
+        saveMissions(previousMissions, user.id).catch(console.error);
+        toast.error('Échec de la mise à jour, modification annulée');
+      });
     toast.success('Mission mise à jour');
-  }, [user]);
+  }, [user, missions]);
 
   const deleteMission = useCallback((id: string) => {
     if (!user) return;
