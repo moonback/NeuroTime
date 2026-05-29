@@ -53,38 +53,7 @@ export const saveMissions = async (missions: Mission[], userId: string): Promise
 
 };
 
-/**
- * Résout les conflits entre missions locales et Supabase.
- * Supabase reste la source de vérité pour les lignes connues ; les lignes locales inconnues
- * sont conservées comme créations offline et ré-upsertées sans supprimer les lignes distantes.
- */
-const resolveConflicts = (localMissions: Mission[], supabaseMissions: Mission[]): Mission[] => {
-  const missionMap = new Map<string, Mission>();
 
-  supabaseMissions.forEach(mission => {
-    missionMap.set(mission.id, mission);
-  });
-
-  localMissions.forEach(localMission => {
-    const supabaseMission = missionMap.get(localMission.id);
-
-    if (supabaseMission) {
-      const localUpdatedAt = localMission.updatedAt;
-      const supabaseUpdatedAt = supabaseMission.updatedAt;
-
-      if (localUpdatedAt && supabaseUpdatedAt && new Date(localUpdatedAt) > new Date(supabaseUpdatedAt)) {
-        missionMap.set(localMission.id, localMission);
-      }
-    } else {
-      missionMap.set(localMission.id, {
-        ...localMission,
-        updatedAt: localMission.updatedAt || new Date().toISOString(),
-      });
-    }
-  });
-
-  return Array.from(missionMap.values());
-};
 
 // Fonction de chargement avec fallback sur localStorage scoped utilisateur et résolution de conflits non destructive
 export const loadMissions = async (userId: string): Promise<Mission[]> => {
@@ -94,26 +63,10 @@ export const loadMissions = async (userId: string): Promise<Mission[]> => {
   try {
     const supabaseMissions = await loadMissionsFromSupabase();
 
-    if (supabaseMissions.length > 0 || localMissions.length > 0) {
-      const resolvedMissions = resolveConflicts(localMissions, supabaseMissions);
-      writeJsonArray(storageKey, resolvedMissions);
-
-      const missionsToPush = resolvedMissions.filter(mission => {
-        const remoteMission = supabaseMissions.find(candidate => candidate.id === mission.id);
-        if (!remoteMission) return true;
-        if (!mission.updatedAt || !remoteMission.updatedAt) return false;
-        return new Date(mission.updatedAt) > new Date(remoteMission.updatedAt);
-      });
-
-      if (missionsToPush.length > 0) {
-        try {
-          await saveMissionsToSupabase(missionsToPush);
-        } catch (error) {
-          console.warn('Impossible de sauvegarder les missions locales en attente dans Supabase:', error);
-        }
-      }
-
-      return resolvedMissions;
+    if (supabaseMissions.length > 0) {
+      // Supabase est la source de vérité, on met à jour le cache local
+      writeJsonArray(storageKey, supabaseMissions);
+      return supabaseMissions;
     }
   } catch (error) {
     if (isNetworkError(error)) {

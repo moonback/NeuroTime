@@ -100,14 +100,6 @@ define(['./workbox-5fac4102'], (function (workbox) { 'use strict';
       statuses: [0, 200]
     })]
   }), 'GET');
-  workbox.registerRoute(/^https:\/\/.*\.supabase\.co\/.*/i, new workbox.NetworkFirst({
-    "cacheName": "supabase-cache",
-    "networkTimeoutSeconds": 10,
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 50,
-      maxAgeSeconds: 3600
-    })]
-  }), 'GET');
   workbox.registerRoute(/^https:\/\/nominatim\.openstreetmap\.org\/.*/i, new workbox.NetworkFirst({
     "cacheName": "nominatim-cache",
     "networkTimeoutSeconds": 5,

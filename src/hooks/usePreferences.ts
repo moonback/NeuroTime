@@ -3,19 +3,28 @@ import {
   loadPreferences,
   savePreferences,
   updatePreference,
-  UserPreferences
+  UserPreferences,
+  getPreferencesKey
 } from '../services/preferencesService';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Hook personnalisé pour gérer les préférences utilisateur
  */
 export const usePreferences = () => {
-  const [preferences, setPreferences] = useState<UserPreferences>(loadPreferences);
+  const { user } = useAuth();
+  const userId = user?.id;
+  const [preferences, setPreferences] = useState<UserPreferences>(() => loadPreferences(userId));
+
+  useEffect(() => {
+    setPreferences(loadPreferences(userId));
+  }, [userId]);
 
   // Écouter les changements de localStorage (pour la synchronisation multi-onglets)
   useEffect(() => {
+    const key = getPreferencesKey(userId);
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'neurotime_preferences_v1' && e.newValue) {
+      if (e.key === key && e.newValue) {
         try {
           setPreferences(JSON.parse(e.newValue));
         } catch (error) {
@@ -26,7 +35,7 @@ export const usePreferences = () => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [userId]);
 
   /**
    * Met à jour une préférence spécifique
@@ -35,14 +44,14 @@ export const usePreferences = () => {
     key: K,
     value: UserPreferences[K]
   ) => {
-    const updated = updatePreference(key, value);
+    const updated = updatePreference(key, value, userId);
     setPreferences(updated);
     // Déclencher un événement personnalisé pour notifier les autres onglets
     window.dispatchEvent(new StorageEvent('storage', {
-      key: 'neurotime_preferences_v1',
+      key: getPreferencesKey(userId),
       newValue: JSON.stringify(updated),
     }));
-  }, []);
+  }, [userId]);
 
   /**
    * Bascule une préférence booléenne

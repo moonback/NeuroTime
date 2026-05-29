@@ -499,26 +499,7 @@ export const savePaymentToSupabase = async (payment: Payment): Promise<void> => 
       payment_payload: payment,
     });
 
-    if (!rpcError) return;
-
-    console.warn('RPC save_payment_with_missions indisponible, fallback client:', rpcError);
-
-    const { error } = await supabase
-      .from('payments')
-      .upsert(paymentDb);
-
-    if (error) throw error;
-
-    // Mettre à jour les missions liées
-    if (payment.missionIds.length > 0) {
-      const { error: updateError } = await supabase
-        .from('missions')
-        .update({ payment_id: payment.id, is_paid: true, updated_at: new Date().toISOString() })
-        .in('id', payment.missionIds)
-        .eq('user_id', userId);
-
-      if (updateError) throw updateError;
-    }
+    if (rpcError) throw rpcError;
   } catch (error) {
     console.error('Erreur lors de la sauvegarde du paiement:', error);
     throw error;

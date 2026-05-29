@@ -1,4 +1,4 @@
-const PREFERENCES_KEY = 'neurotime_preferences_v1';
+export const getPreferencesKey = (userId?: string | null) => userId ? `neurotime_preferences_${userId}_v1` : 'neurotime_preferences_v1';
 
 export interface UserPreferences {
   hidePrices: boolean;
@@ -17,9 +17,10 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 /**
  * Charge les préférences utilisateur depuis localStorage
  */
-export const loadPreferences = (): UserPreferences => {
+export const loadPreferences = (userId?: string | null): UserPreferences => {
   try {
-    const stored = localStorage.getItem(PREFERENCES_KEY);
+    const key = getPreferencesKey(userId);
+    const stored = localStorage.getItem(key);
     if (stored) {
       const parsed = JSON.parse(stored);
       // Fusionner avec les préférences par défaut pour supporter les nouvelles clés
@@ -34,9 +35,10 @@ export const loadPreferences = (): UserPreferences => {
 /**
  * Sauvegarde les préférences utilisateur dans localStorage
  */
-export const savePreferences = (preferences: UserPreferences): void => {
+export const savePreferences = (preferences: UserPreferences, userId?: string | null): void => {
   try {
-    localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+    const key = getPreferencesKey(userId);
+    localStorage.setItem(key, JSON.stringify(preferences));
   } catch (error) {
     console.error('Erreur lors de la sauvegarde des préférences:', error);
   }
@@ -47,11 +49,12 @@ export const savePreferences = (preferences: UserPreferences): void => {
  */
 export const updatePreference = <K extends keyof UserPreferences>(
   key: K,
-  value: UserPreferences[K]
+  value: UserPreferences[K],
+  userId?: string | null
 ): UserPreferences => {
-  const current = loadPreferences();
+  const current = loadPreferences(userId);
   const updated = { ...current, [key]: value };
-  savePreferences(updated);
+  savePreferences(updated, userId);
   return updated;
 };
 
@@ -59,9 +62,10 @@ export const updatePreference = <K extends keyof UserPreferences>(
  * Récupère une préférence spécifique
  */
 export const getPreference = <K extends keyof UserPreferences>(
-  key: K
+  key: K,
+  userId?: string | null
 ): UserPreferences[K] => {
-  const preferences = loadPreferences();
+  const preferences = loadPreferences(userId);
   return preferences[key];
 };
 
