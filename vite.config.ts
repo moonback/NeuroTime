@@ -125,9 +125,10 @@ export default defineConfig(({ mode }) => {
             ]
           },
           devOptions: {
-            enabled: true,
+            // Désactiver le service worker en dev : Vite sert des modules /src, /@vite
+            // et /node_modules qui ne doivent jamais être interceptés par Workbox.
+            enabled: false,
             type: 'module',
-            // Réduire les warnings en développement
             suppressWarnings: true
           }
         })
