@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthUser, getCurrentUser, onAuthStateChange, signOut as authSignOut } from '../services/authService';
+import { clearLegacyStorage } from '../services/legacyCleanup';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -17,6 +18,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = async () => {
       try {
         const currentUser = await getCurrentUser();
+        if (currentUser) {
+          clearLegacyStorage(); // Nettoyer les clés legacy au login
+        }
         setUser(currentUser);
       } catch (error) {
         console.error("Auth check failed", error);
@@ -28,6 +32,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
 
     const unsubscribe = onAuthStateChange((authUser) => {
+      if (authUser) {
+        clearLegacyStorage(); // Nettoyer les clés legacy à chaque changement d'auth
+      }
       setUser(authUser);
       setLoading(false);
     });
@@ -38,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
+    clearLegacyStorage(); // Nettoyer les clés legacy au logout
     await authSignOut();
     setUser(null);
   };

@@ -3,7 +3,7 @@ import { Mission } from '../types';
 import { Target, TrendingUp, Award, Edit2, X } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, Goal } from '../services/goalsService';
+import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, ensureDefaultGoals, Goal } from '../services/goalsService';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
@@ -34,18 +34,10 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
         if (loadedGoals.length > 0) {
           setGoals(loadedGoals);
         } else {
-          // Objectifs par défaut si aucun objectif n'existe
-          const defaultGoals: Goal[] = [
-            { id: crypto.randomUUID(), type: 'revenue', target: 5000, period: 'month' },
-            { id: crypto.randomUUID(), type: 'missions', target: 10, period: 'month' },
-          ];
-          setGoals(defaultGoals);
-          // Sauvegarder les objectifs par défaut
-          try {
-            await saveGoalsToSupabase(defaultGoals);
-          } catch (e) {
-            console.error('Erreur lors de la sauvegarde des objectifs par défaut:', e);
-          }
+          // Aucun objectif existant, créer les objectifs par défaut de façon idempotente
+          await ensureDefaultGoals();
+          const refreshed = await loadGoalsFromSupabase();
+          setGoals(refreshed);
         }
       } catch (e) {
         console.error('Erreur lors du chargement des objectifs:', e);

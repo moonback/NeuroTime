@@ -1,4 +1,4 @@
-export const getPreferencesKey = (userId?: string | null) => userId ? `neurotime_preferences_${userId}_v1` : 'neurotime_preferences_v1';
+export const getPreferencesKey = (userId?: string | null) => userId ? `neurotime_preferences_${userId}_v2` : 'neurotime_preferences_anonymous_v2';
 
 export interface UserPreferences {
   hidePrices: boolean;

@@ -71,6 +71,21 @@ export const loadGoalsFromSupabase = async (): Promise<Goal[]> => {
   }
 };
 
+// Ensure default goals exist (idempotent)
+export const ensureDefaultGoals = async (): Promise<void> => {
+  const existingGoals = await loadGoalsFromSupabase();
+  if (existingGoals.length > 0) {
+    // Goals already exist, nothing to do
+    return;
+  }
+  const defaultGoals: Goal[] = [
+    { id: crypto.randomUUID(), type: 'revenue', target: 5000, period: 'month' },
+    { id: crypto.randomUUID(), type: 'missions', target: 10, period: 'month' },
+  ];
+  // Use upsert to insert default goals
+  await saveGoalsToSupabase(defaultGoals);
+};
+
 // Sauvegarder un objectif (créer ou mettre à jour)
 export const saveGoalToSupabase = async (goal: Goal): Promise<Goal> => {
   const supabase = getSupabase();

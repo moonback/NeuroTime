@@ -163,69 +163,47 @@ export const loadMissionsFromSupabase = async (): Promise<Mission[]> => {
   }
 };
 
-// Ajouter une mission
-export const addMissionToSupabase = async (mission: Mission): Promise<void> => {
+// Mutation unitaire idempotente : crée ou met à jour une mission
+export const saveMissionMutation = async (mission: Mission): Promise<Mission> => {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return;
-  }
+  if (!supabase) throw new Error('Supabase non configuré');
 
   const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return;
-  }
+  if (!userId) throw new Error('Utilisateur non connecté');
 
   try {
-    await retry(async () => {
-      const missionDb = missionToDb(mission, userId);
-      const { error } = await supabase
-        .from('missions')
-        .upsert(missionDb, { onConflict: 'id' });
+    return await retry(async () => {
+      const now = new Date().toISOString();
+      const payload = missionToDb({ ...mission, updatedAt: mission.updatedAt || now }, userId);
 
-      if (error) {
-        throw error;
-      }
+      // Filtrer les valeurs undefined pour éviter les erreurs si les colonnes n'existent pas encore
+      const filtered: any = {};
+      Object.keys(payload).forEach(key => {
+        if (payload[key] !== undefined) {
+          filtered[key] = payload[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('missions')
+        .upsert(filtered, { onConflict: 'id' })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Aucune donnée retournée après upsert');
+
+      return dbToMission(data);
     });
   } catch (error) {
-    console.error('Erreur lors de l\'ajout dans Supabase:', error);
+    console.error('Erreur lors de la sauvegarde dans Supabase:', error);
     throw error;
   }
 };
 
-// Mettre à jour une mission
-export const updateMissionInSupabase = async (mission: Mission): Promise<void> => {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
-    console.error('Impossible de se connecter à Supabase');
-    return;
-  }
-
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    console.error('Utilisateur non connecté');
-    return;
-  }
-
-  try {
-    await retry(async () => {
-      const missionDb = missionToDb(mission, userId);
-      const { error } = await supabase
-        .from('missions')
-        .update(missionDb)
-        .eq('id', mission.id)
-        .eq('user_id', userId);
-
-      if (error) {
-        throw error;
-      }
-    });
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour dans Supabase:', error);
-    throw error;
-  }
-};
+// Aliases pour compatibilité
+export const addMissionToSupabase = saveMissionMutation;
+export const updateMissionInSupabase = saveMissionMutation;
 
 // Supprimer une mission
 export const deleteMissionFromSupabase = async (missionId: string): Promise<void> => {
