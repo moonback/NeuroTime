@@ -29,7 +29,7 @@ const goalToDb = (goal: Goal, userId: string) => ({
   updated_at: goal.updatedAt || new Date().toISOString(),
 });
 
-const dbToGoal = (dbRow: any): Goal => ({
+export const dbToGoal = (dbRow: any): Goal => ({
   id: dbRow.id,
   type: dbRow.type,
   target: parseFloat(dbRow.target),

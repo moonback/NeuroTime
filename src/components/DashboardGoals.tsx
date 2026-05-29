@@ -3,9 +3,11 @@ import { Mission } from '../types';
 import { Target, TrendingUp, Award, Edit2, X } from 'lucide-react';
 import { format, isThisMonth, startOfMonth, endOfMonth } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
-import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, ensureDefaultGoals, Goal } from '../services/goalsService';
+import { loadGoalsFromSupabase, saveGoalToSupabase, deleteGoalFromSupabase, saveGoalsToSupabase, ensureDefaultGoals, Goal, dbToGoal } from '../services/goalsService';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import { useAuth } from '../context/AuthContext';
+import { getSupabase } from '../services/authService';
 
 interface DashboardGoalsProps {
   missions: Mission[];
@@ -19,6 +21,7 @@ interface GoalWithProgress extends Goal {
 }
 
 const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth }) => {
+  const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +51,41 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
     
     loadGoals();
   }, []);
+
+  // Realtime subscription for goals
+  useEffect(() => {
+    if (!user) return;
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel(`goals:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'goals', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            const deletedId = (payload.old as { id?: string }).id;
+            if (deletedId) {
+              setGoals(current => current.filter(g => g.id !== deletedId));
+            }
+            return;
+          }
+
+          const remoteGoal = dbToGoal(payload.new);
+          setGoals(current => {
+            const existing = current.find(g => g.id === remoteGoal.id);
+            if (!existing) return [...current, remoteGoal];
+            return current.map(g => g.id === remoteGoal.id ? remoteGoal : g);
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   // Calculer les valeurs actuelles pour le mois sélectionné (optimisé)
   const goalsWithProgress = useMemo((): GoalWithProgress[] => {
