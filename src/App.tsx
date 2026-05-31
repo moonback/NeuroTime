@@ -1,6 +1,6 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3, Calculator } from 'lucide-react';
+import { LayoutDashboard, Plus, ListChecks, LogOut, User, Euro, Eye, EyeOff, Menu, ChevronLeft, Pin, PinOff, BarChart3, Calculator, Map } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
@@ -17,6 +17,7 @@ const MissionForm = lazy(() => import('./components/MissionForm'));
 const StatsView = lazy(() => import('./components/StatsView'));
 const UrssafView = lazy(() => import('./components/UrssafView'));
 const ProfileView = lazy(() => import('./components/ProfileView'));
+const RoadmapView = lazy(() => import('./components/RoadmapView'));
 
 import AuthModal from './components/AuthModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -287,6 +288,12 @@ const App: React.FC = () => {
             label="URSSAF"
           />
           <NavButton
+            active={location.pathname === '/roadmap'}
+            onClick={() => { navigate('/roadmap'); setIsSidebarOpen(false) }}
+            icon={<Map size={14} />}
+            label="Roadmap"
+          />
+          <NavButton
             active={location.pathname === '/profile'}
             onClick={() => { navigate('/profile'); setIsSidebarOpen(false) }}
             icon={<User size={14} />}
@@ -450,6 +457,9 @@ const App: React.FC = () => {
               <Route path="/profile" element={
                 <ProfileView />
               } />
+              <Route path="/roadmap" element={
+                <RoadmapView />
+              } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
@@ -490,6 +500,12 @@ const App: React.FC = () => {
             onClick={() => navigate('/payments')}
             icon={<Euro size={18} />}
             label="Paiements"
+          />
+          <MobileNavButton
+            active={location.pathname === '/roadmap'}
+            onClick={() => navigate('/roadmap')}
+            icon={<Map size={18} />}
+            label="Plan"
           />
           <MobileNavButton
             active={location.pathname === '/profile'}
