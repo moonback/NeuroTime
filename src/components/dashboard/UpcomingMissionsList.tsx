@@ -108,18 +108,18 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
   return (
     <div className="relative overflow-hidden rounded-xl">
       {/* Swipe actions */}
-      <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 px-3 bg-gradient-to-l from-indigo-500/30 via-indigo-500/20 to-transparent pointer-events-none md:hidden">
+      <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-[var(--bg-elevated)] pointer-events-none md:hidden">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           <button
             onClick={() => handleActionClick(() => onValidate(mission))}
-            className="p-2.5 rounded-xl bg-emerald-500 text-white shadow-lg active:scale-95 transition-transform"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--success)] text-white active:scale-95 transition-transform"
             aria-label="Valider"
           >
             <CheckCircle size={15} strokeWidth={2.5} />
           </button>
           <button
             onClick={() => handleActionClick(() => onEdit(mission))}
-            className="p-2.5 rounded-xl bg-indigo-500 text-white shadow-lg active:scale-95 transition-transform"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)] text-white active:scale-95 transition-transform"
             aria-label="Modifier"
           >
             <Edit size={15} strokeWidth={2.5} />
@@ -130,7 +130,7 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
       {/* Card */}
       <div
         ref={cardRef}
-        className="group flex flex-col md:flex-row md:items-center gap-2 md:gap-3 p-3 md:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-indigo-500/15 transition-all duration-200 relative"
+        className="group relative flex flex-col gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3.5 transition-all duration-200 hover:border-[var(--border-default)] md:flex-row md:items-center md:gap-4 md:p-4"
         style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none',
@@ -140,10 +140,10 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
         {/* Swipe indicator */}
         {!isSwiped && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none md:hidden">
-            <div className="flex items-center gap-0.5 text-indigo-400">
-              <div className="w-0.5 h-0.5 rounded-full bg-indigo-400" />
-              <div className="w-0.5 h-0.5 rounded-full bg-indigo-400" />
-              <div className="w-0.5 h-0.5 rounded-full bg-indigo-400" />
+            <div className="flex items-center gap-0.5 text-[var(--accent)]">
+              <div className="w-0.5 h-0.5 rounded-full bg-[var(--accent)]" />
+              <div className="w-0.5 h-0.5 rounded-full bg-[var(--accent)]" />
+              <div className="w-0.5 h-0.5 rounded-full bg-[var(--accent)]" />
             </div>
           </div>
         )}
@@ -151,12 +151,12 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
         {/* Date Badge */}
         <div
           onClick={() => onEdit(mission)}
-          className="flex cursor-pointer md:flex-col items-center gap-1.5 md:gap-0 bg-white/[0.03] p-2 md:p-2.5 rounded-lg min-w-[56px] md:min-w-[60px] text-center border border-white/[0.05] group-hover:border-indigo-500/20 transition-all relative z-10"
+          className="relative z-10 flex min-w-[64px] cursor-pointer items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-white/[0.035] p-2.5 text-center transition-all group-hover:border-[var(--border-default)] md:flex-col md:gap-0"
         >
-          <div className="text-[8px] text-gray-400 uppercase font-bold tracking-wider">
+          <div className="text-[9px] text-[var(--text-muted)] uppercase font-semibold tracking-[0.14em]">
             {format(new Date(mission.startTime), 'MMM', { locale: fr })}
           </div>
-          <div className="text-lg md:text-xl font-extrabold text-gray-100 leading-none md:mt-0.5">
+          <div className="text-xl font-semibold text-[var(--text-primary)] leading-none md:mt-0.5">
             {format(new Date(mission.startTime), 'dd')}
           </div>
           <div className="md:hidden h-4 w-px bg-white/[0.06] mx-1" />
@@ -168,24 +168,24 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
         {/* Content */}
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit(mission)}>
           <div className="flex justify-between items-start gap-1.5">
-            <h4 className="font-bold text-gray-100 text-[13px] truncate group-hover:text-indigo-300 transition-colors">{mission.title}</h4>
+            <h4 className="truncate text-sm font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-hover)]">{mission.title}</h4>
             {!hidePrices && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-orange-500/10 text-orange-300 border border-orange-500/15 flex-shrink-0">
+              <span className="inline-flex shrink-0 items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
                 {formatPrice(mission.totalEarnings)}€
               </span>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-y-1 gap-x-2.5 mt-1 text-[10px] text-gray-400">
-            <span className="flex items-center gap-1 bg-white/[0.03] px-1.5 py-0.5 rounded-md border border-white/[0.04]">
-              <Clock size={10} className="text-gray-500" />
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-medium text-[var(--text-secondary)]">
+            <span className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-white/[0.03] px-2 py-1">
+              <Clock size={10} className="text-[var(--text-muted)]" />
               {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
             </span>
             <span className="flex items-center gap-1">
-              <MapPin size={10} className="text-gray-500" />
+              <MapPin size={10} className="text-[var(--text-muted)]" />
               <span className="truncate max-w-[120px]">{mission.location}</span>
             </span>
-            <span className="flex items-center gap-1 font-medium">
+            <span className="flex items-center gap-1.5 font-medium">
               {mission.rateType === 'night' ? <Moon size={9} className="text-purple-400" /> : <Sun size={9} className="text-amber-400" />}
               {mission.rateType === 'night' ? 'Nuit' : 'Jour'}
             </span>
@@ -196,7 +196,7 @@ const SwipeableUpcomingMissionCard: React.FC<SwipeableUpcomingMissionCardProps> 
         <div className="hidden md:flex items-center">
           <button
             onClick={(e) => { e.stopPropagation(); onValidate(mission); }}
-            className="flex items-center gap-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg font-semibold text-[10px] transition-all"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/15"
             title="Valider les heures"
           >
             <CheckCircle size={13} />
@@ -226,22 +226,22 @@ const UpcomingMissionsList: React.FC<UpcomingMissionsListProps> = ({ upcomingMis
   };
 
   return (
-    <div className="glass-card rounded-xl p-3 md:p-4 animate-slide-in-up">
+    <div className="glass-card rounded-xl p-4 md:p-5 animate-slide-in-up">
       <button
         onClick={() => setIsUpcomingExpanded(!isUpcomingExpanded)}
-        className="w-full flex items-center justify-between mb-0 hover:opacity-80 transition-opacity"
+        className="w-full flex items-center justify-between gap-3 text-left"
       >
         <div className="flex items-center gap-2">
-          <span className="bg-white/[0.04] p-1.5 rounded-lg border border-white/[0.06]">
-            <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+          <span className="rounded-lg border border-[var(--border-subtle)] bg-white/[0.035] p-2">
+            <Calendar className="w-4 h-4 text-[var(--accent)]" />
           </span>
-          <h3 className="text-xs font-bold text-gray-200">À venir</h3>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">À venir</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-gray-300 font-semibold bg-white/[0.04] px-2 py-0.5 rounded-md border border-white/[0.04]">
+          <span className="rounded-full border border-[var(--border-subtle)] bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-[var(--text-secondary)]">
             {upcomingMissions.length}
           </span>
-          <span className="text-[10px] text-gray-500">
+          <span className="text-xs text-[var(--text-muted)]">
             {isUpcomingExpanded ? 'Réduire' : 'Voir'}
           </span>
           {isUpcomingExpanded ? (
@@ -253,17 +253,17 @@ const UpcomingMissionsList: React.FC<UpcomingMissionsListProps> = ({ upcomingMis
       </button>
 
       {isUpcomingExpanded && (
-        <div className="animate-slide-in-up mt-3">
+        <div className="animate-slide-in-up mt-4">
           {upcomingMissions.length === 0 ? (
-            <div className="text-center py-8 bg-white/[0.02] rounded-lg border border-dashed border-white/[0.08]">
-              <div className="mx-auto w-8 h-8 bg-white/[0.04] rounded-full flex items-center justify-center mb-2">
+            <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-white/[0.02] py-10 text-center">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04]">
                 <CheckCircle className="text-emerald-400" size={16} />
               </div>
-              <p className="text-gray-300 font-medium text-xs">Tout est à jour !</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">Aucune mission en attente</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Tout est à jour !</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Aucune mission en attente</p>
             </div>
           ) : (
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               {upcomingMissions.map((mission, index) => (
                 <SwipeableUpcomingMissionCard
                   key={mission.id}

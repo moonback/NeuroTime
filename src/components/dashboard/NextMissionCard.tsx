@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Calendar, MapPin, Clock, Moon, Sun, Briefcase, Euro, Edit, CheckCircle, Navigation } from 'lucide-react';
+import { Calendar, MapPin, Clock, Moon, Sun, Briefcase, Edit, CheckCircle } from 'lucide-react';
 import { format, differenceInHours, differenceInMinutes, isToday, isTomorrow, differenceInCalendarDays } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import { Mission } from '../../types';
@@ -13,7 +13,6 @@ interface NextMissionCardProps {
 }
 
 const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, onValidate, hidePrices = false }) => {
-
   const formatPrice = (value: number | null | undefined): string => {
     if (hidePrices) return '***';
     if (value === null || value === undefined) return '0';
@@ -22,13 +21,13 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
 
   if (!nextMission) {
     return (
-      <div className="glass-card rounded-xl p-3.5 border border-orange-500/15 bg-gradient-to-br from-orange-600/5 to-transparent flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/15 text-orange-300">
-          <Calendar size={16} strokeWidth={2} />
+      <div className="glass-card flex items-center gap-4 rounded-xl p-4">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-white/[0.035] p-3 text-[var(--warning)]">
+          <Calendar size={18} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-xs font-bold text-orange-100">Aucune mission planifiée</p>
-          <p className="text-[10px] text-gray-500">Ajoutez une mission pour commencer</p>
+          <p className="text-sm font-semibold text-[var(--text-primary)]">Aucune mission planifiée</p>
+          <p className="text-xs text-[var(--text-muted)]">Ajoutez une mission pour alimenter votre planning.</p>
         </div>
       </div>
     );
@@ -39,7 +38,6 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
   const now = new Date();
   const isOngoing = now >= missionStart && now < missionEnd;
 
-  // Calcul du temps restant compact
   let timeText = '';
   if (isOngoing) {
     const hoursLeft = differenceInHours(missionEnd, now);
@@ -56,7 +54,6 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
     else timeText = `Dans ${daysUntil}j`;
   }
 
-  // Swipe logic pour mobile
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwiped, setIsSwiped] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -82,21 +79,16 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
     const deltaY = touch.clientY - touchStartY.current;
     const absDeltaX = Math.abs(deltaX);
     const absDeltaY = Math.abs(deltaY);
-
     const isHorizontalSwipe = absDeltaX > absDeltaY * SWIPE_ANGLE_THRESHOLD;
 
     if (isHorizontalSwipe && absDeltaX > 10) {
-      if (!isSwiping.current) {
-        isSwiping.current = true;
-      }
+      if (!isSwiping.current) isSwiping.current = true;
       e.preventDefault();
 
       if (deltaX < 0) {
-        const offset = Math.max(-MAX_SWIPE, deltaX);
-        setSwipeOffset(offset);
+        setSwipeOffset(Math.max(-MAX_SWIPE, deltaX));
       } else if (deltaX > 0 && isSwiped) {
-        const offset = Math.min(0, deltaX);
-        setSwipeOffset(offset);
+        setSwipeOffset(Math.min(0, deltaX));
       }
     }
   }, [isSwiped]);
@@ -164,134 +156,120 @@ const NextMissionCard: React.FC<NextMissionCardProps> = ({ nextMission, onEdit, 
   }, [isSwiped]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl">
-      {/* Actions rapides révélées par le swipe */}
-      <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 px-3 bg-gradient-to-l from-indigo-500/30 via-indigo-500/20 to-transparent pointer-events-none md:hidden">
-        <div className="flex items-center gap-1.5 pointer-events-auto">
+    <section className="relative overflow-hidden rounded-xl">
+      <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-[var(--bg-elevated)] pointer-events-none md:hidden">
+        <div className="flex items-center gap-2 pointer-events-auto">
           <button
             onClick={() => handleActionClick(() => onValidate(nextMission))}
-            className="p-2.5 rounded-xl bg-emerald-500 text-white shadow-lg active:scale-95 transition-transform"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--success)] text-white active:scale-95"
             aria-label="Valider"
           >
-            <CheckCircle size={16} strokeWidth={2.5} />
+            <CheckCircle size={17} strokeWidth={2.5} />
           </button>
           <button
             onClick={() => handleActionClick(() => onEdit(nextMission))}
-            className="p-2.5 rounded-xl bg-indigo-500 text-white shadow-lg active:scale-95 transition-transform"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent)] text-white active:scale-95"
             aria-label="Modifier"
           >
-            <Edit size={16} strokeWidth={2.5} />
+            <Edit size={17} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      {/* Carte principale */}
       <div
         ref={cardRef}
         onClick={() => onEdit(nextMission)}
-        className="group relative overflow-hidden rounded-xl p-3.5 md:p-4 transition-all duration-300 cursor-pointer active:scale-[0.995]"
+        className="glass-card group cursor-pointer rounded-xl p-4 md:p-5"
         style={{
           transform: `translateX(${swipeOffset}px)`,
-          transition: swipeOffset === 0 ? 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+          transition: swipeOffset === 0 ? 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
         }}
       >
-        {/* Background */}
-        <div className="absolute inset-0 bg-[#0c0f1a]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.04] via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 border border-white/[0.05] group-hover:border-indigo-500/15 rounded-xl transition-colors duration-300" />
-
-        {/* Subtle glow */}
-        <div className="absolute -top-16 -right-16 w-40 h-40 bg-indigo-500/[0.04] blur-[60px] rounded-full group-hover:bg-indigo-500/[0.08] transition-all duration-500" />
-
-        <div className="relative z-10 flex flex-col md:flex-row gap-3 md:gap-5 items-start md:items-center">
-          {/* Date Block — COMPACT */}
-          <div className="flex-shrink-0 flex md:flex-col items-center gap-1 bg-white/[0.04] p-px rounded-lg border border-white/[0.06] group-hover:border-indigo-500/20 transition-all">
-            <div className="bg-[#0c0f1a] rounded-[7px] px-2.5 py-1.5 md:min-w-[56px] text-center">
-              <span className="block text-[8px] uppercase font-bold text-indigo-400 tracking-wider mb-0.5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+          <div className="flex shrink-0 items-center gap-3 md:block">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-center md:min-w-[72px] md:px-4 md:py-3">
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
                 {format(missionStart, 'MMM', { locale: fr })}
               </span>
-              <span className="block text-lg font-extrabold text-white leading-none tracking-tight">
+              <span className="block text-2xl font-semibold leading-none tracking-[-0.045em] text-[var(--text-primary)] md:text-3xl">
                 {format(missionStart, 'dd')}
               </span>
-              <span className="block text-[8px] font-semibold text-gray-500 mt-1 opacity-60">
+              <span className="mt-1 block text-[11px] font-medium text-[var(--text-muted)]">
                 {format(missionStart, 'HH:mm')}
               </span>
             </div>
+            <div className="md:hidden">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Prochaine mission</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{timeText}</p>
+            </div>
           </div>
 
-          {/* Info Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 mb-2">
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border transition-all ${isOngoing
-                ? 'bg-orange-500 text-white border-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.3)] animate-pulse'
-                : 'bg-white/[0.04] text-orange-300 border-white/[0.06]'
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${isOngoing
+                ? 'border-orange-500/25 bg-orange-500/12 text-[var(--warning)]'
+                : 'border-[var(--border-subtle)] bg-white/[0.035] text-[var(--text-secondary)]'
                 }`}>
-                {isOngoing ? (
-                  <>
-                    <span className="w-1 h-1 rounded-full bg-white animate-ping" />
-                    En cours
-                  </>
-                ) : timeText}
+                {isOngoing && <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />}
+                {isOngoing ? 'En cours' : timeText}
               </span>
 
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.04] text-gray-400">
-                  {nextMission.rateType === 'night' ? <Moon size={10} className="text-purple-400" /> : nextMission.rateType === 'mixed' ? <Clock size={10} className="text-indigo-400" /> : <Sun size={10} className="text-amber-400" />}
-                  <span className="text-[9px] font-semibold">{nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}</span>
-                </div>
-                {!hidePrices && (
-                  <div className="num-financial px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/15 text-emerald-400 font-bold text-[10px]">
-                    {formatPrice(nextMission.totalEarnings)}€
-                  </div>
-                )}
-              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-white/[0.035] px-2.5 py-1 text-[10px] font-semibold text-[var(--text-secondary)]">
+                {nextMission.rateType === 'night'
+                  ? <Moon size={11} className="text-[var(--accent)]" />
+                  : nextMission.rateType === 'mixed'
+                    ? <Clock size={11} className="text-[var(--accent)]" />
+                    : <Sun size={11} className="text-[var(--warning)]" />}
+                {nextMission.rateType === 'night' ? 'Nuit' : nextMission.rateType === 'mixed' ? 'Mixte' : 'Jour'}
+              </span>
+
+              {!hidePrices && (
+                <span className="num-financial inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+                  {formatPrice(nextMission.totalEarnings)}€
+                </span>
+              )}
             </div>
 
-            <h3 className="text-base md:text-lg font-extrabold text-white mb-1.5 tracking-tight transition-colors group-hover:text-indigo-300 leading-tight">
+            <h3 className="mb-2 truncate text-xl font-semibold tracking-[-0.04em] text-[var(--text-primary)] md:text-2xl">
               {nextMission.title}
             </h3>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-[var(--text-secondary)]">
               {nextMission.client && (
-                <div className="flex items-center gap-1 text-orange-200/80 text-[10px] font-semibold">
-                  <Briefcase size={11} className="text-orange-400" />
-                  <span>{nextMission.client}</span>
-                </div>
+                <span className="flex items-center gap-1.5">
+                  <Briefcase size={13} className="text-[var(--text-muted)]" />
+                  {nextMission.client}
+                </span>
               )}
-              <div className="flex items-center gap-1 text-gray-400 text-[10px] font-medium">
-                <Clock size={11} className="text-gray-500" />
-                <span>{formatTimeSlots(nextMission)}</span>
-              </div>
-              <div className="flex items-center gap-1 text-gray-400 text-[10px] font-medium">
-                <MapPin size={11} className="text-gray-500" />
-                <span className="truncate max-w-[150px]">{nextMission.location}</span>
-              </div>
+              <span className="flex items-center gap-1.5">
+                <Clock size={13} className="text-[var(--text-muted)]" />
+                {formatTimeSlots(nextMission)}
+              </span>
+              <span className="flex min-w-0 items-center gap-1.5">
+                <MapPin size={13} className="shrink-0 text-[var(--text-muted)]" />
+                <span className="truncate max-w-[220px]">{nextMission.location}</span>
+              </span>
             </div>
           </div>
 
-          {/* Action Row - Desktop */}
-          <div className="hidden md:flex flex-col gap-2 pl-4 border-l border-white/[0.06]">
+          <div className="hidden shrink-0 items-center gap-2 border-l border-[var(--border-subtle)] pl-5 md:flex">
             <button
               onClick={(e) => { e.stopPropagation(); onValidate(nextMission); }}
-              className="group/btn relative px-4 py-2 rounded-xl overflow-hidden font-bold text-[10px] uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--success)] px-4 text-sm font-semibold text-white transition-transform active:scale-[0.98]"
             >
-              <div className="absolute inset-0 bg-emerald-500" />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-              <div className="relative z-10 flex items-center justify-center gap-1.5 text-white">
-                <CheckCircle size={14} strokeWidth={2.5} />
-                <span>Terminer</span>
-              </div>
+              <CheckCircle size={15} strokeWidth={2.5} />
+              Terminer
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(nextMission); }}
-              className="px-4 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-gray-300 font-semibold text-[10px] uppercase tracking-wider hover:bg-white/[0.08] transition-all active:scale-95"
+              className="btn-secondary min-h-10 px-4 text-sm font-semibold"
             >
               Modifier
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

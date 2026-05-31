@@ -59,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
   } = useDashboardExports(missions, allCompletedMissions, selectedMonthDate);
 
   return (
-    <div className="space-y-3 md:space-y-5 pb-16 md:pb-8 animate-fade-in">
+    <div className="space-y-5 md:space-y-7 pb-20 md:pb-10 animate-fade-in">
       {/* Header amélioré */}
       <DashboardHeader
         selectedMonth={selectedMonth}
@@ -118,11 +118,11 @@ const Dashboard: React.FC<DashboardProps> = ({ missions, onEdit, onValidate, onI
       </div>
 
       {/* Statistiques avancées et Objectifs — ENHANCED GRID */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-6 animate-slide-in-up stagger-3">
-        <div className="glass-card rounded-xl p-4 md:p-5 border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5 animate-slide-in-up stagger-3">
+        <div className="glass-card rounded-xl p-4 md:p-6">
           <DashboardStats missions={missions} selectedMonth={selectedMonthDate} />
         </div>
-        <div className="glass-card rounded-xl p-4 md:p-5 border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all">
+        <div className="glass-card rounded-xl p-4 md:p-6">
           <DashboardGoals missions={missions} selectedMonth={selectedMonthDate} />
         </div>
       </div>

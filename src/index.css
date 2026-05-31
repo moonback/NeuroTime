@@ -323,24 +323,8 @@ textarea:focus {
 
 .glow-blue,
 .glow-blue:hover,
-.glow-blue-strong,
-.shadow-2xl,
-.shadow-xl,
-.shadow-lg,
-.shadow-md,
-.shadow-sm {
+.glow-blue-strong {
   box-shadow: none !important;
-}
-
-.bg-gradient-to-r,
-.bg-gradient-to-l,
-.bg-gradient-to-b,
-.bg-gradient-to-t,
-.bg-gradient-to-br,
-.bg-gradient-to-bl,
-.bg-gradient-to-tr,
-.bg-gradient-to-tl {
-  background-image: none !important;
 }
 
 .text-indigo-300,
