@@ -59,10 +59,10 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 md:space-y-4">
       {/* Primary Statistics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-12 gap-2.5">
-        <div className="col-span-2 md:col-span-12 lg:col-span-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 md:gap-4">
+        <div className="sm:col-span-2 md:col-span-12 lg:col-span-6">
           <StatCard
             icon={<Euro className="w-4 h-4 text-emerald-400" />}
             label="Chiffre d'Affaires"
@@ -78,7 +78,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           />
         </div>
 
-        <div className="col-span-1 md:col-span-6 lg:col-span-3">
+        <div className="md:col-span-6 lg:col-span-3">
           <StatCard
             icon={<Clock className="w-4 h-4 text-indigo-400" />}
             label="Volume Horaire"
@@ -89,7 +89,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           />
         </div>
 
-        <div className="col-span-1 md:col-span-6 lg:col-span-3">
+        <div className="md:col-span-6 lg:col-span-3">
           <StatCard
             icon={<CheckCircle className="w-4 h-4 text-purple-400" />}
             label="Clôturées"
@@ -102,7 +102,7 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       </div>
 
       {/* Secondary KPIs - Compact Row */}
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
           icon={<DollarSign className="w-3.5 h-3.5 text-blue-400" />}
           label="Taux Horaire"

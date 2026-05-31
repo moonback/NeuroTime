@@ -20,9 +20,9 @@ export default {
 
       // — Font families
       fontFamily: {
-        sans:    ['Figtree', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Syne',    'system-ui', 'sans-serif'],
-        mono:    ['DM Mono', 'ui-monospace', 'monospace'],
+        sans:    ['Inter', 'Geist', 'SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Geist', 'Inter', 'SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
+        mono:    ['Geist Mono', 'SF Mono', 'ui-monospace', 'monospace'],
       },
 
       // — Brand colors
