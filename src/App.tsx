@@ -187,7 +187,7 @@ const App: React.FC = () => {
   const currentView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] neo-aurora text-gray-100 font-sans antialiased relative z-10 overflow-y-auto">
+    <div className="min-h-screen min-h-[100dvh] neo-aurora text-[var(--text-primary)] font-sans antialiased relative z-10 overflow-y-auto">
       {/* Notifications */}
       <Toaster position="top-right" theme="dark" richColors />
 
@@ -201,7 +201,7 @@ const App: React.FC = () => {
       {/* Desktop Sidebar Opener - Only show when sidebar is closed */}
       {!sidebarOpen && (
         <div
-          className="hidden md:block fixed inset-y-0 left-0 z-20 w-3 h-full hover:bg-[var(--primary)]/5 transition-colors cursor-pointer"
+          className="hidden md:block fixed inset-y-0 left-0 z-20 w-2 h-full hover:bg-[var(--accent)]/10 transition-colors cursor-pointer"
           onMouseEnter={() => setIsSidebarOpen(true)}
           onClick={() => setIsSidebarOpen(true)}
         />
@@ -209,16 +209,16 @@ const App: React.FC = () => {
 
       {/* Sidebar — ENHANCED MINIMAL — Always visible on desktop */}
       <aside
-        className={`hidden md:flex flex-col w-52 border-r border-[var(--border-subtle)] fixed inset-y-0 z-20 transition-all duration-300 ease-out bg-[var(--bg-secondary)] backdrop-blur-sm ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/20' : '-translate-x-full'
+        className={`hidden md:flex flex-col w-56 border-r border-[var(--border-subtle)] fixed inset-y-0 z-20 transition-all duration-200 ease-out bg-[var(--bg-secondary)]/95 backdrop-blur-sm ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
         {/* Header avec gradient subtil */}
-        <div className="p-3 pb-2 flex flex-col gap-2 border-b border-[var(--border-subtle)] bg-gradient-to-b from-[var(--bg-elevated)]/30 to-transparent">
+        <div className="px-4 py-4 flex flex-col gap-3 border-b border-[var(--border-subtle)]">
           <div className="flex justify-between items-center">
             <div className="flex flex-col group">
-              <img src="/logo.png" alt="Logo NeuroTime" className="h-6 w-auto object-contain object-left mb-0.5 transition-transform group-hover:scale-105" />
-              <span className="text-[7px] text-[var(--text-tertiary)] font-medium uppercase tracking-[0.15em] leading-none">
+              <img src="/logo.png" alt="Logo NeuroTime" className="h-7 w-auto object-contain object-left" />
+              <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-[0.14em] leading-none">
                 Freelance Platform
               </span>
             </div>
@@ -226,7 +226,7 @@ const App: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleSidebarPinned}
-                className={`p-1.5 rounded-md transition-all hover:scale-110 ${sidebarPinned ? 'text-[var(--primary)] bg-[var(--primary-light)] shadow-sm shadow-[var(--primary)]/20' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+                className={`p-2 rounded-lg transition-all ${sidebarPinned ? 'text-[var(--accent)] bg-[var(--primary-light)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'}`}
                 title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
               >
                 {sidebarPinned ? <PinOff size={12} /> : <Pin size={12} />}
@@ -235,7 +235,7 @@ const App: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen(false)}
-                  className="p-1.5 rounded-md transition-all hover:scale-110 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+                  className="p-2 rounded-lg transition-all text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]"
                   title="Fermer la sidebar"
                 >
                   <ChevronLeft size={12} />
@@ -246,10 +246,10 @@ const App: React.FC = () => {
         </div>
 
         {/* Navigation avec indicateurs améliorés */}
-        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
-          <div className="px-2 mb-2 flex items-center gap-1.5">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar" aria-label="Navigation principale">
+          <div className="px-2 mb-3 flex items-center gap-2">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
-            <span className="text-[7px] text-[var(--text-tertiary)] font-medium uppercase tracking-[0.1em]">Menu</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-[0.14em]">Menu</span>
             <div className="h-px flex-1 bg-gradient-to-r from-[var(--border-default)] via-transparent to-transparent" />
           </div>
           <NavButton
@@ -293,20 +293,19 @@ const App: React.FC = () => {
         </nav>
 
         {/* Footer avec CTA et profil améliorés */}
-        <div className="p-2 space-y-2 border-t border-[var(--border-subtle)] bg-gradient-to-t from-[var(--bg-elevated)]/30 to-transparent">
+        <div className="p-3 space-y-3 border-t border-[var(--border-subtle)]">
           <button
             onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
-            className="w-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/25 text-white font-medium py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] hover:scale-[1.02] group relative overflow-hidden"
+            className="w-full btn-primary px-3 py-2 text-[11px] uppercase tracking-[0.12em]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <Plus size={14} strokeWidth={2.5} className="relative z-10" />
-            <span className="text-[9px] uppercase tracking-wider font-semibold relative z-10">Nouvelle mission</span>
+            <Plus size={14} strokeWidth={2.5} className="" />
+            <span className="text-[11px] uppercase tracking-[0.12em] font-semibold">Nouvelle mission</span>
           </button>
 
-          <div className="p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] space-y-2 hover:border-[var(--border-default)] transition-all">
+          <div className="p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-3">
             <div className="flex items-center gap-2">
               <div className="relative group/avatar">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center text-[10px] font-bold text-white shadow-sm transition-transform group-hover/avatar:scale-110">
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center text-[12px] font-bold text-white">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">
@@ -314,10 +313,10 @@ const App: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-[9px] font-semibold text-[var(--text-primary)] truncate leading-none mb-1">{user.email?.split('@')[0]}</span>
+                <span className="text-[12px] font-semibold text-[var(--text-primary)] truncate leading-none mb-1">{user.email?.split('@')[0]}</span>
                 <button
                   onClick={() => navigate('/profile')}
-                  className="text-[7px] text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium uppercase tracking-wider text-left hover:underline underline-offset-2"
+                  className="text-[10px] text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium text-left"
                 >
                   Voir Profil →
                 </button>
@@ -327,7 +326,7 @@ const App: React.FC = () => {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={toggleHidePrices}
-                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-md border transition-all text-[7px] font-medium uppercase hover:scale-105 ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 shadow-sm shadow-orange-500/10' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]'}`}
+                className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border transition-all text-[9px] font-semibold uppercase ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 shadow-sm shadow-orange-500/10' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]'}`}
                 title={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
               >
                 {hidePrices ? <EyeOff size={11} /> : <Eye size={11} />}
@@ -335,7 +334,7 @@ const App: React.FC = () => {
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-all text-[7px] font-medium uppercase hover:scale-105"
+                className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg bg-white/[0.025] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-red-300 hover:border-red-500/30 hover:bg-red-500/10 transition-all text-[9px] font-semibold uppercase"
                 title="Se déconnecter"
               >
                 <LogOut size={11} />
@@ -348,18 +347,18 @@ const App: React.FC = () => {
 
       {/* Mobile Header — ENHANCED */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-30 pb-safe backdrop-blur-md">
-        <div className="bg-[var(--bg-secondary)]/95 border-b border-[var(--border-subtle)] shadow-lg shadow-black/5">
-          <div className="flex items-center justify-between px-3 py-2.5">
+        <div className="bg-[var(--bg-secondary)]/95 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2.5">
               <div className="relative group">
-                <img src="/logo.png" alt="Logo NeuroTime" className="h-5 object-contain transition-transform group-hover:scale-110" />
-                <div className="absolute -inset-1 bg-[var(--primary)]/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+                <img src="/logo.png" alt="Logo NeuroTime" className="h-6 object-contain" />
+                <div className="hidden" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] text-[var(--text-primary)] font-semibold leading-none mb-0.5">
+                <span className="text-[11px] text-[var(--text-primary)] font-semibold leading-none mb-1">
                   {format(new Date(), 'EEEE', { locale: fr })}
                 </span>
-                <span className="text-[8px] text-[var(--text-tertiary)] font-medium leading-none">
+                <span className="text-[10px] text-[var(--text-muted)] font-medium leading-none">
                   {format(new Date(), 'dd MMM yyyy', { locale: fr })}
                 </span>
               </div>
@@ -379,13 +378,13 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content — ENHANCED DESKTOP LAYOUT */}
-      <main className={`min-h-screen min-h-[100dvh] pb-14 md:pb-0 bg-transparent overflow-y-auto relative pt-[44px] md:pt-0 transition-all duration-300 ease-out ${sidebarOpen ? 'md:ml-52' : 'md:ml-0'}`}>
+      <main className={`min-h-screen min-h-[100dvh] pb-14 md:pb-0 bg-transparent overflow-y-auto relative pt-[44px] md:pt-0 transition-all duration-300 ease-out ${sidebarOpen ? 'md:ml-56' : 'md:ml-0'}`}>
         {/* Sidebar Toggle Button (Desktop) - Only visible when closed */}
         {!sidebarOpen && (
           <div className="hidden md:block fixed top-4 left-4 z-10">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2.5 glass-button rounded-xl text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:scale-110 transition-all shadow-lg shadow-black/10 hover:shadow-[var(--primary)]/20 border border-[var(--border-subtle)] hover:border-[var(--primary)]/30"
+              className="p-2.5 glass-button rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
               aria-label="Ouvrir la navigation"
               title="Ouvrir la sidebar"
             >
@@ -397,7 +396,7 @@ const App: React.FC = () => {
         <Suspense fallback={<LoadingSpinner fullScreen text="Chargement..." />}>
           <div
             key={location.key}
-            className="p-3 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-slide-in-up relative"
+            className="px-4 py-5 md:p-8 lg:p-10 max-w-[1440px] mx-auto animate-slide-in-up relative"
           >
             <Routes>
               <Route path="/" element={
@@ -452,10 +451,10 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation — MINIMAL */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe" aria-label="Navigation mobile">
-        <div className="absolute inset-0 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)]" />
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe px-3 pb-3" aria-label="Navigation mobile">
+        <div className="absolute inset-x-3 bottom-3 top-0 bg-[var(--bg-secondary)]/95 border border-[var(--border-subtle)] rounded-2xl" />
 
-        <div className="relative flex justify-around items-center px-1 py-1">
+        <div className="relative flex justify-around items-center px-1.5 py-1.5">
           <MobileNavButton
             active={location.pathname === '/'}
             onClick={() => navigate('/')}
@@ -473,7 +472,7 @@ const App: React.FC = () => {
           <div className="relative -top-2 flex items-center justify-center">
             <button
               onClick={() => openNewMissionModal()}
-              className="relative bg-[var(--primary)] active:bg-[var(--primary-hover)] text-white p-2.5 rounded-xl active:scale-95 transition-all duration-150 ring-[3px] ring-[var(--bg-secondary)]"
+              className="relative bg-[var(--accent)] active:bg-[var(--accent-hover)] text-white p-3 rounded-xl active:scale-95 transition-all duration-150 ring-[4px] ring-[var(--bg-primary)]"
               aria-label="Ajouter une mission"
             >
               <Plus size={20} strokeWidth={2.5} />
@@ -516,7 +515,7 @@ const App: React.FC = () => {
 
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-16 md:bottom-3 right-3 z-40 glass-card px-2 py-1 rounded-md flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] font-medium">
+        <div className="fixed bottom-20 md:bottom-4 right-4 z-40 glass-card px-3 py-2 rounded-xl flex items-center gap-2 text-[11px] text-[var(--text-secondary)] font-medium">
           <div className="w-2 h-2 border border-[var(--primary)] border-t-transparent rounded-full animate-spin" aria-hidden />
           <span>Sauvegarde…</span>
         </div>
@@ -532,24 +531,22 @@ const App: React.FC = () => {
 const NavButton = ({ active, onClick, icon, label, badge }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, badge?: number }) => (
   <button
     onClick={onClick}
-    className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-md transition-all duration-150 relative ${active
-      ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 shadow-sm shadow-[var(--primary)]/10'
-      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] border border-transparent hover:border-[var(--border-subtle)]'
+    className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 relative border ${active
+      ? 'bg-white/[0.055] text-[var(--text-primary)] border-[var(--border-default)]'
+      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.035] border-transparent'
       }`}
   >
-    {/* Active indicator */}
     {active && (
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3 bg-[var(--primary)] rounded-r-full" />
+      <span className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-5 bg-[var(--accent)] rounded-full" />
     )}
-    
-    <span className={`transition-transform duration-150 ${active ? 'scale-105' : 'group-hover:scale-110'}`}>
+
+    <span className={active ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]'}>
       {icon}
     </span>
-    <span className={`text-[9px] font-medium tracking-wide flex-1 text-left ${active ? 'font-semibold' : ''}`}>{label}</span>
-    
-    {/* Badge for notifications */}
+    <span className="text-[12px] font-semibold tracking-[-0.01em] flex-1 text-left">{label}</span>
+
     {badge !== undefined && badge > 0 && (
-      <span className="min-w-[16px] h-4 px-1 flex items-center justify-center bg-[var(--primary)] text-white text-[7px] font-bold rounded-full">
+      <span className="min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-secondary)] text-[10px] font-semibold rounded-full">
         {badge > 99 ? '99+' : badge}
       </span>
     )}
@@ -559,25 +556,14 @@ const NavButton = ({ active, onClick, icon, label, badge }: { active: boolean, o
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all duration-150 min-w-[52px] relative ${active
-      ? 'text-[var(--primary)]'
-      : 'text-[var(--text-tertiary)] active:text-[var(--primary)] active:scale-95'
+    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-w-[56px] relative ${active
+      ? 'text-[var(--accent)] bg-white/[0.045]'
+      : 'text-[var(--text-muted)] active:text-[var(--accent)] active:scale-95'
       }`}
   >
-    {/* Active indicator - top dot */}
-    {active && (
-      <div className="absolute -top-0.5 w-1 h-1 rounded-full bg-[var(--primary)] animate-pulse" />
-    )}
-
-    <span className={`relative z-10 transition-transform ${active ? 'scale-110' : ''}`}>
-      {icon}
-    </span>
-
+    <span>{icon}</span>
     {label && (
-      <span className={`relative z-10 text-[7px] font-medium tracking-wider mt-1 transition-all ${active
-        ? 'text-[var(--primary)] font-semibold'
-        : 'text-[var(--text-tertiary)]'
-        }`}>
+      <span className={`text-[9px] font-semibold tracking-[-0.01em] mt-1 ${active ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
         {label}
       </span>
     )}
