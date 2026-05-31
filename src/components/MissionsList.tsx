@@ -171,15 +171,15 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   const hasSwipeActions = !mission.isPaid || (mission.status === 'planned' && !mission.isPaid);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
+    <div className="relative overflow-hidden rounded-[var(--radius-lg)]">
       {/* Actions rapides révélées par le swipe */}
       {hasSwipeActions && (
-        <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-gradient-to-l from-primary-500/40 via-primary-500/30 to-transparent pointer-events-none">
+        <div className="absolute inset-y-0 right-0 flex items-center gap-2 px-4 bg-gradient-to-l from-[var(--primary-light)] via-[var(--primary-light)] to-transparent pointer-events-none">
           <div className="flex items-center gap-2 pointer-events-auto">
             {mission.status === 'planned' && !mission.isPaid && (
               <button
                 onClick={() => handleActionClick(onComplete)}
-                className="p-3 rounded-xl bg-emerald-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-emerald-600"
+                className="p-3 rounded-[var(--radius-md)] bg-[var(--success)] text-white shadow-lg active:scale-95 transition-transform hover:bg-[var(--success)]"
                 aria-label="Terminer"
               >
                 <CheckCircle size={18} strokeWidth={2.5} />
@@ -189,14 +189,14 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
               <>
                 <button
                   onClick={() => handleActionClick(onEdit)}
-                  className="p-3 rounded-xl bg-primary-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-primary-600"
+                  className="p-3 rounded-[var(--radius-md)] bg-[var(--primary)] text-white shadow-lg active:scale-95 transition-transform hover:bg-[var(--primary-hover)]"
                   aria-label="Modifier"
                 >
                   <Edit size={18} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={() => handleActionClick(onDelete)}
-                  className="p-3 rounded-xl bg-red-500 text-white shadow-lg active:scale-95 transition-transform hover:bg-red-600"
+                  className="p-3 rounded-[var(--radius-md)] bg-[var(--danger)] text-white shadow-lg active:scale-95 transition-transform hover:bg-[var(--danger)]"
                   aria-label="Supprimer"
                 >
                   <Trash2 size={18} strokeWidth={2.5} />
@@ -210,7 +210,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       {/* Carte principale */}
       <div
         ref={cardRef}
-        className="glass-card rounded-2xl p-4 space-y-3 relative bg-dark-200/80 transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
+        className="glass rounded-[var(--radius-lg)] p-4 space-y-3 relative transition-all duration-[var(--dur-normal)] hover:border-[var(--border-strong)] hover:-translate-y-0.5 hover:shadow-lg cursor-grab active:cursor-grabbing"
         style={{
           transform: `translateX(${swipeOffset}px)`,
         }}
@@ -218,10 +218,10 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         {/* Indicateur de swipe (visible uniquement si pas swipé et si actions disponibles) */}
         {!isSwiped && hasSwipeActions && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none animate-pulse">
-            <div className="flex items-center gap-1 text-primary-400">
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
-              <div className="w-1 h-1 rounded-full bg-primary-400"></div>
+            <div className="flex items-center gap-1 text-[var(--primary)]">
+              <div className="w-1 h-1 rounded-full bg-[var(--primary)]"></div>
+              <div className="w-1 h-1 rounded-full bg-[var(--primary)]"></div>
+              <div className="w-1 h-1 rounded-full bg-[var(--primary)]"></div>
             </div>
           </div>
         )}
@@ -229,54 +229,54 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-black text-gray-50 text-sm tracking-tight">
+              <span className="font-black text-[var(--text-primary)] text-sm tracking-tight">
                 {format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}
               </span>
-              <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold border
-                ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' :
-                  mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' :
-                    'bg-red-500/25 text-red-200 border-red-500/40'}`}>
+              <span className={`inline-flex items-center px-2 py-1 rounded-[var(--radius-md)] text-[10px] font-bold border
+                ${mission.status === 'completed' ? 'bg-[var(--success-light)] text-[var(--success)] border-[var(--success)]' :
+                  mission.status === 'planned' ? 'bg-[var(--warning-light)] text-[var(--warning)] border-[var(--warning)]' :
+                    'bg-[var(--danger)]/25 text-[var(--danger)] border-[var(--danger)]'}`}>
                 {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-              <Clock size={12} className="text-gray-500" strokeWidth={2} />
+            <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium">
+              <Clock size={12} className="text-[var(--text-tertiary)]" strokeWidth={2} />
               {formatTimeSlots(mission)}
             </div>
           </div>
-          <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-2.5 py-1.5 rounded-lg shadow-sm text-sm">
+          <div className="flex items-center gap-1 font-semibold text-[var(--primary)] px-2.5 py-1.5 rounded-[var(--radius-md)] text-sm">
             {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
           </div>
         </div>
 
         {/* Titre et Client */}
         <div>
-          <h3 className="font-bold text-gray-50 text-base tracking-tight mb-1.5">{mission.title}</h3>
-          <div className="flex items-center gap-1.5 text-xs text-primary-300 font-semibold">
-            <Briefcase size={12} className="text-primary-400" strokeWidth={2} />
+          <h3 className="font-bold text-[var(--text-primary)] text-base tracking-tight mb-1.5">{mission.title}</h3>
+          <div className="flex items-center gap-1.5 text-xs text-[var(--primary)] font-semibold">
+            <Briefcase size={12} className="text-[var(--primary)]" strokeWidth={2} />
             {mission.client}
           </div>
         </div>
 
         {/* Lieu */}
-        <div className="flex items-center gap-2 text-sm text-gray-300">
-          <MapPin size={14} className="text-gray-400" strokeWidth={2} />
+        <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+          <MapPin size={14} className="text-[var(--text-tertiary)]" strokeWidth={2} />
           <span className="font-medium">{mission.location}</span>
         </div>
 
         {/* Paiement (si terminé) */}
         {mission.status === 'completed' && (
-          <div className="pt-2 border-t border-primary-500/10">
+          <div className="pt-2 border-t border-[var(--border-default)]">
             <button
               onClick={onTogglePaid}
-              className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border shadow-sm transition-all ${mission.isPaid
-                ? 'bg-emerald-500/25 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/35'
-                : 'bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25 hover:text-gray-300'
+              className={`w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-[var(--radius-md)] text-xs font-bold border shadow-sm transition-all ${mission.isPaid
+                ? 'bg-[var(--success)]/25 text-[var(--success)] border-[var(--success)] hover:bg-[var(--success)]/35'
+                : 'bg-[var(--bg-elevated)] text-[var(--text-tertiary)] border-[var(--border-default)] hover:bg-white/[0.04] hover:text-[var(--text-secondary)]'
                 }`}
             >
               {mission.isPaid ? (
                 <>
-                  <CheckCircle2 size={14} strokeWidth={2.5} />
+                  <CheckCircle2 size={14} className="text-[var(--success)]" strokeWidth={2.5} />
                   Payé
                 </>
               ) : (
@@ -291,8 +291,8 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
         {/* Actions (masquées sur mobile car disponibles via swipe, affichées uniquement si mission payée) */}
         {mission.isPaid && (
-          <div className="pt-2 border-t border-primary-500/10">
-            <div className="w-full text-center text-xs text-gray-500 italic py-2.5">
+          <div className="pt-2 border-t border-[var(--border-default)]">
+            <div className="w-full text-center text-xs text-[var(--text-tertiary)] italic py-2.5">
               Mission verrouillée (payée)
             </div>
           </div>
@@ -399,8 +399,8 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center mb-3">
         <div>
-          <h1 className="text-lg md:text-xl font-extrabold text-gray-50 tracking-tight">Mes Missions</h1>
-          <p className="text-gray-500 text-[10px] font-medium tracking-wide">
+          <h1 className="text-lg md:text-xl font-extrabold text-[var(--text-primary)] tracking-tight">Mes Missions</h1>
+          <p className="text-[var(--text-tertiary)] text-[10px] font-medium tracking-wide">
             {monthFilter === 'all'
               ? 'Historique complet'
               : `Missions de ${format(new Date(parseInt(monthFilter.split('-')[0]), parseInt(monthFilter.split('-')[1]) - 1), 'MMMM yyyy', { locale: fr })}`
@@ -410,21 +410,21 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button
             onClick={() => setShowPdfModal(true)}
-            className="flex-1 md:flex-none glass-button hover:bg-red-500/10 text-red-400 font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] border border-red-500/15"
+            className="flex-1 md:flex-none glass-button hover:bg-[var(--danger)]/10 text-[var(--danger)] font-semibold py-2 px-3 rounded-[var(--radius-md)] flex items-center justify-center gap-1.5 transition-all text-[10px] border border-[var(--danger)]"
           >
             <FileText size={13} strokeWidth={2.5} />
             <span>PDF</span>
           </button>
           <button
             onClick={() => exportMissionsToCSV(filteredMissions)}
-            className="flex-1 md:flex-none glass-button hover:bg-indigo-500/10 text-indigo-300 font-semibold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] border border-indigo-500/15"
+            className="flex-1 md:flex-none glass-button hover:bg-[var(--primary)]/10 text-[var(--primary)] font-semibold py-2 px-3 rounded-[var(--radius-md)] flex items-center justify-center gap-1.5 transition-all text-[10px] border border-[var(--primary)]"
           >
             <Download size={13} strokeWidth={2.5} />
             <span>CSV</span>
           </button>
           <button
             onClick={onNew}
-            className="flex-1 md:flex-none bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[10px] shadow-[0_2px_10px_rgba(99,102,241,0.25)]"
+            className="shimmer-btn relative overflow-hidden flex-1 md:flex-none bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] hover:shadow-lg hover:shadow-[var(--primary-glow)] text-white font-bold py-2 px-3 rounded-[var(--radius-md)] flex items-center justify-center gap-1.5 transition-all duration-[var(--dur-fast)] active:scale-95 text-[10px]"
           >
             <Plus size={13} strokeWidth={2.5} />
             <span>Nouvelle</span>
@@ -433,16 +433,16 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Filters Bar */}
-      <div className="glass-card rounded-xl p-3 flex flex-col gap-2.5">
+      <div className="glass rounded-[var(--radius-md)] p-3 flex flex-col gap-2.5">
         <div className="flex flex-col md:flex-row gap-2.5 items-center justify-between">
           <div className="relative w-full md:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} strokeWidth={2} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" size={14} strokeWidth={2} />
             <input
               type="text"
               placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/30 outline-none transition-all text-[11px] text-gray-100 placeholder-gray-500 font-medium"
+              className="w-full pl-8 pr-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-[var(--radius-md)] focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none transition-all text-[11px] text-[var(--text-primary)] placeholder-gray-500 font-medium"
             />
           </div>
 
@@ -452,20 +452,20 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                 <select
                   value={monthFilter}
                   onChange={(e) => setMonthFilter(e.target.value)}
-                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[10px] font-medium text-gray-300 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none cursor-pointer"
+                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-[var(--radius-md)] text-[10px] font-medium text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none cursor-pointer"
                 >
-                  <option value="all" className="bg-dark-200 text-gray-200">Tous les mois</option>
+                  <option value="all" className="bg-dark-200 text-[var(--text-secondary)]">Tous les mois</option>
                   {uniqueMonths.map(monthKey => {
                     const [year, month] = monthKey.split('-');
                     const date = new Date(parseInt(year), parseInt(month) - 1);
                     return (
-                      <option key={monthKey} value={monthKey} className="bg-dark-200 text-gray-200 capitalize">
+                      <option key={monthKey} value={monthKey} className="bg-dark-200 text-[var(--text-secondary)] capitalize">
                         {format(date, 'MMMM yyyy', { locale: fr })}
                       </option>
                     );
                   })}
                 </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]">
                   <CalendarDays size={10} />
                 </div>
               </div>
@@ -476,14 +476,14 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                 <select
                   value={clientFilter}
                   onChange={(e) => setClientFilter(e.target.value)}
-                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[10px] font-medium text-gray-300 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none cursor-pointer"
+                  className="w-full md:w-auto appearance-none pl-3 pr-8 py-1.5 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-[var(--radius-md)] text-[10px] font-medium text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none cursor-pointer"
                 >
-                  <option value="all" className="bg-dark-200 text-gray-200">Tous clients</option>
+                  <option value="all" className="bg-dark-200 text-[var(--text-secondary)]">Tous clients</option>
                   {uniqueClients.map(client => (
-                    <option key={client} value={client} className="bg-dark-200 text-gray-200">{client}</option>
+                    <option key={client} value={client} className="bg-dark-200 text-[var(--text-secondary)]">{client}</option>
                   ))}
                 </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]">
                   <Briefcase size={10} />
                 </div>
               </div>
@@ -497,9 +497,9 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all ${statusFilter === s
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-white/[0.04] text-gray-400 hover:text-indigo-300'
+                className={`px-2.5 py-1.5 rounded-[var(--radius-md)] text-[10px] font-semibold whitespace-nowrap transition-all ${statusFilter === s
+                  ? 'bg-[var(--primary)] text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] hover:text-[var(--primary)]'
                   }`}
               >
                 {s === 'all' ? 'Tout' : s === 'planned' ? 'Planifié' : s === 'completed' ? 'Terminé' : 'Annulé'}
@@ -511,9 +511,9 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
               <button
                 key={p}
                 onClick={() => setPaidFilter(p)}
-                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all ${paidFilter === p
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white/[0.04] text-gray-400 hover:text-emerald-300'
+                className={`px-2.5 py-1.5 rounded-[var(--radius-md)] text-[10px] font-semibold whitespace-nowrap transition-all ${paidFilter === p
+                  ? 'bg-[var(--success)] text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] hover:text-[var(--success)]'
                   }`}
               >
                 {p === 'all' ? 'Tous' : p === 'paid' ? 'Payé' : 'Non payé'}
@@ -524,23 +524,23 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Stats Summary */}
-      <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-300 bg-white/[0.02] border border-white/[0.05] p-2 rounded-lg">
+      <div className="flex flex-wrap items-center gap-2 text-[10px] text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-default)] p-2 rounded-[var(--radius-md)]">
         <div className="flex items-center gap-1.5">
-          <Filter size={11} className="text-indigo-400" strokeWidth={2.5} />
-          <span className="font-medium"><b className="text-gray-100 font-bold">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
-          <span className="text-gray-600">·</span>
-          <span className="font-medium">Total: <b className="text-indigo-300 font-bold">{formatPrice(totalFilteredEarnings)} €</b></span>
+          <Filter size={11} className="text-[var(--primary)]" strokeWidth={2.5} />
+          <span className="font-medium"><b className="text-[var(--text-primary)] font-bold">{filteredMissions.length}</b> mission{filteredMissions.length > 1 ? 's' : ''}</span>
+          <span className="text-[var(--text-tertiary)]">·</span>
+          <span className="font-medium">Total: <b className="text-[var(--primary)] font-bold">{formatPrice(totalFilteredEarnings)} €</b></span>
         </div>
         {statusFilter === 'completed' && (
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">·</span>
+            <span className="text-[var(--text-tertiary)]">·</span>
             <span className="flex items-center gap-1">
-              <CheckCircle2 size={10} className="text-emerald-400" strokeWidth={2.5} />
-              <b className="text-emerald-300">{filteredMissions.filter(m => m.isPaid).length}</b> payées
+              <CheckCircle2 size={10} className="text-[var(--success)]" strokeWidth={2.5} />
+              <b className="text-[var(--success)]">{filteredMissions.filter(m => m.isPaid).length}</b> payées
             </span>
             <span className="flex items-center gap-1">
-              <Circle size={10} className="text-gray-400" strokeWidth={2.5} />
-              <b className="text-gray-300">{filteredMissions.filter(m => !m.isPaid).length}</b> en attente
+              <Circle size={10} className="text-[var(--text-tertiary)]" strokeWidth={2.5} />
+              <b className="text-[var(--text-secondary)]">{filteredMissions.filter(m => !m.isPaid).length}</b> en attente
             </span>
           </div>
         )}
@@ -549,12 +549,15 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {filteredMissions.length === 0 ? (
-          <div className="glass-card rounded-xl p-6 text-center">
-            <div className="mx-auto w-10 h-10 bg-white/[0.04] rounded-lg flex items-center justify-center mb-2.5 border border-white/[0.06]">
-              <Search size={18} className="text-gray-400" strokeWidth={2} />
+          <div className="glass rounded-[var(--radius-md)] p-6 text-center">
+            <div className="mx-auto w-10 h-10 bg-[var(--bg-tertiary)] rounded-[var(--radius-md)] flex items-center justify-center mb-2.5 border border-[var(--border-default)]">
+              <Search size={18} className="text-[var(--text-tertiary)]" strokeWidth={2} />
             </div>
-            <p className="text-sm font-bold text-gray-200 mb-1">Aucune mission</p>
-            <p className="text-[10px] text-gray-500">Modifiez vos filtres ou créez une mission</p>
+            <p className="text-sm font-bold text-[var(--text-secondary)] mb-1">Aucune mission</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] mb-3">Modifiez vos filtres ou créez une mission</p>
+            <button type="button" onClick={onNew} className="shimmer-btn mx-auto inline-flex items-center gap-1.5 rounded-[var(--radius-md)] bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] px-3 py-2 text-[10px] font-bold text-white transition-all duration-[var(--dur-fast)] active:scale-95">
+              <Plus size={13} /> Nouvelle mission
+            </button>
           </div>
         ) : (
           sortedGroupKeys.map(monthKey => {
@@ -564,12 +567,12 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
 
             return (
               <div key={monthKey} className="space-y-2">
-                <div className="sticky top-[52px] z-10 bg-[#080b14]/95 backdrop-blur-xl py-1.5 px-2 -mx-1 border-b border-indigo-500/15 flex items-center gap-1.5">
-                  <CalendarDays size={12} className="text-indigo-400" />
-                  <h3 className="text-[11px] font-bold text-gray-200 capitalize">
+                <div className="sticky top-[52px] z-10 bg-[var(--bg-secondary)]/95 backdrop-blur-xl py-1.5 px-2 -mx-1 border-b border-[var(--primary)] flex items-center gap-1.5">
+                  <CalendarDays size={12} className="text-[var(--primary)]" />
+                  <h3 className="text-[11px] font-bold text-[var(--text-secondary)] capitalize">
                     {format(monthDate, 'MMMM yyyy', { locale: fr })}
                   </h3>
-                  <span className="text-[9px] text-gray-500 font-medium ml-auto">
+                  <span className="text-[9px] text-[var(--text-tertiary)] font-medium ml-auto">
                     {missionsInMonth.length}
                   </span>
                 </div>
@@ -595,30 +598,33 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block glass-card rounded-2xl overflow-hidden shadow-lg">
+      <div className="hidden md:block glass rounded-[var(--radius-lg)] overflow-hidden shadow-lg">
         {filteredMissions.length === 0 ? (
-          <div className="p-14 text-center text-gray-300">
-            <div className="mx-auto w-20 h-20 bg-dark-100/80 rounded-2xl flex items-center justify-center mb-5 border border-primary-500/20 shadow-lg">
-              <Search size={28} className="text-gray-400" strokeWidth={2} />
+          <div className="p-14 text-center text-[var(--text-secondary)]">
+            <div className="mx-auto w-20 h-20 bg-[var(--bg-elevated)] rounded-[var(--radius-lg)] flex items-center justify-center mb-5 border border-[var(--primary)] shadow-lg">
+              <Search size={28} className="text-[var(--text-tertiary)]" strokeWidth={2} />
             </div>
-            <p className="text-xl font-bold text-gray-200 mb-2">Aucune mission trouvée</p>
-            <p className="text-sm text-gray-400 font-medium">Modifiez vos filtres ou créez une nouvelle mission</p>
+            <p className="text-xl font-bold text-[var(--text-secondary)] mb-2">Aucune mission trouvée</p>
+            <p className="text-sm text-[var(--text-tertiary)] font-medium mb-4">Modifiez vos filtres ou créez une nouvelle mission</p>
+            <button type="button" onClick={onNew} className="shimmer-btn mx-auto inline-flex items-center gap-2 rounded-[var(--radius-md)] bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] px-4 py-2.5 text-xs font-bold text-white transition-all duration-[var(--dur-fast)] active:scale-95">
+              <Plus size={14} /> Nouvelle mission
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[1000px]">
-              <thead className="bg-dark-100/60 border-b border-primary-500/20 backdrop-blur-sm">
+              <thead className="bg-[var(--bg-elevated)] border-b border-[var(--primary)] backdrop-blur-sm">
                 <tr>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Date & Heure</th>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Mission / Client</th>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Lieu</th>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Montant</th>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Statut</th>
-                  <th className="px-6 py-5 text-left text-xs font-bold text-gray-300 uppercase tracking-widest">Paiement</th>
-                  <th className="px-6 py-5 text-right text-xs font-bold text-gray-300 uppercase tracking-widest">Actions</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Date & Heure</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Mission / Client</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Lieu</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Montant</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Statut</th>
+                  <th className="px-6 py-5 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Paiement</th>
+                  <th className="px-6 py-5 text-right text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-primary-500/10">
+              <tbody className="divide-y divide-[var(--border-default)]">
                 {sortedGroupKeys.map(monthKey => {
                   const missionsInMonth = groupedMissions[monthKey];
                   const [year, month] = monthKey.split('-');
@@ -628,11 +634,11 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                     <React.Fragment key={monthKey}>
                       {/* Month Header Row */}
                       <tr className="bg-dark-200/50">
-                        <td colSpan={7} className="px-6 py-3 text-sm font-bold text-primary-300 border-y border-primary-500/10 sticky top-0 backdrop-blur-sm">
+                        <td colSpan={7} className="px-6 py-3 text-sm font-bold text-[var(--primary)] border-y border-[var(--border-default)] sticky top-0 backdrop-blur-sm">
                           <div className="flex items-center gap-2">
                             <CalendarDays size={16} />
                             <span className="capitalize">{format(monthDate, 'MMMM yyyy', { locale: fr })}</span>
-                            <span className="text-xs font-medium text-gray-500 ml-2">({missionsInMonth.length})</span>
+                            <span className="text-xs font-medium text-[var(--text-tertiary)] ml-2">({missionsInMonth.length})</span>
                           </div>
                         </td>
                       </tr>
@@ -640,37 +646,37 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                         <tr key={mission.id} className="group hover:bg-dark-100/40 transition-all duration-300">
                           <td className="px-6 py-5 whitespace-nowrap">
                             <div className="flex flex-col">
-                              <span className="font-black text-gray-50 text-base tracking-tight">{format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
-                              <span className="text-xs text-gray-400 flex items-center gap-1.5 mt-1 font-medium">
-                                <Clock size={12} className="text-gray-500" strokeWidth={2} />
+                              <span className="font-black text-[var(--text-primary)] text-base tracking-tight">{format(new Date(mission.startTime), 'dd MMM yyyy', { locale: fr })}</span>
+                              <span className="text-xs text-[var(--text-tertiary)] flex items-center gap-1.5 mt-1 font-medium">
+                                <Clock size={12} className="text-[var(--text-tertiary)]" strokeWidth={2} />
                                 {formatTimeSlots(mission)}
                               </span>
                             </div>
                           </td>
                           <td className="px-6 py-5">
                             <div className="flex flex-col">
-                              <span className="font-bold text-gray-50 text-base tracking-tight">{mission.title}</span>
-                              <span className="text-xs text-primary-300 font-semibold flex items-center gap-1.5 mt-1">
-                                <Briefcase size={12} className="text-primary-400" strokeWidth={2} /> {mission.client}
+                              <span className="font-bold text-[var(--text-primary)] text-base tracking-tight">{mission.title}</span>
+                              <span className="text-xs text-[var(--primary)] font-semibold flex items-center gap-1.5 mt-1">
+                                <Briefcase size={12} className="text-[var(--primary)]" strokeWidth={2} /> {mission.client}
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-300">
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                             <div className="flex items-center gap-2">
-                              <MapPin size={14} className="text-gray-400" strokeWidth={2} />
+                              <MapPin size={14} className="text-[var(--text-tertiary)]" strokeWidth={2} />
                               <span className="truncate max-w-[150px] font-medium">{mission.location}</span>
                             </div>
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap">
-                            <div className="flex items-center gap-1 font-black text-gray-50 bg-primary-500/20 border border-primary-500/30 px-3 py-1.5 rounded-lg w-fit shadow-sm text-sm">
+                            <div className="flex items-center gap-1 font-black text-[var(--text-primary)] bg-[var(--primary-light)] border border-[var(--primary)] px-3 py-1.5 rounded-[var(--radius-md)] w-fit shadow-sm text-sm">
                               {formatPrice(mission.totalEarnings)} {!hidePrices && <Euro size={12} strokeWidth={2.5} />}
                             </div>
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm
-                              ${mission.status === 'completed' ? 'bg-green-500/25 text-green-200 border-green-500/40' :
-                                mission.status === 'planned' ? 'bg-primary-500/25 text-primary-200 border-primary-500/40' :
-                                  'bg-red-500/25 text-red-200 border-red-500/40'}`}>
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-bold border shadow-sm
+                              ${mission.status === 'completed' ? 'bg-[var(--success-light)] text-[var(--success)] border-[var(--success)]' :
+                                mission.status === 'planned' ? 'bg-[var(--warning-light)] text-[var(--warning)] border-[var(--warning)]' :
+                                  'bg-[var(--danger)]/25 text-[var(--danger)] border-[var(--danger)]'}`}>
                               {mission.status === 'completed' ? 'Terminé' : mission.status === 'planned' ? 'Planifié' : 'Annulé'}
                             </span>
                           </td>
@@ -678,9 +684,9 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                             {mission.status === 'completed' ? (
                               <button
                                 onClick={() => onTogglePaid(mission)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-all hover:scale-105 ${mission.isPaid
-                                  ? 'bg-emerald-500/30 text-emerald-200 border-emerald-500/50 hover:bg-emerald-500/40'
-                                  : 'bg-gray-500/20 text-gray-400 border-gray-500/30 hover:bg-gray-500/30 hover:text-gray-300'
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-bold border shadow-sm transition-all hover:scale-105 ${mission.isPaid
+                                  ? 'bg-[var(--success)]/30 text-[var(--success)] border-[var(--success)] hover:bg-[var(--success)]/40'
+                                  : 'bg-[var(--bg-elevated)] text-[var(--text-tertiary)] border-[var(--border-default)] hover:bg-white/[0.04] hover:text-[var(--text-secondary)]'
                                   }`}
                                 title={mission.isPaid ? 'Marquer comme non payé' : 'Marquer comme payé'}
                               >
@@ -697,7 +703,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                                 )}
                               </button>
                             ) : (
-                              <span className="text-xs text-gray-500 italic">—</span>
+                              <span className="text-xs text-[var(--text-tertiary)] italic">—</span>
                             )}
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
@@ -705,7 +711,7 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                               {mission.status === 'planned' && !mission.isPaid && (
                                 <button
                                   onClick={() => onComplete(mission)}
-                                  className="text-emerald-300 hover:text-emerald-200 bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-500/30 hover:border-emerald-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                                  className="text-[var(--success)] hover:text-[var(--success)] bg-[var(--success)]/25 hover:bg-[var(--success)]/35 border border-[var(--success)] hover:border-[var(--success)] p-2 rounded-[var(--radius-md)] transition-all shadow-sm hover:shadow-md"
                                   title="Marquer comme terminée"
                                 >
                                   <CheckCircle size={16} strokeWidth={2} />
@@ -715,21 +721,21 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
                                 <>
                                   <button
                                     onClick={() => onEdit(mission)}
-                                    className="text-primary-300 hover:text-primary-200 bg-primary-500/25 hover:bg-primary-500/35 border border-primary-500/30 hover:border-primary-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                                    className="text-[var(--primary)] hover:text-[var(--warning)] bg-[var(--warning-light)] hover:bg-[var(--primary)]/35 border border-[var(--primary)] hover:border-[var(--primary)] p-2 rounded-[var(--radius-md)] transition-all shadow-sm hover:shadow-md"
                                     title="Modifier"
                                   >
                                     <Edit size={16} strokeWidth={2} />
                                   </button>
                                   <button
                                     onClick={() => onDelete(mission.id)}
-                                    className="text-red-300 hover:text-red-200 bg-red-500/25 hover:bg-red-500/35 border border-red-500/30 hover:border-red-500/50 p-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                                    className="text-[var(--danger)] hover:text-[var(--danger)] bg-[var(--danger)]/25 hover:bg-[var(--danger)]/35 border border-[var(--danger)] hover:border-[var(--danger)] p-2 rounded-[var(--radius-md)] transition-all shadow-sm hover:shadow-md"
                                     title="Supprimer"
                                   >
                                     <Trash2 size={16} strokeWidth={2} />
                                   </button>
                                 </>
                               ) : (
-                                <span className="text-xs text-gray-500 italic px-2" title="Mission payée - Modification et suppression désactivées">
+                                <span className="text-xs text-[var(--text-tertiary)] italic px-2" title="Mission payée - Modification et suppression désactivées">
                                   Verrouillée
                                 </span>
                               )}
@@ -748,58 +754,58 @@ const MissionsList: React.FC<MissionsListProps> = ({ missions, onEdit, onDelete,
 
       {showPdfModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-300/80 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-scale-in border border-primary-500/20">
+          <div className="glass w-full max-w-md rounded-[var(--radius-lg)] overflow-hidden shadow-2xl animate-scale-in border border-[var(--primary)]">
             <div className="flex items-center justify-between p-5 border-b border-white/5">
-              <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-                <FileText className="text-red-400" />
+              <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <FileText className="text-[var(--danger)]" />
                 Export PDF des missions terminées
               </h2>
               <button
                 onClick={() => setShowPdfModal(false)}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+                className="p-2 hover:bg-white/5 rounded-[var(--radius-md)] transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
               >
                 <X size={20} />
               </button>
             </div>
 
             <div className="p-5 space-y-4">
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Sélectionnez une période pour exporter vos missions terminées.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Date de début</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">Date de début</label>
                   <input
                     type="date"
                     value={pdfStartDate}
                     onChange={(e) => setPdfStartDate(e.target.value)}
-                    className="w-full px-4 py-2.5 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500/30 outline-none text-gray-100"
+                    className="w-full px-4 py-2.5 glass-light border-[var(--primary)] rounded-[var(--radius-md)] focus:ring-2 focus:ring-[var(--primary)] outline-none text-[var(--text-primary)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Date de fin</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">Date de fin</label>
                   <input
                     type="date"
                     value={pdfEndDate}
                     onChange={(e) => setPdfEndDate(e.target.value)}
-                    className="w-full px-4 py-2.5 glass-light border-primary-500/20 rounded-xl focus:ring-2 focus:ring-primary-500/30 outline-none text-gray-100"
+                    className="w-full px-4 py-2.5 glass-light border-[var(--primary)] rounded-[var(--radius-md)] focus:ring-2 focus:ring-[var(--primary)] outline-none text-[var(--text-primary)]"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-5 border-t border-white/5 bg-white/[0.02]">
+            <div className="flex justify-end gap-3 p-5 border-t border-white/5 bg-[var(--bg-secondary)]">
               <button
                 onClick={() => setShowPdfModal(false)}
-                className="px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                className="px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] hover:text-white transition-colors"
               >
                 Annuler
               </button>
               <button
                 onClick={handleExportPdf}
                 disabled={!pdfStartDate || !pdfEndDate}
-                className="px-5 py-2.5 text-sm font-medium bg-red-500 hover:bg-red-600 disabled:bg-gray-600 disabled:text-gray-400 text-white rounded-xl transition-all shadow-lg hover:shadow-red-500/20"
+                className="px-5 py-2.5 text-sm font-medium bg-[var(--danger)] hover:bg-[var(--danger)] disabled:bg-[var(--bg-elevated)] disabled:text-[var(--text-tertiary)] text-white rounded-[var(--radius-md)] transition-all shadow-lg hover:shadow-[var(--danger-light)]"
               >
                 Générer PDF
               </button>
