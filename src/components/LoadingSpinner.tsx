@@ -1,5 +1,4 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -19,15 +18,19 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   const spinner = (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <Loader2 className={`${sizes[size]} animate-spin text-primary-400`} />
-      {text && <p className="text-sm text-gray-400">{text}</p>}
+    <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+      <div
+        className={`${sizes[size]} animate-spin rounded-full border-2 border-[var(--border-default)] border-t-[var(--primary)]`}
+        aria-hidden="true"
+      />
+      {text && <p className="text-sm text-[var(--text-secondary)]">{text}</p>}
+      <span className="sr-only">{text ?? 'Chargement'}</span>
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         {spinner}
       </div>
     );
@@ -45,7 +48,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
   variant = 'rectangular',
 }) => {
-  const baseClasses = 'animate-pulse glass-light rounded';
+  const baseClasses = 'animate-pulse glass-light rounded-[var(--radius-sm)]';
   const variantClasses = {
     text: 'h-4',
     rectangular: 'h-20',
@@ -59,4 +62,3 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     />
   );
 };
-

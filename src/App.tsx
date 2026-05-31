@@ -187,7 +187,7 @@ const App: React.FC = () => {
   const currentView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] neo-aurora text-gray-100 font-sans antialiased relative z-10 overflow-y-auto">
+    <div className="min-h-screen min-h-[100dvh] neo-aurora text-[var(--text-primary)] font-sans antialiased relative z-10 overflow-y-auto">
       {/* Notifications */}
       <Toaster position="top-right" theme="dark" richColors />
 
@@ -209,7 +209,7 @@ const App: React.FC = () => {
 
       {/* Sidebar — ENHANCED MINIMAL — Always visible on desktop */}
       <aside
-        className={`hidden md:flex flex-col w-52 border-r border-[var(--border-subtle)] fixed inset-y-0 z-20 transition-all duration-300 ease-out bg-[var(--bg-secondary)] backdrop-blur-sm ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/20' : '-translate-x-full'
+        className={`hidden md:flex flex-col w-52 border-r border-[var(--border-default)] fixed inset-y-0 z-20 transition-all duration-300 ease-out glass shadow-2xl ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/20' : '-translate-x-full'
           }`}
         onMouseLeave={() => { if (!sidebarPinned) setIsSidebarOpen(false) }}
       >
@@ -226,8 +226,9 @@ const App: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleSidebarPinned}
-                className={`p-1.5 rounded-md transition-all hover:scale-110 ${sidebarPinned ? 'text-[var(--primary)] bg-[var(--primary-light)] shadow-sm shadow-[var(--primary)]/20' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+                className={`p-1.5 rounded-[var(--radius-md)] transition-all duration-[var(--dur-fast)] hover:scale-110 active:scale-95 ${sidebarPinned ? 'text-[var(--primary)] bg-[var(--primary-light)] shadow-sm shadow-[var(--primary)]/20' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
                 title={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
+                aria-label={sidebarPinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
               >
                 {sidebarPinned ? <PinOff size={12} /> : <Pin size={12} />}
               </button>
@@ -235,8 +236,9 @@ const App: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen(false)}
-                  className="p-1.5 rounded-md transition-all hover:scale-110 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+                  className="p-1.5 rounded-[var(--radius-md)] transition-all duration-[var(--dur-fast)] hover:scale-110 active:scale-95 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                   title="Fermer la sidebar"
+                  aria-label="Fermer la sidebar"
                 >
                   <ChevronLeft size={12} />
                 </button>
@@ -296,14 +298,14 @@ const App: React.FC = () => {
         <div className="p-2 space-y-2 border-t border-[var(--border-subtle)] bg-gradient-to-t from-[var(--bg-elevated)]/30 to-transparent">
           <button
             onClick={() => { openNewMissionModal(); setIsSidebarOpen(false) }}
-            className="w-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/25 text-white font-medium py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] hover:scale-[1.02] group relative overflow-hidden"
+            className="shimmer-btn relative overflow-hidden w-full bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] hover:shadow-lg hover:shadow-[var(--primary-glow)] text-white font-medium py-2 px-2.5 rounded-[var(--radius-md)] flex items-center justify-center gap-1.5 transition-all duration-[var(--dur-fast)] active:scale-[0.98] hover:scale-[1.02] group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             <Plus size={14} strokeWidth={2.5} className="relative z-10" />
             <span className="text-[9px] uppercase tracking-wider font-semibold relative z-10">Nouvelle mission</span>
           </button>
 
-          <div className="p-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] space-y-2 hover:border-[var(--border-default)] transition-all">
+          <div className="glass p-2 rounded-[var(--radius-lg)] space-y-2 hover:border-[var(--border-strong)] transition-all duration-[var(--dur-fast)]">
             <div className="flex items-center gap-2">
               <div className="relative group/avatar">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center text-[10px] font-bold text-white shadow-sm transition-transform group-hover/avatar:scale-110">
@@ -327,16 +329,18 @@ const App: React.FC = () => {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={toggleHidePrices}
-                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-md border transition-all text-[7px] font-medium uppercase hover:scale-105 ${hidePrices ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 shadow-sm shadow-orange-500/10' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]'}`}
+                className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded-[var(--radius-md)] border transition-all text-[7px] font-medium uppercase hover:scale-105 ${hidePrices ? 'bg-[var(--primary-light)] border-[var(--primary)] text-[var(--primary)] shadow-sm shadow-[var(--primary-glow)]' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]'}`}
                 title={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
+                aria-label={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
               >
                 {hidePrices ? <EyeOff size={11} /> : <Eye size={11} />}
                 <span className="leading-none">{hidePrices ? 'Masqué' : 'Visible'}</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-all text-[7px] font-medium uppercase hover:scale-105"
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-[var(--radius-md)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--danger)] hover:border-[var(--danger)] hover:bg-[var(--danger-light)] transition-all text-[7px] font-medium uppercase hover:scale-105"
                 title="Se déconnecter"
+                aria-label="Se déconnecter"
               >
                 <LogOut size={11} />
                 <span className="leading-none">Quitter</span>
@@ -347,19 +351,19 @@ const App: React.FC = () => {
       </aside>
 
       {/* Mobile Header — ENHANCED */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-30 pb-safe backdrop-blur-md">
-        <div className="bg-[var(--bg-secondary)]/95 border-b border-[var(--border-subtle)] shadow-lg shadow-black/5">
+      <header className="md:hidden sticky top-0 left-0 right-0 z-40 pb-safe glass border-b border-[var(--border-default)]">
+        <div>
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <div className="relative group">
-                <img src="/logo.png" alt="Logo NeuroTime" className="h-5 object-contain transition-transform group-hover:scale-110" />
+                <img src="/logo.png" alt="Logo NeuroTime" className="h-5 object-contain hover:scale-110 transition-transform duration-[var(--dur-fast)]" />
                 <div className="absolute -inset-1 bg-[var(--primary)]/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] text-[var(--text-primary)] font-semibold leading-none mb-0.5">
+                <span className="text-[10px] text-[var(--text-primary)] font-semibold leading-none mb-0.5">
                   {format(new Date(), 'EEEE', { locale: fr })}
                 </span>
-                <span className="text-[8px] text-[var(--text-tertiary)] font-medium leading-none">
+                <span className="text-xs text-[var(--text-tertiary)] font-medium leading-none">
                   {format(new Date(), 'dd MMM yyyy', { locale: fr })}
                 </span>
               </div>
@@ -367,9 +371,10 @@ const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleHidePrices}
-                className={`flex items-center justify-center p-2 rounded-lg transition-all active:scale-95 ${hidePrices ? 'text-orange-400 bg-orange-500/10 border border-orange-500/20' : 'text-[var(--text-tertiary)] bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] hover:border-[var(--border-default)]'}`}
+                className={`flex items-center justify-center p-2 rounded-lg transition-all active:scale-95 ${hidePrices ? 'text-[var(--primary)] bg-[var(--primary-light)] border border-[var(--primary)]' : 'text-[var(--text-tertiary)] bg-[var(--bg-tertiary)] border border-[var(--border-default)] hover:border-[var(--border-strong)]'}`}
                 aria-pressed={hidePrices}
                 title={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
+                aria-label={hidePrices ? 'Afficher les tarifs' : 'Masquer les tarifs'}
               >
                 {hidePrices ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -379,13 +384,13 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content — ENHANCED DESKTOP LAYOUT */}
-      <main className={`min-h-screen min-h-[100dvh] pb-14 md:pb-0 bg-transparent overflow-y-auto relative pt-[44px] md:pt-0 transition-all duration-300 ease-out ${sidebarOpen ? 'md:ml-52' : 'md:ml-0'}`}>
+      <main className={`min-h-screen min-h-[100dvh] pb-14 md:pb-0 bg-transparent overflow-y-auto relative pt-0 md:pt-0 transition-all duration-300 ease-out ${sidebarOpen ? 'md:ml-52' : 'md:ml-0'}`}>
         {/* Sidebar Toggle Button (Desktop) - Only visible when closed */}
         {!sidebarOpen && (
           <div className="hidden md:block fixed top-4 left-4 z-10">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2.5 glass-button rounded-xl text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:scale-110 transition-all shadow-lg shadow-black/10 hover:shadow-[var(--primary)]/20 border border-[var(--border-subtle)] hover:border-[var(--primary)]/30"
+              className="p-2.5 glass-button rounded-[var(--radius-md)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:scale-110 active:scale-95 transition-all duration-[var(--dur-fast)] shadow-lg shadow-black/10 hover:shadow-[var(--primary)]/20 border border-[var(--border-subtle)] hover:border-[var(--primary)]/30"
               aria-label="Ouvrir la navigation"
               title="Ouvrir la sidebar"
             >
@@ -452,8 +457,8 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation — MINIMAL */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe" aria-label="Navigation mobile">
-        <div className="absolute inset-0 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)]" />
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 pb-safe glass border-t border-[var(--border-default)]" aria-label="Navigation mobile">
+        <div className="absolute inset-0" />
 
         <div className="relative flex justify-around items-center px-1 py-1">
           <MobileNavButton
@@ -473,7 +478,7 @@ const App: React.FC = () => {
           <div className="relative -top-2 flex items-center justify-center">
             <button
               onClick={() => openNewMissionModal()}
-              className="relative bg-[var(--primary)] active:bg-[var(--primary-hover)] text-white p-2.5 rounded-xl active:scale-95 transition-all duration-150 ring-[3px] ring-[var(--bg-secondary)]"
+              className="relative bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] text-white p-2.5 rounded-[var(--radius-lg)] shadow-lg shadow-[var(--primary-glow)] active:scale-95 transition-transform duration-[var(--dur-fast)] ring-[3px] ring-[var(--bg-secondary)]"
               aria-label="Ajouter une mission"
             >
               <Plus size={20} strokeWidth={2.5} />
@@ -516,8 +521,8 @@ const App: React.FC = () => {
 
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-16 md:bottom-3 right-3 z-40 glass-card px-2 py-1 rounded-md flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] font-medium">
-          <div className="w-2 h-2 border border-[var(--primary)] border-t-transparent rounded-full animate-spin" aria-hidden />
+        <div className="fixed bottom-16 md:bottom-3 right-3 z-40 glass px-2 py-1 rounded-[var(--radius-md)] flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] font-medium">
+          <div className="w-3 h-3 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-[var(--primary)]" aria-hidden />
           <span>Sauvegarde…</span>
         </div>
       )}
@@ -531,50 +536,44 @@ const App: React.FC = () => {
 
 const NavButton = ({ active, onClick, icon, label, badge }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, badge?: number }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-md transition-all duration-150 relative ${active
-      ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 shadow-sm shadow-[var(--primary)]/10'
-      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] border border-transparent hover:border-[var(--border-subtle)]'
+    className={`w-full group flex items-center gap-2 px-2 py-1.5 rounded-[var(--radius-md)] transition-all duration-[var(--dur-fast)] relative active:scale-95 hover:scale-[1.01] ${active
+      ? 'bg-[var(--primary-light)] text-[var(--primary)] before:absolute before:left-0 before:inset-y-2 before:w-0.5 before:bg-[var(--primary)] before:rounded-full'
+      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'
       }`}
   >
-    {/* Active indicator */}
-    {active && (
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3 bg-[var(--primary)] rounded-r-full" />
-    )}
-    
-    <span className={`transition-transform duration-150 ${active ? 'scale-105' : 'group-hover:scale-110'}`}>
+    <span className={`relative transition-transform duration-[var(--dur-fast)] ${active ? 'scale-105' : 'group-hover:scale-110'}`}>
       {icon}
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -right-2 -top-2 min-w-4 h-4 px-1 flex items-center justify-center rounded-full bg-[var(--primary)] text-white text-[7px] font-bold animate-badge-pop shadow-sm shadow-[var(--primary-glow)]">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </span>
     <span className={`text-[9px] font-medium tracking-wide flex-1 text-left ${active ? 'font-semibold' : ''}`}>{label}</span>
-    
-    {/* Badge for notifications */}
-    {badge !== undefined && badge > 0 && (
-      <span className="min-w-[16px] h-4 px-1 flex items-center justify-center bg-[var(--primary)] text-white text-[7px] font-bold rounded-full">
-        {badge > 99 ? '99+' : badge}
-      </span>
-    )}
   </button>
 );
 
 const MobileNavButton = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label?: string }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all duration-150 min-w-[52px] relative ${active
+    className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-[var(--radius-md)] transition-all duration-[var(--dur-fast)] active:scale-95 min-w-[52px] relative ${active
       ? 'text-[var(--primary)]'
-      : 'text-[var(--text-tertiary)] active:text-[var(--primary)] active:scale-95'
+      : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
       }`}
   >
-    {/* Active indicator - top dot */}
     {active && (
-      <div className="absolute -top-0.5 w-1 h-1 rounded-full bg-[var(--primary)] animate-pulse" />
+      <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-badge-pop" />
     )}
 
-    <span className={`relative z-10 transition-transform ${active ? 'scale-110' : ''}`}>
+    <span className={`relative z-10 transition-transform duration-[var(--dur-fast)] ${active ? 'scale-110 text-[var(--primary)]' : ''}`}>
       {icon}
     </span>
 
     {label && (
-      <span className={`relative z-10 text-[7px] font-medium tracking-wider mt-1 transition-all ${active
+      <span className={`relative z-10 text-[7px] font-medium tracking-wider mt-1 transition-colors duration-[var(--dur-fast)] ${active
         ? 'text-[var(--primary)] font-semibold'
         : 'text-[var(--text-tertiary)]'
         }`}>

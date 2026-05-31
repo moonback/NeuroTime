@@ -64,12 +64,14 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-12 gap-2.5">
         <div className="col-span-2 md:col-span-12 lg:col-span-6">
           <StatCard
-            icon={<Euro className="w-4 h-4 text-emerald-400" />}
+            icon={<Euro className="w-4 h-4 text-[var(--success)]" />}
             label="Chiffre d'Affaires"
             value={formatPriceWithSymbol(totalEarnings)}
             subtext={hidePrices ? '***' : `Encaissé: ${formatPrice(totalEarningsCollected)}€ · Prév: ${formatPrice(totalEarningsExpected)}€`}
-            color="bg-emerald-500/[0.03] border-emerald-500/15"
-            textColor="text-emerald-400"
+            color=""
+            textColor="text-[var(--success)]"
+            accentColor="border-[var(--primary)]"
+            animationDelay="0ms"
             trend={monthlyComparison.percentage !== 0 ? {
               value: Math.abs(monthlyComparison.percentage),
               isPositive: monthlyComparison.isPositive,
@@ -80,23 +82,27 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
 
         <div className="col-span-1 md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<Clock className="w-4 h-4 text-indigo-400" />}
+            icon={<Clock className="w-4 h-4 text-[var(--primary)]" />}
             label="Volume Horaire"
             value={`${totalHours.toFixed(1)}h`}
             subtext={`J: ${totalDayHours}h · N: ${totalNightHours}h`}
-            color="bg-indigo-500/[0.03] border-indigo-500/15"
-            textColor="text-indigo-400"
+            color=""
+            textColor="text-[var(--primary)]"
+            accentColor="border-[var(--warning)]"
+            animationDelay="60ms"
           />
         </div>
 
         <div className="col-span-1 md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<CheckCircle className="w-4 h-4 text-purple-400" />}
+            icon={<CheckCircle className="w-4 h-4 text-[#a78bfa]" />}
             label="Clôturées"
             value={completedMissionsCount.toString()}
             subtext={`${upcomingMissionsCount} à venir`}
-            color="bg-purple-500/[0.03] border-purple-500/15"
-            textColor="text-purple-400"
+            color=""
+            textColor="text-[#a78bfa]"
+            accentColor="border-[var(--success)]"
+            animationDelay="120ms"
           />
         </div>
       </div>
@@ -104,28 +110,34 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
       {/* Secondary KPIs - Compact Row */}
       <div className="grid grid-cols-3 gap-2.5">
         <StatCard
-          icon={<DollarSign className="w-3.5 h-3.5 text-blue-400" />}
+          icon={<DollarSign className="w-3.5 h-3.5 text-[var(--primary)]" />}
           label="Taux Horaire"
           value={hidePrices ? '***' : `${averageHourlyRate.toFixed(0)}€/h`}
           subtext={`J: ${averageDayHourlyRate.toFixed(0)}€ · N: ${averageNightHourlyRate.toFixed(0)}€`}
-          color="bg-blue-500/[0.03] border-blue-500/15"
-          textColor="text-blue-400"
+          color=""
+          textColor="text-[var(--primary)]"
+          accentColor="border-[var(--primary)]"
+          animationDelay="180ms"
         />
         <StatCard
-          icon={monthlyComparison.isPositive ? <TrendingUp className="w-3.5 h-3.5 text-green-400" /> : <TrendingDown className="w-3.5 h-3.5 text-red-400" />}
+          icon={monthlyComparison.isPositive ? <TrendingUp className="w-3.5 h-3.5 text-[var(--success)]" /> : <TrendingDown className="w-3.5 h-3.5 text-[var(--danger)]" />}
           label="Croissance"
           value={`${monthlyComparison.isPositive ? '+' : ''}${monthlyComparison.percentage.toFixed(0)}%`}
           subtext="vs mois précédent"
-          color={monthlyComparison.isPositive ? "bg-green-500/[0.03] border-green-500/15" : "bg-red-500/[0.03] border-red-500/15"}
-          textColor={monthlyComparison.isPositive ? "text-green-400" : "text-red-400"}
+          color=""
+          textColor={monthlyComparison.isPositive ? "text-[var(--success)]" : "text-[var(--danger)]"}
+          accentColor={monthlyComparison.isPositive ? "border-[var(--success)]" : "border-[var(--danger)]"}
+          animationDelay="240ms"
         />
         <StatCard
-          icon={<Award className={`w-3.5 h-3.5 ${mostProfitableMission ? 'text-amber-400' : 'text-gray-500'}`} />}
+          icon={<Award className={`w-3.5 h-3.5 ${mostProfitableMission ? 'text-[var(--warning)]' : 'text-[var(--text-tertiary)]'}`} />}
           label="Top Mission"
           value={mostProfitableMission ? formatPriceWithSymbol(mostProfitableMission.totalEarnings) : '—'}
           subtext={mostProfitableMission ? mostProfitableMission.title : 'Aucune'}
-          color={mostProfitableMission ? "bg-amber-500/[0.03] border-amber-500/15" : "bg-white/[0.02] border-white/[0.06]"}
-          textColor={mostProfitableMission ? "text-amber-400" : "text-gray-500"}
+          color=""
+          textColor={mostProfitableMission ? "text-[var(--warning)]" : "text-[var(--text-tertiary)]"}
+          accentColor="border-[var(--warning)]"
+          animationDelay="300ms"
         />
       </div>
     </div>

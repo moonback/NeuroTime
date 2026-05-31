@@ -198,17 +198,17 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+      <div className="glass rounded-[var(--radius-lg)] p-4 md:p-6 animate-slide-in-up">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="bg-yellow-500/20 p-2 rounded-lg border border-yellow-500/30">
-              <Target className="w-5 h-5 text-yellow-400" />
+            <div className="bg-[var(--warning-light)] p-2 rounded-[var(--radius-md)] border border-[var(--warning)]">
+              <Target className="w-5 h-5 text-[var(--warning)]" />
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-100">Objectifs</h3>
+            <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)]">Objectifs</h3>
           </div>
         </div>
         <div className="flex items-center justify-center py-8">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-[var(--primary)]" aria-hidden="true" />
         </div>
       </div>
     );
@@ -216,26 +216,28 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
 
   if (goalsWithProgress.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+      <div className="glass rounded-[var(--radius-lg)] p-4 md:p-6 animate-slide-in-up">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="bg-yellow-500/20 p-2 rounded-lg border border-yellow-500/30">
-              <Target className="w-5 h-5 text-yellow-400" />
+            <div className="bg-[var(--warning-light)] p-2 rounded-[var(--radius-md)] border border-[var(--warning)]">
+              <Target className="w-5 h-5 text-[var(--warning)]" />
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-100">Objectifs</h3>
+            <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)]">Objectifs</h3>
           </div>
           <button
             onClick={handleAddGoal}
-            className="text-xs px-3 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 rounded-lg border border-primary-500/30 transition-all"
+            className="text-xs px-3 py-1.5 bg-[var(--primary-light)] hover:bg-[var(--primary-light)] text-[var(--primary)] rounded-[var(--radius-md)] border border-[var(--primary)] transition-all duration-[var(--dur-fast)] active:scale-95"
           >
             + Ajouter
           </button>
         </div>
-        <div className="text-center py-8 text-gray-400">
-          <p>Aucun objectif défini</p>
+        <div className="text-center py-8">
+          <Target size={40} className="mx-auto mb-3 text-[var(--text-tertiary)]" aria-hidden="true" />
+          <p className="text-sm font-semibold text-[var(--text-secondary)]">Aucun objectif défini</p>
           <button
+            type="button"
             onClick={handleAddGoal}
-            className="mt-3 text-primary-300 hover:text-primary-200 text-sm font-medium"
+            className="mt-3 rounded-[var(--radius-md)] border border-[var(--primary)] bg-[var(--primary-light)] px-3 py-2 text-sm font-medium text-[var(--primary)] transition-all duration-[var(--dur-fast)] active:scale-95"
           >
             Créer un objectif
           </button>
@@ -245,17 +247,17 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
   }
 
   return (
-    <div className="glass-card rounded-2xl p-4 md:p-6 animate-slide-in-up">
+    <div className="glass rounded-[var(--radius-lg)] p-4 md:p-6 animate-slide-in-up">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
-          <div className="bg-yellow-500/20 p-2 rounded-lg border border-yellow-500/30">
-            <Target className="w-5 h-5 text-yellow-400" />
+          <div className="bg-[var(--warning-light)] p-2 rounded-[var(--radius-md)] border border-[var(--warning)]">
+            <Target className="w-5 h-5 text-[var(--warning)]" />
           </div>
-          <h3 className="text-lg md:text-xl font-bold text-gray-100">Objectifs</h3>
+          <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)]">Objectifs</h3>
         </div>
         <button
           onClick={handleAddGoal}
-          className="text-xs px-3 py-1.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 rounded-lg border border-primary-500/30 transition-all"
+          className="text-xs px-3 py-1.5 bg-[var(--primary-light)] hover:bg-[var(--primary-light)] text-[var(--primary)] rounded-[var(--radius-md)] border border-[var(--primary)] transition-all duration-[var(--dur-fast)] active:scale-95"
         >
           + Ajouter
         </button>
@@ -265,54 +267,56 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
         {goalsWithProgress.map((goal) => (
           <div
             key={goal.id}
-            className={`p-4 rounded-xl border transition-all glass-light backdrop-blur-sm ${
+            className={`p-4 rounded-[var(--radius-md)] border transition-all glass-light backdrop-blur-sm ${
               goal.isCompleted
-                ? 'border-green-400/40 bg-green-500/10 shadow-soft'
-                : 'border-gray-700/40'
+                ? 'border-[var(--success)] bg-[var(--success-light)]'
+                : 'border-[var(--border-default)]'
             }`}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                {goal.isCompleted && <Award className="w-4 h-4 text-green-400" />}
-                <h4 className="text-sm font-semibold text-gray-200">
+                {goal.isCompleted && <Award className="w-4 h-4 text-[var(--success)]" />}
+                <h4 className="text-sm font-semibold text-[var(--text-secondary)]">
                   {getGoalLabel(goal)} ({goal.period === 'month' ? 'Mois' : 'Année'})
                 </h4>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleEditGoal(goal)}
-                  className="p-1.5 hover:bg-dark-100 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-white/[0.04] rounded-[var(--radius-md)] transition-colors"
                   title="Modifier"
+                  aria-label="Modifier l’objectif"
                 >
-                  <Edit2 size={14} className="text-gray-400" />
+                  <Edit2 size={14} className="text-[var(--text-secondary)]" />
                 </button>
                 <button
                   onClick={() => handleDeleteGoal(goal.id)}
-                  className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-[var(--danger-light)] rounded-[var(--radius-md)] transition-colors"
                   title="Supprimer"
+                  aria-label="Supprimer l’objectif"
                 >
-                  <X size={14} className="text-red-400" />
+                  <X size={14} className="text-[var(--danger)]" />
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-2">
               <div>
-                <p className="text-lg font-bold text-gray-100">
+                <p className="text-lg font-bold text-[var(--text-primary)]">
                   {goal.current.toFixed(goal.type === 'revenue' ? 0 : 1)}{getGoalUnit(goal)}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[var(--text-secondary)]">
                   sur {goal.target}{getGoalUnit(goal)} • {goal.percentage.toFixed(0)}%
                 </p>
               </div>
             </div>
 
-            <div className="h-2.5 bg-dark-100 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
                   goal.isCompleted
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                    : 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                    ? 'bg-gradient-to-r from-[var(--success)] to-[var(--primary)]'
+                    : 'bg-gradient-to-r from-[var(--warning)] to-[var(--primary)]'
                 }`}
                 style={{ width: `${Math.min(goal.percentage, 100)}%` }}
               />
@@ -324,18 +328,18 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
       {/* Modal d'édition */}
       {isEditing && editingGoal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="glass-card rounded-2xl p-6 max-w-md w-full animate-slide-in-up">
-            <h3 className="text-xl font-bold text-gray-100 mb-4">
+          <div className="glass rounded-[var(--radius-lg)] p-6 max-w-md w-full animate-slide-in-up">
+            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">
               {editingGoal.id && goals.find(g => g.id === editingGoal.id) ? 'Modifier' : 'Créer'} un objectif
             </h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Type</label>
                 <select
                   value={editingGoal.type}
                   onChange={(e) => setEditingGoal({ ...editingGoal, type: e.target.value as 'revenue' | 'missions' | 'hours' })}
-                  className="w-full glass-button px-4 py-2 rounded-lg"
+                  className="w-full glass-button px-4 py-2 rounded-[var(--radius-md)]"
                 >
                   <option value="revenue">CA mensuel</option>
                   <option value="missions">Nombre de missions</option>
@@ -344,23 +348,23 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Objectif</label>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Objectif</label>
                 <input
                   type="number"
                   value={editingGoal.target}
                   onChange={(e) => setEditingGoal({ ...editingGoal, target: parseFloat(e.target.value) || 0 })}
-                  className="w-full glass-button px-4 py-2 rounded-lg"
+                  className="w-full glass-button px-4 py-2 rounded-[var(--radius-md)]"
                   min="0"
                   step={editingGoal.type === 'revenue' ? '100' : '1'}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Période</label>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Période</label>
                 <select
                   value={editingGoal.period}
                   onChange={(e) => setEditingGoal({ ...editingGoal, period: e.target.value as 'month' | 'year' })}
-                  className="w-full glass-button px-4 py-2 rounded-lg"
+                  className="w-full glass-button px-4 py-2 rounded-[var(--radius-md)]"
                 >
                   <option value="month">Mensuel</option>
                   <option value="year">Annuel</option>
@@ -374,13 +378,13 @@ const DashboardGoals: React.FC<DashboardGoalsProps> = ({ missions, selectedMonth
                   setIsEditing(false);
                   setEditingGoal(null);
                 }}
-                className="flex-1 glass-button px-4 py-2 rounded-lg text-gray-300 hover:bg-dark-100 transition-all"
+                className="flex-1 border border-[var(--border-default)] px-4 py-2 rounded-[var(--radius-md)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] transition-all duration-[var(--dur-fast)] active:scale-95"
               >
                 Annuler
               </button>
               <button
                 onClick={handleSaveGoal}
-                className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                className="shimmer-btn flex-1 bg-gradient-to-r from-[var(--primary)] to-[#7c3aed] hover:shadow-lg hover:shadow-[var(--primary-glow)] text-white px-4 py-2 rounded-[var(--radius-md)] font-semibold transition-all duration-[var(--dur-fast)]"
               >
                 {editingGoal.id && goals.find(g => g.id === editingGoal.id) ? 'Modifier' : 'Créer'}
               </button>
