@@ -34,44 +34,48 @@ const DataPersistence: React.FC<DataPersistenceProps> = ({ onImport, onBackup })
   };
 
   return (
-    <div className="glass-card rounded-xl p-3 md:p-3.5 animate-slide-in-up">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="p-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-gray-400">
-          <Database size={14} />
+    <section className="glass-card rounded-xl p-4 animate-slide-in-up md:p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-white/[0.035] p-2.5 text-[var(--accent)]">
+            <Database size={17} />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Sauvegarde et restauration</h3>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Exportez une copie locale ou restaurez vos données depuis un fichier JSON.
+            </p>
+          </div>
         </div>
-        <h3 className="text-xs font-bold text-gray-200">Sauvegarde</h3>
-      </div>
-      <p className="text-[10px] text-gray-500 mb-3">
-        Sauvegardez régulièrement vos données.
-      </p>
 
-      <div className="flex gap-2">
-        <button
-          onClick={onBackup}
-          className="flex items-center justify-center gap-1.5 glass-button text-gray-300 font-medium py-2 px-3 rounded-lg hover:border-indigo-500/30 transition-all flex-1 text-[11px]"
-        >
-          <Save size={13} />
-          Sauvegarder
-        </button>
-
-        <div className="flex-1">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".json"
-            className="hidden"
-          />
+        <div className="grid grid-cols-2 gap-2 md:min-w-[260px]">
           <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full flex items-center justify-center gap-1.5 glass-button text-gray-300 font-medium py-2 px-3 rounded-lg hover:border-indigo-500/30 transition-all text-[11px]"
+            onClick={onBackup}
+            className="btn-secondary inline-flex items-center justify-center gap-2 px-3 text-sm font-semibold"
           >
-            <Upload size={13} />
-            Restaurer
+            <Save size={14} />
+            Sauvegarder
           </button>
+
+          <div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".json"
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-secondary inline-flex w-full items-center justify-center gap-2 px-3 text-sm font-semibold"
+            >
+              <Upload size={14} />
+              Restaurer
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

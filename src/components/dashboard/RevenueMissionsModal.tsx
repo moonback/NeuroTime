@@ -37,97 +37,99 @@ const RevenueMissionsModal: React.FC<RevenueMissionsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/75 p-3 backdrop-blur-sm animate-fade-in sm:items-center sm:p-6" onClick={onClose}>
             <div
-                className="w-full max-w-2xl max-h-[85vh] bg-dark-200 glass-strong rounded-3xl border border-emerald-500/30 shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] flex flex-col overflow-hidden animate-scale-in"
+                className="flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-[var(--shadow-elevated)] animate-scale-in"
                 onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="revenue-modal-title"
             >
-                {/* Header */}
-                <div className="p-6 border-b border-white/5 bg-white/5">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-                                <TrendingUp size={24} strokeWidth={2.5} />
+                <div className="border-b border-[var(--border-subtle)] p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-emerald-400">
+                                <TrendingUp size={20} strokeWidth={2.3} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-white tracking-tight uppercase">Détail du Chiffre d'Affaires</h3>
-                                <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest">{monthLabel}</p>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Chiffre d'affaires</p>
+                                <h3 id="revenue-modal-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em] text-[var(--text-primary)] sm:text-2xl">
+                                    Détail des missions
+                                </h3>
+                                <p className="mt-1 text-sm font-medium capitalize text-[var(--text-secondary)]">{monthLabel}</p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                            className="btn-ghost inline-flex h-10 min-h-0 w-10 shrink-0 items-center justify-center p-0"
+                            aria-label="Fermer"
                         >
-                            <X size={24} />
+                            <X size={20} />
                         </button>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between p-3 rounded-2xl bg-dark-300/50 border border-white/5">
-                        <span className="text-sm text-gray-400 font-bold uppercase tracking-wider">Total Période</span>
-                        <span className="text-2xl font-black text-emerald-400">{formatPrice(totalEarnings)} €</span>
+                    <div className="mt-5 grid gap-3 rounded-xl border border-[var(--border-subtle)] bg-white/[0.025] p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Total période</span>
+                        <span className="num-financial text-3xl font-semibold tracking-[-0.05em] text-emerald-400">{formatPrice(totalEarnings)} €</span>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 custom-scrollbar">
+                <div className="flex-1 space-y-3 overflow-y-auto p-4 custom-scrollbar sm:p-6">
                     {sortedMissions.length === 0 ? (
-                        <div className="py-12 text-center">
-                            <AlertCircle size={40} className="mx-auto text-gray-600 mb-3" />
-                            <p className="text-gray-400 font-bold">Aucune mission comptabilisée</p>
+                        <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-white/[0.02] py-14 text-center">
+                            <AlertCircle size={34} className="mx-auto mb-3 text-[var(--text-muted)]" />
+                            <p className="font-semibold text-[var(--text-secondary)]">Aucune mission comptabilisée</p>
                         </div>
                     ) : (
                         sortedMissions.map((mission, index) => (
-                            <div
+                            <button
                                 key={mission.id}
                                 onClick={() => { onEdit(mission); onClose(); }}
-                                className={`group flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl glass-light border transition-all cursor-pointer animate-slide-in-up ${mission.status === 'planned' ? 'border-primary-500/10 hover:border-primary-500/30' : 'border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/5'}`}
-                                style={{ animationDelay: `${index * 50}ms` }}
+                                className="group flex w-full flex-col gap-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left transition-all hover:border-[var(--border-default)] hover:bg-white/[0.045] sm:flex-row sm:items-center"
+                                style={{ animationDelay: `${index * 35}ms` }}
                             >
-                                {/* Date */}
-                                <div className={`flex sm:flex-col items-center justify-center p-2 rounded-xl bg-dark-300 min-w-[60px] border border-white/5 transition-all ${mission.status === 'planned' ? 'group-hover:bg-primary-500/20 group-hover:border-primary-500/40' : 'group-hover:bg-emerald-500/20 group-hover:border-emerald-500/40'}`}>
-                                    <span className="text-[10px] text-gray-500 group-hover:text-emerald-300 font-black uppercase leading-none">{format(new Date(mission.startTime), 'MMM', { locale: fr })}</span>
-                                    <span className="text-lg font-black text-white group-hover:text-emerald-200 leading-none mt-1">{format(new Date(mission.startTime), 'dd')}</span>
+                                <div className="flex min-w-[64px] items-center justify-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2 sm:flex-col sm:gap-0">
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{format(new Date(mission.startTime), 'MMM', { locale: fr })}</span>
+                                    <span className="text-xl font-semibold leading-none text-[var(--text-primary)] sm:mt-1">{format(new Date(mission.startTime), 'dd')}</span>
                                 </div>
 
-                                {/* Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2 mb-1">
-                                        <h4 className={`font-bold text-gray-100 truncate transition-colors uppercase text-sm tracking-wide ${mission.status === 'planned' ? 'group-hover:text-primary-300' : 'group-hover:text-emerald-300'}`}>{mission.title}</h4>
-                                        <span className={`text-sm font-black shrink-0 ${mission.status === 'planned' ? 'text-primary-400' : 'text-emerald-400'}`}>
+                                <div className="min-w-0 flex-1">
+                                    <div className="mb-2 flex items-start justify-between gap-3">
+                                        <h4 className="truncate text-sm font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-hover)]">{mission.title}</h4>
+                                        <span className={`num-financial shrink-0 text-sm font-semibold ${mission.status === 'planned' ? 'text-[var(--accent)]' : 'text-emerald-400'}`}>
                                             {formatPrice(mission.totalEarnings)} €
                                         </span>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                                        <span className="flex items-center gap-1">
-                                            <Clock size={12} className="text-gray-600" />
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-[var(--text-secondary)]">
+                                        <span className="flex items-center gap-1.5">
+                                            <Clock size={12} className="text-[var(--text-muted)]" />
                                             {format(new Date(mission.startTime), 'HH:mm')} - {format(new Date(mission.endTime), 'HH:mm')}
                                         </span>
-                                        <span className="flex items-center gap-1">
-                                            <MapPin size={12} className="text-gray-600" />
-                                            <span className="truncate max-w-[120px]">{mission.location}</span>
+                                        <span className="flex min-w-0 items-center gap-1.5">
+                                            <MapPin size={12} className="shrink-0 text-[var(--text-muted)]" />
+                                            <span className="truncate max-w-[140px]">{mission.location}</span>
                                         </span>
                                         {mission.status === 'planned' ? (
-                                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary-500/10 text-primary-400">
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-white/[0.035] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--accent)]">
                                                 <Calendar size={10} />
-                                                PLANIFIÉ
+                                                Planifié
                                             </span>
                                         ) : (
-                                            <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 ${mission.isPaid ? 'text-emerald-400' : 'text-orange-400'}`}>
+                                            <span className={`inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-white/[0.035] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${mission.isPaid ? 'text-emerald-400' : 'text-[var(--warning)]'}`}>
                                                 {mission.isPaid ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
-                                                {mission.isPaid ? 'PAYÉ' : 'EN ATTENTE'}
+                                                {mission.isPaid ? 'Payé' : 'En attente'}
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         ))
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-white/5 bg-white/5 text-center">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                        Cliquez sur une mission pour la consulter ou la modifier
+                <div className="border-t border-[var(--border-subtle)] px-5 py-4 text-center">
+                    <p className="text-[11px] font-medium text-[var(--text-muted)]">
+                        Cliquez sur une mission pour la consulter ou la modifier.
                     </p>
                 </div>
             </div>
