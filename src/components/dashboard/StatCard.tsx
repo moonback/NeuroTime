@@ -15,7 +15,7 @@ interface StatCardProps {
   onClick?: () => void;
 }
 
-const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, color, textColor, trend, onClick }) => {
+const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, textColor, trend, onClick }) => {
   const renderedIcon = React.isValidElement(icon)
     ? React.cloneElement(icon as React.ReactElement, { strokeWidth: 2 })
     : icon;
@@ -23,69 +23,58 @@ const StatCard: React.FC<StatCardProps> = memo(({ icon, label, value, subtext, c
   return (
     <div
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick();
+        }
+      }}
       className={[
-        'group relative overflow-hidden rounded-xl p-3 md:p-4',
-        'glass-card border border-white/[0.04]',
-        'transition-all duration-200 animate-slide-in-up',
-        onClick ? 'cursor-pointer active:scale-[0.98] md:hover:scale-[1.02]' : '',
-        color,
+        'group relative min-h-[132px] overflow-hidden rounded-xl p-4 md:p-5',
+        'glass-card border border-[var(--border-subtle)]',
+        'transition-all duration-200',
+        onClick ? 'cursor-pointer active:scale-[0.99]' : '',
       ].join(' ')}
     >
-      {/* Enhanced hover gradient for desktop */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      {/* Subtle glow effect on hover (desktop only) */}
-      <div className="hidden md:block absolute -inset-[1px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl -z-10" />
-
-      <div className="relative z-10 flex flex-col h-full justify-between">
-        {/* Top row: icon + trend */}
-        <div className="flex items-start justify-between mb-3">
-          <div
-            className={[
-              'shrink-0 p-2 md:p-2.5 rounded-lg md:rounded-xl',
-              'bg-white/[0.04] border border-white/[0.06]',
-              'group-hover:scale-110 transition-transform duration-200',
-              textColor,
-            ].join(' ')}
-          >
+      <div className="flex h-full flex-col justify-between gap-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className={`shrink-0 rounded-lg border border-[var(--border-subtle)] bg-white/[0.035] p-2.5 ${textColor}`}>
             {renderedIcon}
           </div>
 
           {trend && (
             <div
               className={[
-                'flex items-center gap-1',
-                'text-[9px] font-semibold px-2 py-1 rounded-md border',
-                'transition-all duration-200',
+                'flex items-center gap-1 rounded-full border px-2 py-1',
+                'text-[10px] font-semibold tabular-nums',
                 trend.isPositive
-                  ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/15 group-hover:bg-emerald-500/15'
-                  : 'text-red-400 bg-red-500/10 border-red-500/15 group-hover:bg-red-500/15',
+                  ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+                  : 'border-red-500/20 bg-red-500/10 text-red-400',
               ].join(' ')}
             >
-              {trend.isPositive ? <TrendingUp size={10} strokeWidth={2.5} /> : <TrendingDown size={10} strokeWidth={2.5} />}
-              <span className="num-financial">{trend.value}%</span>
+              {trend.isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+              <span>{trend.value}%</span>
             </div>
           )}
         </div>
 
-        {/* Value & label */}
-        <div className="space-y-1">
-          <p className="text-[9px] uppercase font-semibold tracking-[0.1em] text-gray-500 transition-colors group-hover:text-gray-400">
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
             {label}
           </p>
-          <p className={`num-financial text-lg md:text-2xl font-extrabold tracking-tight ${textColor} truncate leading-tight transition-all group-hover:scale-105 origin-left`}>
+          <p className={`num-financial truncate text-2xl font-semibold leading-none tracking-[-0.04em] md:text-3xl ${textColor}`}>
             {value}
           </p>
           {subtext && (
-            <p className="text-[9px] md:text-[10px] text-gray-500 truncate mt-1 font-medium transition-colors group-hover:text-gray-400">
+            <p className="truncate text-[11px] font-medium text-[var(--text-secondary)]">
               {subtext}
             </p>
           )}
         </div>
       </div>
-
-      {/* Bottom accent line (desktop only) */}
-      <div className="hidden md:block absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300" style={{ color: textColor.replace('text-', '') }} />
     </div>
   );
 });

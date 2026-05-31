@@ -59,10 +59,10 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 md:space-y-4">
       {/* Primary Statistics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-12 gap-2.5">
-        <div className="col-span-2 md:col-span-12 lg:col-span-6">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+        <div className="md:col-span-12 lg:col-span-6">
           <StatCard
             icon={<Euro className="w-4 h-4 text-emerald-400" />}
             label="Chiffre d'Affaires"
@@ -78,38 +78,38 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({
           />
         </div>
 
-        <div className="col-span-1 md:col-span-6 lg:col-span-3">
+        <div className="md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<Clock className="w-4 h-4 text-indigo-400" />}
+            icon={<Clock className="w-4 h-4 text-[var(--accent)]" />}
             label="Volume Horaire"
             value={`${totalHours.toFixed(1)}h`}
             subtext={`J: ${totalDayHours}h · N: ${totalNightHours}h`}
-            color="bg-indigo-500/[0.03] border-indigo-500/15"
-            textColor="text-indigo-400"
+            color=""
+            textColor="text-[var(--accent)]"
           />
         </div>
 
-        <div className="col-span-1 md:col-span-6 lg:col-span-3">
+        <div className="md:col-span-6 lg:col-span-3">
           <StatCard
-            icon={<CheckCircle className="w-4 h-4 text-purple-400" />}
+            icon={<CheckCircle className="w-4 h-4 text-[var(--accent)]" />}
             label="Clôturées"
             value={completedMissionsCount.toString()}
             subtext={`${upcomingMissionsCount} à venir`}
-            color="bg-purple-500/[0.03] border-purple-500/15"
-            textColor="text-purple-400"
+            color=""
+            textColor="text-[var(--accent)]"
           />
         </div>
       </div>
 
       {/* Secondary KPIs - Compact Row */}
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
         <StatCard
-          icon={<DollarSign className="w-3.5 h-3.5 text-blue-400" />}
+          icon={<DollarSign className="w-3.5 h-3.5 text-[var(--accent)]" />}
           label="Taux Horaire"
           value={hidePrices ? '***' : `${averageHourlyRate.toFixed(0)}€/h`}
           subtext={`J: ${averageDayHourlyRate.toFixed(0)}€ · N: ${averageNightHourlyRate.toFixed(0)}€`}
-          color="bg-blue-500/[0.03] border-blue-500/15"
-          textColor="text-blue-400"
+          color=""
+          textColor="text-[var(--accent)]"
         />
         <StatCard
           icon={monthlyComparison.isPositive ? <TrendingUp className="w-3.5 h-3.5 text-green-400" /> : <TrendingDown className="w-3.5 h-3.5 text-red-400" />}

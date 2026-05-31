@@ -16,60 +16,60 @@ interface RecentHistoryProps {
 
 const RecentHistory: React.FC<RecentHistoryProps> = ({ data, hidePrices = false }) => {
     return (
-        <div className="space-y-2.5 animate-slide-in-up">
-            <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.1em] flex items-center gap-1.5 px-0.5">
-                <Target size={12} className="text-indigo-400" />
+        <section className="space-y-3 animate-slide-in-up">
+            <h3 className="flex items-center gap-2 px-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                <Target size={13} className="text-[var(--accent)]" />
                 Rétrospective 3 mois
             </h3>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {data.map((month, index) => (
                     <div
                         key={`${month.label}-${month.year}`}
-                        className="group p-3 rounded-xl glass-card border-white/[0.04] hover:border-white/[0.08] transition-all"
-                        style={{ animationDelay: `${index * 80}ms` }}
+                        className="group rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 transition-all hover:border-[var(--border-default)]"
+                        style={{ animationDelay: `${index * 50}ms` }}
                     >
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-[8px] text-gray-500 font-semibold uppercase tracking-tight leading-none mb-0.5">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                            <div className="flex min-w-0 flex-col">
+                                <span className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
                                     {month.year}
                                 </span>
-                                <span className="text-[11px] font-bold text-white capitalize truncate">
+                                <span className="truncate text-sm font-semibold capitalize text-[var(--text-primary)]">
                                     {month.label}
                                 </span>
                             </div>
-                            <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-400 group-hover:scale-105 transition-transform">
-                                <TrendingUp size={12} />
+                            <div className="rounded-lg border border-[var(--border-subtle)] bg-white/[0.035] p-2 text-[var(--accent)]">
+                                <TrendingUp size={14} />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[9px] text-gray-500 font-medium">Revenu</span>
-                                <span className="text-[10px] font-bold text-indigo-300">
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-xs font-medium text-[var(--text-muted)]">Revenu</span>
+                                <span className="num-financial text-sm font-semibold text-[var(--accent)]">
                                     {hidePrices ? '•••' : `${month.earnings.toLocaleString()}€`}
                                 </span>
                             </div>
 
-                            <div className="h-0.5 w-full bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.05]">
                                 <div
-                                    className="h-full bg-indigo-500/40 rounded-full transition-all duration-700"
+                                    className="h-full rounded-full bg-[var(--accent)]/70 transition-[width] duration-200 ease-out"
                                     style={{ width: `${Math.min((month.earnings / 5000) * 100, 100)}%` }}
                                 />
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1">
-                                    <Clock size={9} className="text-gray-500" />
-                                    <span className="text-[9px] text-gray-400 font-medium">{month.hours}h</span>
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-1.5">
+                                    <Clock size={11} className="text-[var(--text-muted)]" />
+                                    <span className="text-xs font-medium text-[var(--text-secondary)]">{month.hours}h</span>
                                 </div>
-                                <span className="text-[8px] text-gray-500 font-medium">{month.count} missions</span>
+                                <span className="text-[11px] font-medium text-[var(--text-muted)]">{month.count} missions</span>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-        </div>
+        </section>
     );
 };
 
