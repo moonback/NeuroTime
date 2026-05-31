@@ -1,56 +1,98 @@
-# NeuroTime .cursorrules
+# Project Context
+- Utilise NeuroTime comme une SPA PWA React pour freelances, centrée sur missions, clients, revenus, paiements, objectifs et URSSAF.
+- Considère Supabase comme backend principal: Auth, PostgreSQL, PostgREST, Realtime, RPC et Edge Functions.
+- Préserve l'isolation multi-utilisateur avec `user_id` et RLS dans toute évolution de données.
+- Ne suppose jamais l'existence d'un backend Node applicatif: aucun serveur API propriétaire n'est présent dans le dépôt.
+- Documente toute information absente avec `> ⚠️ À compléter : raison` au lieu d'inventer.
 
-## 📜 Project Context
-**NeuroTime** is a premium mission management platform for event industry freelancers. It tracks time, calculates earnings (day/night rates), and manages goals.
-- **Goal**: Provide a native-like, premium experience (PWA) with high visual standards.
-- **Key Features**: Missions CRUD, Automated Earnings, Goal System, Stats, AI description Enhancer, Data Export.
+# Tech Stack
+- Utilise React 19, TypeScript, Vite 6 et React Router 7 pour le frontend.
+- Utilise Supabase JS v2 pour l'authentification, les requêtes, Realtime, RPC et Edge Functions.
+- Utilise Tailwind CSS et les variables CSS existantes pour l'interface.
+- Utilise date-fns pour les dates et formats localisés.
+- Utilise Recharts pour les graphiques.
+- Utilise jsPDF et jspdf-autotable pour les exports PDF.
+- Utilise Vitest pour les tests unitaires.
+- Utilise `@` comme alias vers `src` seulement si cela reste cohérent avec la configuration Vite.
 
-## 💻 Tech Stack
-- **Frontend**: React 19, Vite, TypeScript, Tailwind CSS 4.
-- **Backend**: Supabase (PostgreSQL, Auth, RLS).
-- **Icons/UI**: Lucide React, Recharts, Custom Glassmorphism.
-- **AI**: Google Gemini SDK (`@google/genai`).
+# Code Style & Conventions
+- Écris tout nouveau code applicatif en TypeScript typé.
+- Utilise des composants React fonctionnels.
+- Place les types partagés dans `src/types.ts` ou dans le service de domaine concerné.
+- Garde les conversions camelCase/snake_case dans les services Supabase.
+- Utilise les noms frontend camelCase et les noms PostgreSQL snake_case.
+- Ne mets jamais de `try/catch` autour des imports.
+- Ne stocke jamais de secret dans le frontend ou dans une variable `VITE_*`.
+- Utilise `console.error` uniquement pour les erreurs réellement diagnostiques.
+- Affiche les erreurs utilisateur avec `sonner` quand l'action UI échoue.
+- Préserve les textes français existants dans l'interface.
+- Conserve l'accessibilité des boutons icon-only avec `aria-label` ou `title`.
 
-## 🎨 Code Style & Conventions
-- **Naming**:
-    - Components: `PascalCase` (e.g., `StatCard.tsx`).
-    - Hooks: `camelCase` (e.g., `useMissions.ts`).
-    - Database: `snake_case` in SQL, `camelCase` in TypeScript (handled by services).
-- **Structure**:
-    - Use Functional Components with `React.FC`.
-    - Favor composition over inheritance.
-    - Keep business logic in **Services** or **Context**, UI behavior in **Hooks**.
-- **Organization**:
-    - `src/components`: UI elements.
-    - `src/services`: API calls and external integrations.
-    - `src/context`: Global state (Auth, Data).
-    - `src/hooks`: Shared UI logic.
+# Architecture Patterns
+- Place les appels réseau Supabase dans `src/services/`.
+- Place l'état global d'authentification dans `AuthContext`.
+- Place l'état global missions/paiements dans `MissionContext`.
+- Place la logique métier pure et testable dans `src/utils/`.
+- Place les comportements réutilisables dans `src/hooks/`.
+- Utilise les mutations optimistes seulement avec gestion d'échec et notification.
+- Utilise une RPC Supabase pour toute opération multi-table qui doit rester atomique.
+- Utilise Supabase Realtime pour réconcilier missions et paiements modifiés hors de l'onglet courant.
+- Utilise `localStorage` uniquement comme cache ou préférences, jamais comme source de vérité serveur.
+- Scope toujours les clés `localStorage` par utilisateur et environnement Supabase.
 
-## 🏗️ Architecture Patterns
-- **Serverless**: No custom backend; use Supabase directly via services.
-- **State management**: React Context + custom hooks.
-- **Data Access**: Components -> Context -> Services -> Supabase.
-- **Safety**: Ensure `user_id` is always passed/handled for RLS compliance.
+# Best Practices
+- Vérifie `auth.uid() = user_id` dans chaque politique RLS de table utilisateur.
+- Ajoute un index pour tout nouveau filtre fréquent incluant `user_id`.
+- Ajoute ou modifie le schéma via migration SQL versionnée.
+- Maintiens la compatibilité avec les données existantes quand tu ajoutes une colonne nullable.
+- Préserve le fallback local quand une requête Supabase échoue par réseau.
+- Évite les autosaves globaux qui peuvent écraser des données multi-device.
+- Garde Supabase en stratégie PWA `NetworkOnly` pour éviter les données API obsolètes.
+- Protège les intégrations IA derrière une Edge Function Supabase.
+- Teste les calculs de revenus, horaires, chevauchements et exports critiques.
+- Ajoute des états loading, empty et error pour toute nouvelle vue asynchrone.
 
-## ✅ Best Practices
-- **TypeScript**: Strict typing is mandatory. No `any`. Use interfaces for data models.
-- **Styling**: Stick to the premium design system (glassmorphism, aurora blobs). Use Tailwind 4 variables.
-- **Error Handling**: Use `sonner` for user-facing notifications and `try-catch` in services.
-- **Performance**: Use `lazy`/`Suspense` for routes. Memoize heavy calculations with `useMemo`.
-- **AI Integration**: Always check for `process.env.API_KEY` before calling Gemini.
+# Common Workflows
+- Lance `npm install` après modification de `package.json` ou `package-lock.json`.
+- Lance `npm test` avant une PR.
+- Lance `npm run build` avant une PR qui change le frontend, Vite ou les dépendances.
+- Mets à jour `README.md` si l'installation, la configuration ou le lancement change.
+- Mets à jour `API_DOCS.md` si un service Supabase, une RPC ou une Edge Function change.
+- Mets à jour `DB_SCHEMA.md` si une table, colonne, relation, index ou politique RLS change.
+- Mets à jour `ARCHITECTURE.md` si un flux de données ou pattern change.
+- Ajoute une capture d'écran si un changement visuel perceptible est livré.
+- Utilise Conventional Commits: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
-## 🛠️ Common Workflows
-- **New Feature**: Add service -> Add context/hook -> Create components -> Update routes.
-- **New DB Table**: Create SQL script -> Run in Supabase -> Update `src/types.ts` -> Create service.
-- **New Page**: Create component in `src/components`, add to `Routes` in `App.tsx` with `lazy`.
+# Preferred Dependencies
+- Préfère Supabase JS aux appels `fetch` directs pour Auth, PostgREST, RPC et Realtime.
+- Préfère date-fns aux manipulations de dates ad hoc.
+- Préfère Recharts pour les nouveaux graphiques.
+- Préfère lucide-react pour les icônes.
+- Préfère sonner pour les notifications utilisateur.
+- Préfère Vitest pour les nouveaux tests.
+- Préfère les utilitaires existants de `src/utils/` avant d'ajouter une dépendance.
+- N'ajoute une dépendance que si elle réduit clairement la complexité ou le risque.
 
-## 🚫 Things to Avoid
-- **Hardcoding Secrets**: Never commit API keys. Use `.env.local`.
- hardcoding colors: Use Tailwind theme or CSS variables.
-- **Direct DB calls in Components**: Always go through a service/context layer.
-- **Prop Drilling**: Use Context or Composition for deeply nested state.
+# Anti-patterns to Avoid
+- N'expose jamais `GEMINI_API_KEY` ou tout secret dans le bundle frontend.
+- Ne désactive jamais RLS sur une table utilisateur en production.
+- Ne requête jamais les données d'un utilisateur sans filtre `user_id` côté client quand le service le permet.
+- Ne duplique pas la logique de calcul métier dans plusieurs composants.
+- Ne mélange pas requêtes Supabase et rendu complexe dans le même composant.
+- Ne crée pas de table utilisateur sans FK vers `auth.users(id)`.
+- Ne crée pas de politique RLS permissive utilisant `true` pour des données privées.
+- Ne remplace pas une opération atomique multi-table par plusieurs mutations non transactionnelles.
+- Ne casse pas la compatibilité PWA avec des assets manquants dans `public/`.
+- Ne laisse pas une variable d'environnement obligatoire non documentée.
 
-## 📄 Documentation
-- Document complex business logic (like rate calculations) using JSDoc.
-- Update `DB_SCHEMA.md` when database structure changes.
-- Ensure `README.md` reflects new features.
+# Documentation Rules
+- Rédige la documentation en français professionnel.
+- Utilise Markdown GitHub propre avec titres, tableaux et blocs de code typés.
+- Ne documente que les fonctionnalités détectées dans le code.
+- Signale explicitement les ambiguïtés avec `> ⚠️ À compléter : ...`.
+- Garde `README.md` orienté installation, configuration et usage.
+- Garde `ARCHITECTURE.md` orienté flux, décisions et responsabilités.
+- Garde `API_DOCS.md` aligné avec les appels Supabase réellement utilisés.
+- Garde `DB_SCHEMA.md` aligné avec les migrations et scripts SQL.
+- Cite les commandes exactes à exécuter dans les guides contributeur.
+- N'invente jamais de licence si une licence différente est ajoutée ultérieurement.

@@ -1,127 +1,214 @@
-# 🕒 NeuroTime
+# NeuroTime
 
-**NeuroTime** is a premium mission management platform specifically designed for freelancers in the event industry (technicians, managers, hosts). It combines advanced time tracking with automated earnings calculation and AI-powered administrative assistance.
+## Pitch
 
-[![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
-[![Supabase](https://img.shields.io/badge/Backend-Supabase-green.svg)](https://supabase.com/)
-[![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind_4-38b2ac.svg)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
-
-## ✨ Features
-
-- **🚀 Advanced Dashboard**: Real-time overview of your activity, revenue, and progress towards your goals.
-- **📅 Smart Mission Tracking**: Manage single or multi-slot missions with support for day, night, and custom rates.
-- **💰 Automated Earnings**: Instant calculation of daytime vs. nighttime hours and total mission revenue.
-- **📊 Detailed Analytics**: Visual charts for revenue trends and hours worked per period.
-- **🎯 Goal Setting**: Define monthly or yearly targets for revenue, number of missions, or total hours.
-- **🤖 AI description Enhancer**: Use Google Gemini to turn raw notes into professional mission descriptions.
-- **📱 PWA Ready**: Installable on mobile and desktop for a native-like experience with offline capabilities.
-- **💎 Premium Design**: High-end UI with glassmorphism, aurora effects, and smooth micro-animations.
+NeuroTime est une application web de gestion d'activité pensée pour les freelances et indépendants.
+Elle centralise les missions, horaires, clients, revenus, paiements et objectifs dans une interface PWA responsive.
+L'application permet de suivre l'avancement des missions, d'estimer les revenus jour/nuit et de préparer les déclarations URSSAF.
+Les données sont synchronisées avec Supabase par utilisateur, avec un cache local en secours.
+Elle s'adresse aux utilisateurs qui veulent piloter leur activité sans tableur, depuis desktop ou mobile.
 
 ---
 
-## 🛠️ Tech Stack
+## Badges
 
-- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), [Lucide React](https://lucide.dev/) (Icons)
-- **State & Logic**: Custom Hooks, React Context
-- **Backend**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, RLS)
-- **Charts**: [Recharts](https://recharts.org/)
-- **AI Integration**: [Google Gemini (Generative AI)](https://ai.google.dev/)
-- **Testing**: [Vitest](https://vitest.dev/), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+![Build](https://img.shields.io/badge/build-manual-lightgrey)
+![Licence](https://img.shields.io/badge/licence-MIT-blue)
+![Version](https://img.shields.io/badge/version-0.0.0-informational)
 
 ---
 
-## 🚀 Getting Started
+## Stack technique
 
-### Prerequisites
+| Technologie | Rôle | Version détectée |
+|---|---|---:|
+| React | Interface utilisateur SPA | `^19.2.0` |
+| React DOM | Rendu navigateur | `^19.2.0` |
+| React Router DOM | Routage côté client | `^7.10.1` |
+| TypeScript | Typage statique | `~5.8.2` |
+| Vite | Dev server, build et preview | `^6.2.0` |
+| Vite PWA / Workbox | Manifest, service worker, cache PWA | `^1.2.0` |
+| Supabase JS | Auth, PostgREST, Realtime, RPC et Edge Functions | `^2.86.0` |
+| PostgreSQL / Supabase | Base relationnelle, RLS, fonctions SQL | Version distante non figée |
+| Tailwind CSS | Utilitaires CSS et thème | `^4.1.17` |
+| date-fns | Manipulation et formatage des dates | `^4.1.0` |
+| Recharts | Graphiques statistiques | `^3.5.1` |
+| lucide-react | Icônes | `^0.555.0` |
+| sonner | Notifications toast | `^2.0.7` |
+| jsPDF + jspdf-autotable | Exports PDF | `^3.0.4` / `^5.0.7` |
+| Vitest | Tests unitaires | `^4.0.15` |
+| Vercel | Hébergement SPA configuré par rewrite | Configuration présente |
+| Google Gemini | Amélioration IA des descriptions via Edge Function Supabase | `@google/genai ^1.30.0` |
 
-- [Node.js](https://nodejs.org/) (v18+)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- A [Supabase](https://supabase.com/) project
-- A [Google AI API Key](https://aistudio.google.com/) (for Gemini features)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/moonback/NeuroTime.git
-   cd NeuroTime
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**
-   Create a `.env.local` file in the root directory:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   API_KEY=your_google_gemini_api_key
-   ```
-
-4. **Database Setup**
-   Execute the content of `supabase_setup.sql` in your Supabase SQL Editor to create the necessary tables and RLS policies.
-
-### Running the Project
-
-- **Development Mode**:
-  ```bash
-  npm run dev
-  ```
-  The app will be available at `http://localhost:5173`.
-
-- **Production Build**:
-  ```bash
-  npm run build
-  npm run preview
-  ```
+> ⚠️ À compléter : aucune licence `LICENSE` n'est présente dans le dépôt. La section Licence applique MIT par défaut comme demandé.
 
 ---
 
-## 📂 Project Structure
+## Fonctionnalités principales
 
-```text
-NeuroTime/
-├── public/             # Static assets
-├── src/
-│   ├── components/     # UI Components (Dashboard, Missions, etc.)
-│   ├── context/        # React Context (Auth, Missions)
-│   ├── hooks/          # Custom Hooks (Preferences, Confirmation)
-│   ├── services/       # API & External Services (Supabase, Gemini)
-│   ├── types/          # TypeScript Interfaces
-│   ├── utils/          # Helper functions
-│   ├── App.tsx         # Main entry component
-│   └── index.tsx       # Root entry point
-├── supabase/           # SQL Migrations and setup
-├── .cursorrules        # AI development rules
-└── vite.config.ts      # Vite configuration
+### Pour les utilisateurs
+
+- Authentification par e-mail et mot de passe via Supabase Auth.
+- Création, édition, suppression, validation et annulation de missions.
+- Gestion des clients, avec extraction des clients déjà présents dans les missions.
+- Suivi des horaires, incluant des créneaux multiples par mission.
+- Calcul automatique des revenus avec tarifs jour, nuit, mixte ou personnalisé.
+- Statuts de mission : planifiée, terminée, annulée.
+- Suivi des paiements et rattachement de virements à plusieurs missions.
+- Tableau de bord avec indicateurs, prochaine mission, historique récent et missions à venir.
+- Objectifs personnalisables de revenus, nombre de missions ou heures, par mois ou année.
+- Statistiques et visualisations via graphiques.
+- Simulateur URSSAF basé sur le chiffre d'affaires payé.
+- Masquage optionnel des montants pour les démonstrations ou captures d'écran.
+- Exports CSV, Markdown et PDF selon les vues disponibles.
+- Application PWA installable avec service worker et raccourcis d'application.
+- Fonction IA d'amélioration de description de mission via Edge Function Supabase.
+
+### Pour les administrateurs / mainteneurs
+
+- Schéma Supabase versionné dans `supabase/migrations` et scripts SQL complémentaires.
+- Row Level Security active sur les tables métier.
+- Politiques RLS par utilisateur sur missions, clients, objectifs et paiements.
+- Fonction RPC transactionnelle `save_payment_with_missions` pour enregistrer un paiement et marquer les missions associées comme payées.
+- Synchronisation temps réel Supabase Realtime sur missions et paiements.
+- Cache `localStorage` par environnement Supabase et par utilisateur.
+- Configuration PWA centralisée dans `vite.config.ts`.
+- Tests Vitest existants sur les calculs métier.
+
+---
+
+## Prérequis
+
+| Outil / compte | Version minimale recommandée | Pourquoi |
+|---|---:|---|
+| Node.js | 22.x LTS recommandé | Le projet utilise `@types/node ^22.14.0` et Vite 6. |
+| npm | 10.x recommandé | Installation et exécution des scripts. |
+| Compte Supabase | Projet actif | Auth, base PostgreSQL, Realtime, RPC et Edge Function IA. |
+| Supabase CLI | Dernière version stable | Application des migrations et gestion Edge Functions. |
+| Compte Google AI Studio / Gemini | Requis seulement pour l'IA | Clé serveur utilisée par l'Edge Function `enhance-description`. |
+| Compte Vercel | Optionnel | Déploiement compatible avec `vercel.json`. |
+
+---
+
+## Installation
+
+1. Cloner le dépôt.
+
+```bash
+git clone <url-du-repot>
+cd NeuroTime
+```
+
+2. Installer les dépendances.
+
+```bash
+npm install
+```
+
+3. Créer un fichier d'environnement local.
+
+```bash
+cat > .env.local <<'ENV'
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
+ENV
+```
+
+> ⚠️ À compléter : aucun fichier `.env.example` n'est présent dans le dépôt. Ajoutez-en un si l'onboarding doit rester standardisé.
+
+4. Configurer Supabase.
+
+```bash
+# Depuis le dashboard Supabase, créer un projet puis appliquer les scripts SQL/migrations.
+# Exemple avec la CLI si le projet est lié :
+supabase db push
+```
+
+5. Lancer l'application en développement.
+
+```bash
+npm run dev
+```
+
+6. Ouvrir l'application.
+
+```bash
+open http://localhost:3000
 ```
 
 ---
 
-## 🤝 Contributing
+## Configuration
 
-Contributions are welcome! Please follow these steps:
+| Variable | Description | Exemple | Obligatoire |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` | URL publique du projet Supabase utilisée par le client web. Sert aussi à isoler les clés de cache local par environnement. | `https://abc123.supabase.co` | Oui |
+| `VITE_SUPABASE_ANON_KEY` | Clé publique `anon` Supabase pour Auth, PostgREST, Realtime et Edge Functions côté navigateur. | `eyJhbGciOi...` | Oui |
+| `GEMINI_API_KEY` | Clé Google Gemini côté serveur pour l'Edge Function `enhance-description`. Elle ne doit pas être exposée au frontend. | `AIza...` | Oui pour l'IA, non pour le cœur app |
 
-1. Fork the project.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
-Please check [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+> ⚠️ À compléter : le code frontend n'appelle plus directement Gemini. La clé `GEMINI_API_KEY` doit être configurée dans les secrets Supabase Edge Functions, mais le code de l'Edge Function n'est pas présent dans ce dépôt.
 
 ---
 
-## 📄 License
+## Lancement
 
-Distributed under the MIT License. See `LICENSE` for more information.
+### Développement
+
+```bash
+npm run dev
+```
+
+Le serveur Vite écoute sur `0.0.0.0:3000`.
+
+### Production locale
+
+```bash
+npm run build
+npm run preview
+```
+
+### Tests
+
+```bash
+npm test
+```
 
 ---
 
-Developed with ❤️ by the NeuroTime Team.
+## Structure du projet
+
+```text
+NeuroTime/
+├── public/                     # Icônes, logo, manifest et assets PWA
+├── scripts/                    # Outils ponctuels, dont génération d'icônes
+├── src/
+│   ├── components/             # Vues et composants UI React
+│   │   └── dashboard/          # Sous-composants du tableau de bord
+│   ├── context/                # Contextes Auth et Missions/Paiements
+│   ├── hooks/                  # Hooks de préférences, statistiques, exports, gestes
+│   ├── services/               # Accès Supabase, Auth, stockage, clients, objectifs, IA
+│   ├── utils/                  # Calculs métier, exports, validation, retry, créneaux
+│   ├── App.tsx                 # Layout, navigation et routes principales
+│   └── index.tsx               # Point d'entrée React
+├── supabase/
+│   └── migrations/             # Schéma distant Supabase versionné
+├── *.sql                       # Scripts SQL complémentaires historiques
+├── vite.config.ts              # Vite, PWA, chunks et alias `@`
+├── vercel.json                 # Rewrite SPA pour Vercel
+├── package.json                # Scripts, dépendances et version applicative
+└── tsconfig.json               # Configuration TypeScript
+```
+
+---
+
+## Contribuer
+
+Consultez le guide de contribution : [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
+## Licence
+
+MIT par défaut.
+
+> ⚠️ À compléter : ajouter un fichier `LICENSE` si la licence MIT doit être juridiquement publiée avec le projet.
