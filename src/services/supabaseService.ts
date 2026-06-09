@@ -459,22 +459,17 @@ export const savePaymentToSupabase = async (payment: Payment): Promise<void> => 
   const userId = await getCurrentUserId();
   if (!userId) return;
 
-  const paymentDb = {
-    id: payment.id,
-    user_id: userId,
-    date: payment.date,
-    amount: payment.amount,
-    client: payment.client,
-    description: payment.description,
-    reference: payment.reference,
-    mission_ids: payment.missionIds,
-    method: payment.method,
-    created_at: payment.createdAt,
-  };
-
   try {
     const { error: rpcError } = await supabase.rpc('save_payment_with_missions', {
-      payment_payload: payment,
+      p_payment_id: payment.id,
+      p_user_id: userId,
+      p_date: payment.date,
+      p_amount: payment.amount,
+      p_client: payment.client,
+      p_description: payment.description ?? null,
+      p_reference: payment.reference ?? null,
+      p_mission_ids: payment.missionIds,
+      p_method: payment.method,
     });
 
     if (rpcError) throw rpcError;
