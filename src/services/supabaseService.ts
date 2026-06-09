@@ -459,20 +459,39 @@ export const savePaymentToSupabase = async (payment: Payment): Promise<void> => 
   const userId = await getCurrentUserId();
   if (!userId) return;
 
-  try {
-    const { error: rpcError } = await supabase.rpc('save_payment_with_missions', {
-      p_payment_id: payment.id,
-      p_user_id: userId,
-      p_date: payment.date,
-      p_amount: payment.amount,
-      p_client: payment.client,
-      p_description: payment.description ?? null,
-      p_reference: payment.reference ?? null,
-      p_mission_ids: payment.missionIds,
-      p_method: payment.method,
-    });
+  const paymentDb = {
+    id: payment.id,
+    user_id: userId,
+    date: payment.date,
+    amount: payment.amount,
+    client: payment.client,
+    description: payment.description ?? null,
+    reference: payment.reference ?? null,
+    mission_ids: payment.missionIds,
+    method: payment.method,
+    created_at: payment.createdAt,
+  };
 
-    if (rpcError) throw rpcError;
+  try {
+    const { error: upsertError } = await supabase
+      .from('payments')
+      .upsert(paymentDb, { onConflict: 'id' });
+
+    if (upsertError) throw upsertError;
+
+    if (payment.missionIds.length > 0) {
+      const { error: missionsError } = await supabase
+        .from('missions')
+        .update({
+          payment_id: payment.id,
+          is_paid: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .in('id', payment.missionIds);
+
+      if (missionsError) throw missionsError;
+    }
   } catch (error) {
     console.error('Erreur lors de la sauvegarde du paiement:', error);
     throw error;
